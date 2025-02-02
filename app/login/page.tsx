@@ -1,13 +1,41 @@
 "use client";
 
-import { useLogin } from "@privy-io/react-auth";
+import { useLogin, User } from "@privy-io/react-auth";
 import Head from "next/head";
 import { useRouter } from "next/navigation";
 
 export default function Login() {
     const router = useRouter();
+
+    const postLogin = async (userData: User) => {
+        try {
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(userData),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to send user data to backend');
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Error sending user data to backend:', error);
+        }
+    };
+
     const { login } = useLogin({
-        onComplete: () => router.push("/"),
+        onComplete: async ({ user }) => {
+            console.log(user);
+
+            // Send user data to backend
+            await postLogin(user);
+
+            router.push("/");
+        },
     });
 
     return (
