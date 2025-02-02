@@ -29,7 +29,7 @@ export default function AccountLayout({
                 </div>
 
                 {/* Main Content */}
-                <div className="flex-1 p-4 lg:p-8 w-full lg:max-w-4xl lg:mx-auto">
+                <div className="flex-1 p-4 lg:p-8 pb-24 lg:pb-8 w-full lg:max-w-4xl lg:mx-auto">
                     {children}
                 </div>
             </div>
