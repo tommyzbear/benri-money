@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader } from "./ui/card";
 import { Button } from "./ui/button";
-import { MoreVertical, CreditCard, Gift } from "lucide-react";
+import { MoreVertical, CreditCard } from "lucide-react";
 
 export function BankAccounts() {
     return (
