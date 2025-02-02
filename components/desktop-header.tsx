@@ -1,6 +1,7 @@
 import { Bell, Settings } from "lucide-react";
 import { Button } from "./ui/button";
 import Image from "next/image";
+import Link from "next/link";
 
 export function DesktopHeader() {
     return (
@@ -8,12 +9,10 @@ export function DesktopHeader() {
             <div className="flex items-center space-x-8">
                 <Image src="/logo.png" alt="Logo" width={32} height={32} />
                 <nav className="flex space-x-6">
-                    <Button variant="ghost">Home</Button>
-                    <Button variant="ghost">Crypto</Button>
-                    <Button variant="ghost">Send and Request</Button>
-                    <Button variant="ghost">Wallet</Button>
-                    <Button variant="ghost">Activity</Button>
-                    <Button variant="ghost">Help</Button>
+                    <Button variant="ghost"><Link href="/">Home</Link></Button>
+                    <Button variant="ghost"><Link href="/cards">Cards</Link></Button>
+                    <Button variant="ghost"><Link href="/crypto">Crypto</Link></Button>
+                    <Button variant="ghost"><Link href="/myaccount">Me</Link></Button>
                 </nav>
             </div>
             <div className="flex items-center space-x-4">

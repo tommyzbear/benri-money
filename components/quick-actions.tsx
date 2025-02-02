@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Button } from "./ui/button";
 import { HomeIcon, CreditCard, User, BitcoinIcon } from "lucide-react";
 
@@ -17,6 +18,7 @@ const actions = [
     {
         icon: <User className="h-6 w-6" />,
         label: "Me",
+        href: "/myaccount",
     },
 ];
 
@@ -27,10 +29,12 @@ export function QuickActions() {
                 <Button
                     key={index}
                     variant="ghost"
-                    className="flex flex-col items-center space-y-1 h-auto py-2"
+                    className="h-auto py-2"
                 >
-                    {action.icon}
-                    <span className="text-xs text-center">{action.label}</span>
+                    <Link href={action.href || "/"} className="flex flex-col items-center space-y-1">
+                        {action.icon}
+                        <span className="text-xs text-center">{action.label}</span>
+                    </Link>
                 </Button>
             ))}
         </div>
