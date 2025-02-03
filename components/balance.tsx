@@ -1,8 +1,14 @@
+"use client";
+
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader } from "./ui/card";
-import { MoreVertical, Wallet, Banknote } from "lucide-react";
+import { Wallet, Banknote } from "lucide-react";
+import { useState } from "react";
+import { SendMoneyDialog } from "./dialogs/send-money-dialog";
 
 export function Balance() {
+    const [sendDialogOpen, setSendDialogOpen] = useState(false);
+
     return (
         <Card className="mb-6">
             <CardHeader className="flex flex-row items-center justify-between">
@@ -40,9 +46,19 @@ export function Balance() {
                         </Button>
                     </div>
 
-                    <Button className="w-full bg-[#1546a3]">Send Money</Button>
+                    <Button
+                        className="w-full bg-[#1546a3]"
+                        onClick={() => setSendDialogOpen(true)}
+                    >
+                        Send Money
+                    </Button>
                 </div>
             </CardContent>
+
+            <SendMoneyDialog
+                open={sendDialogOpen}
+                onOpenChange={setSendDialogOpen}
+            />
         </Card>
     );
 } 
