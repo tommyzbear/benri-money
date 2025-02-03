@@ -23,26 +23,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <Providers>
           <main className="min-h-screen bg-background">
-            <div className="flex flex-col min-h-screen">
-              {/* Mobile Header - visible only on mobile */}
-              <div className="lg:hidden">
-                <MobileHeader />
-              </div>
-
-              {/* Desktop Header - visible only on desktop */}
-              <div className="hidden lg:block">
-                <DesktopHeader />
-              </div>
-              <div className="pb-24 lg:pb-8">
-                {children}
-              </div>
-
-
-              {/* Mobile Bottom Navigation */}
-              <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 lg:hidden">
-                <QuickActions />
-              </div>
-            </div>
+            {children}
           </main>
         </Providers>
       </body>

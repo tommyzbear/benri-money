@@ -8,7 +8,6 @@ export async function GET(request: Request) {
         const cookieStore = cookies();
         const cookieAuthToken = cookieStore.get("privy-token");
 
-        // If no cookie is found, skip any further checks
         if (!cookieAuthToken) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
         const claims = await privyClient.verifyAuthToken(cookieAuthToken.value);
@@ -30,7 +29,8 @@ export async function GET(request: Request) {
                 .select(`
                     id,
                     wallet:wallet!inner(address),
-                    email:email!inner(address)
+                    email:email!inner(address),
+                    isFriend:friends!friend_id(account_id)
                 `)
                 .neq('id', claims.userId)
                 .ilike('wallet.address', `${query}%`);
@@ -40,7 +40,10 @@ export async function GET(request: Request) {
                 return NextResponse.json({ error: 'Error searching accounts' }, { status: 500 });
             }
 
-            data = walletMatches;
+            data = walletMatches?.map(account => ({
+                ...account,
+                isFriend: account.isFriend.length > 0
+            }));
         }
 
         const { data: emailMatches, error: emailError } = await supabase
@@ -48,7 +51,8 @@ export async function GET(request: Request) {
             .select(`
                 id,
                 wallet:wallet!inner(address),
-                email:email!inner(address)
+                email:email!inner(address),
+                isFriend:friends!friend_id(account_id)
             `)
             .neq('id', claims.userId)
             .ilike('email.address', `${query}%`);
@@ -58,7 +62,12 @@ export async function GET(request: Request) {
             return NextResponse.json({ error: 'Error searching accounts' }, { status: 500 });
         }
 
-        data = [...data, ...emailMatches.filter(item => !data.some(d => d.id === item.id))];
+        const emailData = emailMatches?.map(account => ({
+            ...account,
+            isFriend: account.isFriend.length > 0
+        }));
+
+        data = [...data, ...emailData.filter(item => !data.some(d => d.id === item.id))];
 
         return NextResponse.json({ data });
     } catch (error) {
