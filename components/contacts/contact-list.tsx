@@ -7,24 +7,18 @@ import Image from "next/image";
 import { blo } from "blo";
 import { Send, Plus, HandCoins, Check } from "lucide-react";
 import { SendMoneyDialog } from "@/components/dialogs/send-money-dialog";
+import { Contact } from "@/types/search";
 
 type ContactListProps = {
     searchQuery?: string;
 };
 
-type SearchResult = {
-    id: string;
-    email: Email[];
-    wallet: Wallet[];
-    isFriend?: boolean;
-};
-
 export function ContactList({ searchQuery }: ContactListProps) {
-    const [contacts, setContacts] = useState<SearchResult[]>([]);
+    const [contacts, setContacts] = useState<Contact[]>([]);
     const [loading, setLoading] = useState(false);
     const [addingFriend, setAddingFriend] = useState<string | null>(null);
     const [sendDialogOpen, setSendDialogOpen] = useState(false);
-    const [selectedContact, setSelectedContact] = useState<SearchResult | null>(null);
+    const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
 
     const handleAddFriend = async (contactId: string) => {
         try {
@@ -55,7 +49,7 @@ export function ContactList({ searchQuery }: ContactListProps) {
         }
     };
 
-    const handleSendClick = (e: React.MouseEvent, contact: SearchResult) => {
+    const handleSendClick = (e: React.MouseEvent, contact: Contact) => {
         e.stopPropagation();
         setSelectedContact(contact);
         setSendDialogOpen(true);
@@ -101,21 +95,21 @@ export function ContactList({ searchQuery }: ContactListProps) {
                             <div className="flex items-center space-x-3">
                                 <div className="flex items-center justify-center">
                                     <Image
-                                        src={blo(contact.wallet?.[0]?.address as `0x${string}`)}
-                                        alt={contact.wallet?.[0]?.address}
+                                        src={blo(contact.wallet as `0x${string}`)}
+                                        alt={contact.wallet}
                                         width={40}
                                         height={40}
                                     />
                                 </div>
                                 <div>
-                                    {contact.email?.[0]?.address && (
+                                    {contact.email && (
                                         <p className="font-medium text-left">
-                                            {contact.email[0].address}
+                                            {contact.email}
                                         </p>
                                     )}
-                                    {contact.wallet?.[0]?.address && (
+                                    {contact.wallet && (
                                         <p className="text-sm text-gray-500 text-left">
-                                            {`${contact.wallet[0].address.slice(0, 6)}...${contact.wallet[0].address.slice(-4)}`}
+                                            {`${contact.wallet.slice(0, 6)}...${contact.wallet.slice(-4)}`}
                                         </p>
                                     )}
                                 </div>
@@ -168,6 +162,7 @@ export function ContactList({ searchQuery }: ContactListProps) {
             <SendMoneyDialog
                 open={sendDialogOpen}
                 onOpenChange={setSendDialogOpen}
+                selectedContact={selectedContact}
             />
         </>
     );

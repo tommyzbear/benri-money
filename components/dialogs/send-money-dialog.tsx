@@ -6,8 +6,9 @@ import { CreditCard, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Stepper, Step, StepLabel, Box } from "@mui/material";
 import Image from "next/image";
+import { Contact } from "@/types/search";
 
-const steps = ['Select Type', 'Select Network', 'Enter Amount'];
+const steps = ['Select Type', 'Select Network', 'Enter Amount', 'Confirm'];
 
 type SendOption = "crypto" | "cash" | null;
 type Chain = "Base Sepolia" | "Arbitrum Sepolia" | "Arbitrum Goerli" | "Sepolia" | "Optimism Sepolia" | null;
@@ -15,9 +16,11 @@ type Chain = "Base Sepolia" | "Arbitrum Sepolia" | "Arbitrum Goerli" | "Sepolia"
 export function SendMoneyDialog({
     open,
     onOpenChange,
+    selectedContact,
 }: {
     open: boolean;
     onOpenChange: (open: boolean) => void;
+    selectedContact: Contact | null;
 }) {
     const [activeStep, setActiveStep] = useState(0);
     const [sendOption, setSendOption] = useState<SendOption>(null);
@@ -45,11 +48,11 @@ export function SendMoneyDialog({
     };
 
     const handleSubmit = () => {
-        console.log({
-            sendOption,
-            selectedChain,
-            amount
-        });
+        handleNext();
+    };
+
+    const handleConfirm = () => {
+        console.log("Transaction confirmed!");
         handleReset();
     };
 
@@ -184,6 +187,46 @@ export function SendMoneyDialog({
                         </div>
                     </div>
                 );
+            case 3:
+                return (
+                    <div className="space-y-4 py-4">
+                        <div className="p-4 bg-slate-50 rounded-lg space-y-3">
+                            <h3 className="font-medium">Transaction Details</h3>
+                            <div className="space-y-2 text-sm">
+                                <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Type:</span>
+                                    <span className="font-medium">{sendOption}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Network:</span>
+                                    <span className="font-medium">{selectedChain}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Amount:</span>
+                                    <span className="font-medium">{amount} ETH</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Recipient:</span>
+                                    <span className="font-medium">{selectedContact?.email}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Wallet:</span>
+                                    <span className="font-medium truncate ml-4">
+                                        {selectedContact?.wallet ?
+                                            `${selectedContact.wallet.slice(0, 6)}...${selectedContact.wallet.slice(-4)}` :
+                                            ''}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <Button
+                            className="w-full"
+                            onClick={handleConfirm}
+                        >
+                            Confirm Transaction
+                        </Button>
+                    </div>
+                );
             default:
                 return null;
         }
@@ -191,8 +234,8 @@ export function SendMoneyDialog({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[425px]">
-                <Box sx={{ width: '100%', mb: 4 }}>
+            <DialogContent className="sm:max-w-[400px] rounded-3xl">
+                <Box sx={{ width: '100%' }}>
                     <Stepper activeStep={activeStep} alternativeLabel>
                         {steps.map((label) => (
                             <Step key={label}>
@@ -203,11 +246,9 @@ export function SendMoneyDialog({
                 </Box>
                 {renderStepContent()}
                 {activeStep > 0 && (
-                    <div className="flex justify-start mt-4">
-                        <Button variant="outline" onClick={handleBack}>
-                            Back
-                        </Button>
-                    </div>
+                    <Button variant="outline" onClick={handleBack} className="w-full">
+                        Back
+                    </Button>
                 )}
             </DialogContent>
         </Dialog>

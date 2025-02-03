@@ -41,7 +41,9 @@ export async function GET(request: Request) {
             }
 
             data = walletMatches?.map(account => ({
-                ...account,
+                id: account.id,
+                email: account.email[0]?.address,
+                wallet: account.wallet[0]?.address,
                 isFriend: account.isFriend.length > 0
             }));
         }
@@ -63,7 +65,9 @@ export async function GET(request: Request) {
         }
 
         const emailData = emailMatches?.map(account => ({
-            ...account,
+            id: account.id,
+            email: account.email[0]?.address,
+            wallet: account.wallet[0]?.address,
             isFriend: account.isFriend.length > 0
         }));
 

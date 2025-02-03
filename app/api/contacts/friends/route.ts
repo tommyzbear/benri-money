@@ -8,7 +8,6 @@ export async function GET(request: Request) {
         const cookieStore = cookies();
         const cookieAuthToken = cookieStore.get("privy-token");
 
-        // If no cookie is found, skip any further checks
         if (!cookieAuthToken) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
         const claims = await privyClient.verifyAuthToken(cookieAuthToken.value);
@@ -31,8 +30,13 @@ export async function GET(request: Request) {
             return NextResponse.json({ error: 'Error fetching friends' }, { status: 500 });
         }
 
-        // Transform the data to match the search results format
-        const friends = data.map(({ friend }) => friend);
+        // Transform the data to match the expected format
+        const friends = data.map(({ friend }) => ({
+            id: friend.id,
+            email: friend.email[0]?.address,
+            wallet: friend.wallet[0]?.address,
+            isFriend: true
+        }));
 
         return NextResponse.json({ data: friends });
     } catch (error) {
