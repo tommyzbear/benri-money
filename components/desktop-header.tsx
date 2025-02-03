@@ -10,6 +10,7 @@ export function DesktopHeader() {
                 <Image src="/logo.png" alt="Logo" width={32} height={32} />
                 <nav className="flex space-x-6">
                     <Button variant="ghost"><Link href="/">Home</Link></Button>
+                    <Button variant="ghost"><Link href="/contacts">Contacts</Link></Button>
                     <Button variant="ghost"><Link href="/cards">Cards</Link></Button>
                     <Button variant="ghost"><Link href="/crypto">Crypto</Link></Button>
                     <Button variant="ghost"><Link href="/myaccount">Me</Link></Button>

@@ -35,21 +35,8 @@ export interface Wallet {
     wallet_index: number | null;
 }
 
-// Input types for creating new records
-export interface CreateAccount extends Omit<Account, 'id' | 'created_at'> {
-    id?: string;
-    created_at?: string;
+export interface Friend {
+    account_id: string;
+    friend_id: string;
+    created_at: string;
 }
-
-export interface CreateEmail extends Omit<Email, 'id'> {
-    id?: never; // Generated as identity
-}
-
-export interface CreateWallet extends Omit<Wallet, 'id'> {
-    id?: never; // Generated as identity
-}
-
-// Update types
-export type UpdateAccount = Partial<Account>;
-export type UpdateEmail = Partial<Omit<Email, 'id'>>;
-export type UpdateWallet = Partial<Omit<Wallet, 'id'>>; 

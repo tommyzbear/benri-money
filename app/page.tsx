@@ -7,7 +7,7 @@ import { SendAgain } from "@/components/send-again";
 import { BankAccounts } from "@/components/bank-accounts";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { PrivyClient } from "@privy-io/server-auth";
+import { privyClient } from "@/lib/privy";
 
 async function checkAuth() {
   const cookieStore = cookies();
@@ -16,12 +16,8 @@ async function checkAuth() {
   // If no cookie is found, skip any further checks
   if (!cookieAuthToken) return null;
 
-  const PRIVY_APP_ID = process.env.NEXT_PUBLIC_PRIVY_APP_ID;
-  const PRIVY_APP_SECRET = process.env.PRIVY_APP_SECRET;
-  const client = new PrivyClient(PRIVY_APP_ID!, PRIVY_APP_SECRET!);
-
   try {
-    const claims = await client.verifyAuthToken(cookieAuthToken.value);
+    const claims = await privyClient.verifyAuthToken(cookieAuthToken.value);
     return claims;
   } catch (error) {
     console.error(error);
@@ -37,35 +33,18 @@ export default async function Home() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
-      {/* Mobile Header - visible only on mobile */}
-      <div className="lg:hidden">
-        <MobileHeader />
+    <div className="flex flex-1 lg:flex-row lg:mx-auto lg:max-w-7xl">
+      {/* Main Content */}
+      <div className="flex-1 p-4 lg:max-w-3xl">
+        <Balance />
+        <RecentActivity />
       </div>
 
-      {/* Desktop Header - visible only on desktop */}
-      <div className="hidden lg:block">
-        <DesktopHeader />
-      </div>
-
-      <div className="flex flex-1 lg:flex-row lg:mx-auto lg:max-w-7xl">
-        {/* Main Content */}
-        <div className="flex-1 p-4 lg:max-w-3xl">
-          <Balance />
-          <RecentActivity />
-        </div>
-
-        {/* Right Sidebar - visible only on desktop */}
-        <div className="hidden lg:block lg:max-w-xl lg:p-4 lg:border-l">
-          <QuickActions />
-          <SendAgain />
-          <BankAccounts />
-        </div>
-
-        {/* Mobile Bottom Navigation */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 lg:hidden">
-          <QuickActions />
-        </div>
+      {/* Right Sidebar - visible only on desktop */}
+      <div className="hidden lg:block lg:max-w-xl lg:p-4 lg:border-l">
+        <QuickActions />
+        <SendAgain />
+        <BankAccounts />
       </div>
     </div>
   );

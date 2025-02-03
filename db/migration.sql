@@ -34,3 +34,14 @@ CREATE TABLE Wallet (
     delegated BOOLEAN DEFAULT FALSE,
     wallet_index INT
 );
+-- Table: Friends
+CREATE TABLE Friends (
+    account_id VARCHAR(255) NOT NULL,
+    friend_id VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    -- Optional: Tracks when the friendship was added
+    PRIMARY KEY (account_id, friend_id),
+    -- Prevents duplicate friendships
+    FOREIGN KEY (account_id) REFERENCES Account(id) ON DELETE CASCADE,
+    FOREIGN KEY (friend_id) REFERENCES Account(id) ON DELETE CASCADE
+);

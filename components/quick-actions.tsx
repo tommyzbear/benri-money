@@ -1,11 +1,16 @@
 import Link from "next/link";
 import { Button } from "./ui/button";
-import { HomeIcon, CreditCard, User, BitcoinIcon } from "lucide-react";
+import { HomeIcon, CreditCard, User, BitcoinIcon, Users } from "lucide-react";
 
 const actions = [
     {
         icon: <HomeIcon className="h-6 w-6" />,
         label: "Home",
+    },
+    {
+        icon: <Users className="h-6 w-6" />,
+        label: "Contacts",
+        href: "/contacts",
     },
     {
         icon: <CreditCard className="h-6 w-6" />,
@@ -24,7 +29,7 @@ const actions = [
 
 export function QuickActions() {
     return (
-        <div className="grid grid-cols-4 gap-4 mb-1">
+        <div className="grid grid-cols-5 gap-4 mb-1">
             {actions.map((action, index) => (
                 <Button
                     key={index}
