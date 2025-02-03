@@ -5,6 +5,7 @@ import Providers from "@/components/providers";
 import { DesktopHeader } from "@/components/desktop-header";
 import { MobileHeader } from "@/components/mobile-header";
 import { QuickActions } from "@/components/quick-actions";
+import { Toaster } from "@/components/ui/toaster";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -26,6 +27,7 @@ export default function RootLayout({
             {children}
           </main>
         </Providers>
+        <Toaster />
       </body>
     </html>
   );

@@ -18,7 +18,7 @@ export default function MyAccountLayout({
             <div className="hidden lg:block">
                 <DesktopHeader />
             </div>
-            <div className="pb-24 lg:pb-8">
+            <div className="pb-24 lg:pb-8 p-4 lg:p-8">
                 {children}
             </div>
 

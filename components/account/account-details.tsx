@@ -1,12 +1,15 @@
+"use client";
+
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Mail, Phone, Home, ChevronDown, Plus, Wallet } from "lucide-react";
+import { Mail, Phone, Home, ChevronDown, Plus, Wallet, Copy } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { usePrivy } from "@privy-io/react-auth";
 import Image from "next/image";
-
+import { useToast } from "@/hooks/use-toast";
 
 export function AccountDetails() {
+    const { toast } = useToast();
     const {
         ready,
         authenticated,
@@ -29,6 +32,14 @@ export function AccountDetails() {
     const numAccounts = user?.linkedAccounts?.length || 0;
     const canRemoveAccount = numAccounts > 1;
 
+    const copyToClipboard = (text: string) => {
+        navigator.clipboard.writeText(text);
+        toast({
+            description: "Copied to clipboard",
+            duration: 2000,
+        });
+    };
+
     return (
         <div className="space-y-6">
             {/* Emails Section */}
@@ -41,8 +52,14 @@ export function AccountDetails() {
                         <Mail className="w-5 h-5 mt-1 text-gray-500" />
                         <div className="flex-1">
                             <div className="flex items-center justify-between">
-                                <div>
+                                <div className="flex items-center gap-2">
                                     <p className="font-medium">{user?.email?.address ?? "No email linked"}</p>
+                                    {user?.email?.address && (
+                                        <Copy
+                                            className="w-4 h-4 cursor-pointer text-gray-500 hover:text-gray-700"
+                                            onClick={() => copyToClipboard(user?.email?.address || "")}
+                                        />
+                                    )}
                                 </div>
                                 {user?.email ? (
                                     <Button variant="ghost" className="text-blue-600" onClick={() => {
@@ -72,8 +89,14 @@ export function AccountDetails() {
                         <Phone className="w-5 h-5 mt-1 text-gray-500" />
                         <div className="flex-1">
                             <div className="flex items-center justify-between">
-                                <div>
+                                <div className="flex items-center gap-2">
                                     <p className="font-medium">{user?.phone?.number ?? "No phone number linked"}</p>
+                                    {user?.phone?.number && (
+                                        <Copy
+                                            className="w-4 h-4 cursor-pointer text-gray-500 hover:text-gray-700"
+                                            onClick={() => copyToClipboard(user?.phone?.number || "")}
+                                        />
+                                    )}
                                 </div>
                                 {user?.phone ? (
                                     <Button variant="ghost" className="text-blue-600" onClick={() => {
@@ -104,11 +127,19 @@ export function AccountDetails() {
                         <div className="flex-1">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="font-medium">
-                                        {user?.wallet?.address
-                                            ? `${user.wallet.address.slice(0, 6)}...${user.wallet.address.slice(-4)}`
-                                            : "No wallet linked"}
-                                    </p>
+                                    <div className="flex items-center gap-2">
+                                        <p className="font-medium">
+                                            {user?.wallet?.address
+                                                ? `${user.wallet.address.slice(0, 6)}...${user.wallet.address.slice(-4)}`
+                                                : "No wallet linked"}
+                                        </p>
+                                        {user?.wallet?.address && (
+                                            <Copy
+                                                className="w-4 h-4 cursor-pointer text-gray-500 hover:text-gray-700"
+                                                onClick={() => copyToClipboard(user?.wallet?.address || "")}
+                                            />
+                                        )}
+                                    </div>
                                 </div>
                                 {user?.wallet ? (
                                     <Button variant="ghost" className="text-blue-600" onClick={() => {
@@ -138,8 +169,14 @@ export function AccountDetails() {
                         <Image src={"/icons/discord.svg"} alt="Instagram" width={24} height={24} className="mt-1" />
                         <div className="flex-1">
                             <div className="flex items-center justify-between">
-                                <div>
+                                <div className="flex items-center gap-2">
                                     <p className="font-medium">{user?.discord?.username ?? "No discord linked"}</p>
+                                    {user?.discord?.username && (
+                                        <Copy
+                                            className="w-4 h-4 cursor-pointer text-gray-500 hover:text-gray-700"
+                                            onClick={() => copyToClipboard(user?.discord?.username || "")}
+                                        />
+                                    )}
                                 </div>
                                 {user?.discord ? (
                                     <Button variant="ghost" className="text-blue-600" onClick={() => {
@@ -169,8 +206,14 @@ export function AccountDetails() {
                         <Image src={"/icons/x.svg"} alt="Instagram" width={24} height={24} className="mt-1" />
                         <div className="flex-1">
                             <div className="flex items-center justify-between">
-                                <div>
+                                <div className="flex items-center gap-2">
                                     <p className="font-medium">{user?.twitter?.username ?? "No X linked"}</p>
+                                    {user?.twitter?.username && (
+                                        <Copy
+                                            className="w-4 h-4 cursor-pointer text-gray-500 hover:text-gray-700"
+                                            onClick={() => copyToClipboard(user?.twitter?.username || "")}
+                                        />
+                                    )}
                                 </div>
                                 {user?.twitter ? (
                                     <Button variant="ghost" className="text-blue-600" onClick={() => {
@@ -200,8 +243,14 @@ export function AccountDetails() {
                         <Image src={"/icons/google.svg"} alt="Instagram" width={24} height={24} className="mt-1" />
                         <div className="flex-1">
                             <div className="flex items-center justify-between">
-                                <div>
+                                <div className="flex items-center gap-2">
                                     <p className="font-medium">{user?.google?.email ?? "No Google linked"}</p>
+                                    {user?.google?.email && (
+                                        <Copy
+                                            className="w-4 h-4 cursor-pointer text-gray-500 hover:text-gray-700"
+                                            onClick={() => copyToClipboard(user?.google?.email || "")}
+                                        />
+                                    )}
                                 </div>
                                 {user?.google ? (
                                     <Button variant="ghost" className="text-blue-600" onClick={() => {

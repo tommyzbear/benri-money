@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Stepper, Step, StepLabel, Box } from "@mui/material";
 import Image from "next/image";
 import { Contact } from "@/types/search";
+import { parseEther } from 'viem';
+import { useWallets } from "@privy-io/react-auth";
 
 const steps = ['Select Type', 'Select Network', 'Enter Amount', 'Confirm'];
 
@@ -26,6 +28,8 @@ export function SendMoneyDialog({
     const [sendOption, setSendOption] = useState<SendOption>(null);
     const [selectedChain, setSelectedChain] = useState<Chain>(null);
     const [amount, setAmount] = useState<string>("");
+    const [isLoading, setIsLoading] = useState(false);
+    const { wallets } = useWallets();
 
     const handleNext = () => {
         if (activeStep === 0 && sendOption === "cash") {
@@ -51,9 +55,34 @@ export function SendMoneyDialog({
         handleNext();
     };
 
-    const handleConfirm = () => {
-        console.log("Transaction confirmed!");
-        handleReset();
+    const handleConfirm = async () => {
+        setIsLoading(true);
+        if (!selectedContact?.wallet || !amount || !wallets || wallets.length === 0) {
+            console.error("Missing required transaction details");
+            return;
+        }
+
+        const wallet = wallets[0];
+        const provider = await wallet.getEthereumProvider();
+        const transactionRequest = {
+            to: selectedContact.wallet,
+            value: parseEther(amount),
+        };
+
+        try {
+            const result = await provider.request({
+                method: 'eth_sendTransaction',
+                params: [transactionRequest],
+            });
+
+            console.log("Transaction sent:", result);
+            handleReset();
+        } catch (error) {
+            console.error("Transaction failed:", error);
+            // You might want to show an error message to the user here
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const renderStepContent = () => {
@@ -222,8 +251,9 @@ export function SendMoneyDialog({
                         <Button
                             className="w-full"
                             onClick={handleConfirm}
+                            disabled={isLoading}
                         >
-                            Confirm Transaction
+                            {isLoading ? 'Confirming...' : 'Confirm Transaction'}
                         </Button>
                     </div>
                 );
