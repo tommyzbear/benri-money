@@ -9,6 +9,7 @@ import Image from "next/image";
 import { Contact } from "@/types/search";
 import { parseEther } from 'viem';
 import { useWallets } from "@privy-io/react-auth";
+import { useToast } from "@/hooks/use-toast";
 
 const steps = ['Select Type', 'Select Network', 'Enter Amount', 'Confirm'];
 
@@ -30,6 +31,7 @@ export function SendMoneyDialog({
     const [amount, setAmount] = useState<string>("");
     const [isLoading, setIsLoading] = useState(false);
     const { wallets } = useWallets();
+    const { toast } = useToast();
 
     const handleNext = () => {
         if (activeStep === 0 && sendOption === "cash") {
@@ -59,6 +61,12 @@ export function SendMoneyDialog({
         setIsLoading(true);
         if (!selectedContact?.wallet || !amount || !wallets || wallets.length === 0) {
             console.error("Missing required transaction details");
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Missing required transaction details. Please check all fields.",
+            });
+            setIsLoading(false);
             return;
         }
 
@@ -76,10 +84,18 @@ export function SendMoneyDialog({
             });
 
             console.log("Transaction sent:", result);
+            toast({
+                title: "Success",
+                description: "Transaction sent successfully!",
+            });
             handleReset();
         } catch (error) {
             console.error("Transaction failed:", error);
-            // You might want to show an error message to the user here
+            toast({
+                variant: "destructive",
+                title: "Transaction Failed",
+                description: "Failed to send transaction. Please try again.",
+            });
         } finally {
             setIsLoading(false);
         }

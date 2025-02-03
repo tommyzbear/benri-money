@@ -5,9 +5,12 @@ import { Card, CardContent, CardHeader } from "./ui/card";
 import { Wallet, Banknote } from "lucide-react";
 import { useState } from "react";
 import { SendMoneyDialog } from "./dialogs/send-money-dialog";
+import { useWallets } from "@privy-io/react-auth";
 
 export function Balance() {
     const [sendDialogOpen, setSendDialogOpen] = useState(false);
+    const wallet = useWallets()
+
 
     return (
         <Card className="mb-6">

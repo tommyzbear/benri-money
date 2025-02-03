@@ -8,12 +8,14 @@ import { blo } from "blo";
 import { Send, Plus, HandCoins, Check } from "lucide-react";
 import { SendMoneyDialog } from "@/components/dialogs/send-money-dialog";
 import { Contact } from "@/types/search";
+import { useToast } from "@/hooks/use-toast";
 
 type ContactListProps = {
     searchQuery?: string;
 };
 
 export function ContactList({ searchQuery }: ContactListProps) {
+    const { toast } = useToast();
     const [contacts, setContacts] = useState<Contact[]>([]);
     const [loading, setLoading] = useState(false);
     const [addingFriend, setAddingFriend] = useState<string | null>(null);
@@ -44,6 +46,11 @@ export function ContactList({ searchQuery }: ContactListProps) {
             );
         } catch (error) {
             console.error('Error adding friend:', error);
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Failed to add friend. Please try again.",
+            });
         } finally {
             setAddingFriend(null);
         }
@@ -56,27 +63,40 @@ export function ContactList({ searchQuery }: ContactListProps) {
     };
 
     useEffect(() => {
-        async function fetchContacts() {
-            setLoading(true);
+        const fetchContacts = async () => {
             try {
+                setLoading(true);
                 if (searchQuery) {
                     const response = await fetch(`/api/contacts/search?q=${encodeURIComponent(searchQuery)}`);
                     const { data } = await response.json();
                     setContacts(data);
+
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch contacts');
+                    }
                 } else {
                     const response = await fetch('/api/contacts/friends');
                     const { data } = await response.json();
                     setContacts(data.map(contact => ({ ...contact, isFriend: true })));
+
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch friends');
+                    }
                 }
             } catch (error) {
                 console.error('Error fetching contacts:', error);
+                toast({
+                    variant: "destructive",
+                    title: "Error",
+                    description: "Failed to load contacts. Please try again.",
+                });
             } finally {
                 setLoading(false);
             }
-        }
+        };
 
         fetchContacts();
-    }, [searchQuery]);
+    }, [searchQuery, toast]);
 
     if (loading) {
         return <div className="text-center py-4">Loading...</div>;

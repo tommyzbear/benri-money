@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Mail, Phone, Home, ChevronDown, Plus, Wallet, Copy } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { usePrivy } from "@privy-io/react-auth";
+import { usePrivy, User } from "@privy-io/react-auth";
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 
@@ -32,12 +32,34 @@ export function AccountDetails() {
     const numAccounts = user?.linkedAccounts?.length || 0;
     const canRemoveAccount = numAccounts > 1;
 
-    const copyToClipboard = (text: string) => {
-        navigator.clipboard.writeText(text);
-        toast({
-            description: "Copied to clipboard",
-            duration: 2000,
-        });
+    const copyToClipboard = async (text: string) => {
+        try {
+            await navigator.clipboard.writeText(text);
+            toast({
+                description: "Copied to clipboard",
+                duration: 2000,
+            });
+        } catch (error) {
+            console.error('Failed to copy:', error);
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Failed to copy to clipboard",
+            });
+        }
+    };
+
+    const handleUnlink = async (type: string, value: string, unlinkFn: (value: string) => Promise<User>) => {
+        try {
+            await unlinkFn(value);
+        } catch (error) {
+            console.error(`Error unlinking ${type}:`, error);
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: `Failed to unlink ${type}. Please try again.`,
+            });
+        }
     };
 
     return (
@@ -62,9 +84,7 @@ export function AccountDetails() {
                                     )}
                                 </div>
                                 {user?.email ? (
-                                    <Button variant="ghost" className="text-blue-600" onClick={() => {
-                                        unlinkEmail(user?.email?.address || "");
-                                    }}
+                                    <Button variant="ghost" className="text-blue-600" onClick={() => handleUnlink('email', user?.email?.address || "", unlinkEmail)}
                                         disabled={!canRemoveAccount}>
                                         Unlink
                                     </Button>
@@ -99,9 +119,7 @@ export function AccountDetails() {
                                     )}
                                 </div>
                                 {user?.phone ? (
-                                    <Button variant="ghost" className="text-blue-600" onClick={() => {
-                                        unlinkPhone(user?.phone?.number || "");
-                                    }}
+                                    <Button variant="ghost" className="text-blue-600" onClick={() => handleUnlink('phone', user?.phone?.number || "", unlinkPhone)}
                                         disabled={!canRemoveAccount}>
                                         Unlink
                                     </Button>
@@ -142,9 +160,7 @@ export function AccountDetails() {
                                     </div>
                                 </div>
                                 {user?.wallet ? (
-                                    <Button variant="ghost" className="text-blue-600" onClick={() => {
-                                        unlinkWallet(user?.wallet?.address || "");
-                                    }}
+                                    <Button variant="ghost" className="text-blue-600" onClick={() => handleUnlink('wallet', user?.wallet?.address || "", unlinkWallet)}
                                         disabled={!canRemoveAccount}>
                                         Unlink
                                     </Button>
@@ -179,9 +195,7 @@ export function AccountDetails() {
                                     )}
                                 </div>
                                 {user?.discord ? (
-                                    <Button variant="ghost" className="text-blue-600" onClick={() => {
-                                        unlinkDiscord(user?.discord?.username || "");
-                                    }}
+                                    <Button variant="ghost" className="text-blue-600" onClick={() => handleUnlink('discord', user?.discord?.username || "", unlinkDiscord)}
                                         disabled={!canRemoveAccount}>
                                         Unlink
                                     </Button>
@@ -216,9 +230,7 @@ export function AccountDetails() {
                                     )}
                                 </div>
                                 {user?.twitter ? (
-                                    <Button variant="ghost" className="text-blue-600" onClick={() => {
-                                        unlinkTwitter(user?.twitter?.username || "");
-                                    }}
+                                    <Button variant="ghost" className="text-blue-600" onClick={() => handleUnlink('twitter', user?.twitter?.username || "", unlinkTwitter)}
                                         disabled={!canRemoveAccount}>
                                         Unlink
                                     </Button>
@@ -253,9 +265,7 @@ export function AccountDetails() {
                                     )}
                                 </div>
                                 {user?.google ? (
-                                    <Button variant="ghost" className="text-blue-600" onClick={() => {
-                                        unlinkGoogle(user?.google?.email || "");
-                                    }}
+                                    <Button variant="ghost" className="text-blue-600" onClick={() => handleUnlink('google', user?.google?.email || "", unlinkGoogle)}
                                         disabled={!canRemoveAccount}>
                                         Unlink
                                     </Button>
