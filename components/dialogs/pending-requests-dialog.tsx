@@ -1,7 +1,7 @@
 "use client";
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { PaymentRequest } from "@/types/data";
+import { PaymentRequest, PaymentRequestWithWallet } from "@/types/data";
 import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
@@ -11,10 +11,6 @@ import { useWallets } from "@privy-io/react-auth";
 import { baseSepolia, sepolia } from "@wagmi/core/chains";
 import { TransactionHistory } from "@/types/data";
 import { useState } from "react";
-
-interface PaymentRequestWithWallet extends PaymentRequest {
-    requester_wallet: string;
-}
 
 interface PendingRequestsDialogProps {
     open: boolean;

@@ -70,3 +70,7 @@ export interface PaymentRequest {
     requested_at: string;
     cleared: boolean;
 }
+
+export interface PaymentRequestWithWallet extends PaymentRequest {
+    requester_wallet: string;
+}

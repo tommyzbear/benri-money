@@ -5,15 +5,22 @@ import { Button } from "./ui/button";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { usePrivy } from "@privy-io/react-auth";
+import { useLogout, usePrivy } from "@privy-io/react-auth";
 import { PendingRequestsDialog } from "./dialogs/pending-requests-dialog";
-import { PaymentRequest } from "@/types/data";
+import { PaymentRequestWithWallet } from "@/types/data";
+import { useRouter } from "next/navigation";
 
 export function DesktopHeader() {
+    const router = useRouter();
     const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
-    const [pendingRequests, setPendingRequests] = useState<PaymentRequest[]>([]);
+    const [pendingRequests, setPendingRequests] = useState<PaymentRequestWithWallet[]>([]);
     const [dialogOpen, setDialogOpen] = useState(false);
     const { ready } = usePrivy();
+    const { logout } = useLogout({
+        onSuccess: () => {
+            router.push("/login");
+        }
+    });
 
     useEffect(() => {
         const fetchPendingRequestsCount = async () => {
@@ -39,6 +46,10 @@ export function DesktopHeader() {
 
         return () => clearInterval(interval);
     }, [ready]);
+
+    const handleLogout = async (): Promise<void> => {
+        await logout();
+    }
 
     return (
         <header className="flex items-center justify-between px-6 py-3 bg-[#1546a3] text-white">
@@ -69,7 +80,7 @@ export function DesktopHeader() {
                 <Button variant="ghost" size="icon">
                     <Settings className="h-6 w-6" />
                 </Button>
-                <Button variant="ghost">LOG OUT</Button>
+                <Button variant="ghost" onClick={() => handleLogout()}>LOG OUT</Button>
             </div>
 
             <PendingRequestsDialog

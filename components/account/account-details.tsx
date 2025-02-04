@@ -42,7 +42,6 @@ export function AccountDetails() {
         ready,
         authenticated,
         user,
-        logout,
         linkEmail,
         linkWallet,
         unlinkEmail,
