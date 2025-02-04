@@ -48,6 +48,7 @@ export async function GET(request: Request) {
             }));
         }
 
+
         const { data: emailMatches, error: emailError } = await supabase
             .from('account')
             .select(`
@@ -68,7 +69,7 @@ export async function GET(request: Request) {
             id: account.id,
             email: account.email[0]?.address,
             wallet: account.wallet[0]?.address,
-            isFriend: account.isFriend.length > 0
+            isFriend: account.isFriend.length > 0 && account.isFriend[0].account_id === claims.userId
         }));
 
         data = [...data, ...emailData.filter(item => !data.some(d => d.id === item.id))];

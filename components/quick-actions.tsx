@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Button } from "./ui/button";
-import { HomeIcon, CreditCard, User, BitcoinIcon, Users } from "lucide-react";
+import { HomeIcon, CreditCard, User, BitcoinIcon, Users, Key } from "lucide-react";
 
 const actions = [
     {

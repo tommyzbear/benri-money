@@ -125,19 +125,20 @@ export function ContactList({ searchQuery }: ContactListProps) {
                 if (searchQuery) {
                     const response = await fetch(`/api/contacts/search?q=${encodeURIComponent(searchQuery)}`);
                     const { data } = await response.json();
-                    setContacts(data);
 
                     if (!response.ok) {
                         throw new Error('Failed to fetch contacts');
                     }
+                    setContacts(data);
                 } else {
                     const response = await fetch('/api/contacts/friends');
                     const { data } = await response.json();
-                    setContacts(data.map(contact => ({ ...contact, isFriend: true })));
+
 
                     if (!response.ok) {
                         throw new Error('Failed to fetch friends');
                     }
+                    setContacts(data.map(contact => ({ ...contact, isFriend: true })));
                 }
             } catch (error) {
                 console.error('Error fetching contacts:', error);
