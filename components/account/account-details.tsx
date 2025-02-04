@@ -7,6 +7,34 @@ import { Badge } from "@/components/ui/badge";
 import { usePrivy, User } from "@privy-io/react-auth";
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
+import { Skeleton } from "@/components/ui/skeleton";
+
+function AccountDetailsSkeleton() {
+    return (
+        <div className="space-y-6">
+            {[...Array(6)].map((_, i) => (
+                <Card key={i}>
+                    <CardHeader className="flex flex-row items-center justify-between">
+                        <Skeleton className="h-7 w-32" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="flex items-start gap-4">
+                            <Skeleton className="h-6 w-6" />
+                            <div className="flex-1">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <Skeleton className="h-5 w-48" />
+                                    </div>
+                                    <Skeleton className="h-9 w-24" />
+                                </div>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            ))}
+        </div>
+    );
+}
 
 export function AccountDetails() {
     const { toast } = useToast();
@@ -28,6 +56,10 @@ export function AccountDetails() {
         linkDiscord,
         unlinkDiscord,
     } = usePrivy();
+
+    if (!ready) {
+        return <AccountDetailsSkeleton />;
+    }
 
     const numAccounts = user?.linkedAccounts?.length || 0;
     const canRemoveAccount = numAccounts > 1;

@@ -1,75 +1,130 @@
-import { Card, CardContent, CardHeader } from "./ui/card";
-import { Button } from "./ui/button";
-import Image from "next/image";
-import { MoreVertical } from "lucide-react";
+"use client";
 
-type ActivityItem = {
-    icon: string;
-    name: string;
-    date: string;
-    amount: string;
-    type: "payment" | "automatic";
-};
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import { TransactionHistory } from "@/types/data";
+import { formatDistanceToNow } from "date-fns";
+import { usePrivy } from "@privy-io/react-auth";
+import { useToast } from "@/hooks/use-toast";
+import { formatEther } from "viem";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const recentActivities: ActivityItem[] = [
-    {
-        icon: "/uber-icon.png",
-        name: "UBER PAYMENTS UK LIMITED",
-        date: "12 Jan",
-        amount: "-£26.27",
-        type: "automatic",
-    },
-    {
-        icon: "/apple-icon.png",
-        name: "Apple Services",
-        date: "11 Jan",
-        amount: "-£0.99",
-        type: "automatic",
-    },
-    {
-        icon: "/mjg-icon.png",
-        name: "MJG International, LLC",
-        date: "7 Jan",
-        amount: "-$39.00 USD",
-        type: "automatic",
-    },
-];
-
-export function RecentActivity() {
+function RecentActivitySkeleton() {
     return (
         <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-                <h2 className="text-xl font-semibold">Recent activity</h2>
-                <Button variant="ghost" size="icon">
-                    <MoreVertical className="h-5 w-5" />
-                </Button>
+            <CardHeader>
+                <Skeleton className="h-7 w-32" />
             </CardHeader>
             <CardContent>
                 <div className="space-y-4">
-                    {recentActivities.map((activity, index) => (
-                        <div
-                            key={index}
-                            className="flex items-center justify-between py-2 hover:bg-slate-50 cursor-pointer rounded-lg px-2"
-                        >
-                            <div className="flex items-center space-x-4">
-                                <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center">
-                                    <Image
-                                        src={activity.icon}
-                                        alt={activity.name}
-                                        width={24}
-                                        height={24}
-                                    />
-                                </div>
-                                <div>
-                                    <p className="font-medium">{activity.name}</p>
-                                    <p className="text-sm text-muted-foreground">
-                                        {activity.date} · {activity.type} payment
-                                    </p>
+                    {[...Array(5)].map((_, i) => (
+                        <div key={i} className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
+                            <div className="space-y-1">
+                                <Skeleton className="h-5 w-48" />
+                                <Skeleton className="h-4 w-32" />
+                                <div className="flex items-center space-x-2">
+                                    <Skeleton className="h-4 w-24" />
+                                    <Skeleton className="h-4 w-4 rounded-full" />
+                                    <Skeleton className="h-4 w-32" />
                                 </div>
                             </div>
-                            <p className="font-medium">{activity.amount}</p>
+                            <Skeleton className="h-4 w-16" />
                         </div>
                     ))}
+                </div>
+            </CardContent>
+        </Card>
+    );
+}
+
+export function RecentActivity() {
+    const [transactions, setTransactions] = useState<TransactionHistory[]>([]);
+    const [loading, setLoading] = useState(true);
+    const { user, ready } = usePrivy();
+    const { toast } = useToast();
+
+    useEffect(() => {
+        if (!ready) return;
+
+        const fetchTransactions = async () => {
+            try {
+                const response = await fetch('/api/transactions');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch transactions');
+                }
+                const { data } = await response.json();
+                setTransactions(data);
+            } catch (error) {
+                console.error('Error fetching transactions:', error);
+                toast({
+                    variant: "destructive",
+                    title: "Error",
+                    description: "Failed to load recent activity. Please try again.",
+                });
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchTransactions();
+    }, [ready, toast]);
+
+    const formatAddress = (address: string) => {
+        return `${address.slice(0, 6)}...${address.slice(-4)}`;
+    };
+
+    if (!ready) {
+        return <RecentActivitySkeleton />;
+    }
+
+    if (loading) {
+        return <RecentActivitySkeleton />;
+    }
+
+    return (
+        <Card>
+            <CardHeader>
+                <h2 className="text-xl font-semibold">Recent Activity</h2>
+            </CardHeader>
+            <CardContent>
+                <div className="space-y-4">
+                    {transactions.length === 0 ? (
+                        <div className="text-center py-4 text-muted-foreground">
+                            No recent transactions
+                        </div>
+                    ) : (
+                        transactions.map((tx) => (
+                            <div
+                                key={tx.tx}
+                                className="flex items-center justify-between p-4 bg-slate-50 rounded-lg"
+                            >
+                                <div className="space-y-1">
+                                    <p className="font-medium">
+                                        {tx.from_account_id === user?.id ? 'Sent' : 'Received'}{' '}
+                                        {formatEther(BigInt(tx.amount))} {tx.token_name}
+                                    </p>
+                                    <p className="text-sm text-muted-foreground">
+                                        {tx.from_account_id === user?.id
+                                            ? `To: ${formatAddress(tx.to_address)}`
+                                            : `From: ${formatAddress(tx.from_address)}`}
+                                    </p>
+                                    <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                                        <span>{tx.chain}</span>
+                                        <span>•</span>
+                                        <span>{formatDistanceToNow(new Date(tx.created_at), { addSuffix: true })}</span>
+                                    </div>
+                                </div>
+                                <a
+                                    href={tx.chain === "Base Sepolia" ? `https://sepolia.basescan.org/tx/${tx.tx}` : `https://sepolia.etherscan.io/tx/${tx.tx}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 hover:text-blue-800 text-sm"
+                                >
+                                    View
+                                </a>
+                            </div>
+                        ))
+                    )}
                 </div>
             </CardContent>
         </Card>

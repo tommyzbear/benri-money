@@ -45,3 +45,28 @@ CREATE TABLE Friends (
     FOREIGN KEY (account_id) REFERENCES Account(id) ON DELETE CASCADE,
     FOREIGN KEY (friend_id) REFERENCES Account(id) ON DELETE CASCADE
 );
+CREATE TABLE transaction_history (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    -- Auto-incrementing ID
+    from_account_id VARCHAR(255) NOT NULL REFERENCES Account(id) ON DELETE CASCADE,
+    -- Reference to Account 'from' ID
+    to_account_id VARCHAR(255) NOT NULL REFERENCES Account(id) ON DELETE CASCADE,
+    -- Reference to Account 'to' ID
+    from_address VARCHAR(255) NOT NULL,
+    -- Sender's wallet address
+    to_address VARCHAR(255) NOT NULL,
+    -- Receiver's wallet address
+    amount BIGINT NOT NULL,
+    -- Transaction amount
+    token_address VARCHAR(255) NOT NULL,
+    -- Token contract address
+    tx VARCHAR(255) NOT NULL,
+    -- Transaction hash
+    transaction_type VARCHAR(50) NOT NULL,
+    -- Transaction type
+    chain_id BIGINT NOT NULL,
+    -- Chain ID
+    chain VARCHAR(50) NOT NULL,
+    token_name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

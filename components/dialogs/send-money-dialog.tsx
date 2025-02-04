@@ -8,8 +8,10 @@ import { Stepper, Step, StepLabel, Box } from "@mui/material";
 import Image from "next/image";
 import { Contact } from "@/types/search";
 import { parseEther } from 'viem';
-import { useWallets } from "@privy-io/react-auth";
+import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { useToast } from "@/hooks/use-toast";
+import { TransactionHistory } from "@/types/data";
+import { baseSepolia, sepolia } from "viem/chains";
 
 const steps = ['Select Type', 'Select Network', 'Enter Amount', 'Confirm'];
 
@@ -32,6 +34,7 @@ export function SendMoneyDialog({
     const [isLoading, setIsLoading] = useState(false);
     const { wallets } = useWallets();
     const { toast } = useToast();
+    const { user } = usePrivy();
 
     const handleNext = () => {
         if (activeStep === 0 && sendOption === "cash") {
@@ -71,22 +74,68 @@ export function SendMoneyDialog({
         }
 
         const wallet = wallets[0];
-        const provider = await wallet.getEthereumProvider();
-        const transactionRequest = {
-            to: selectedContact.wallet,
-            value: parseEther(amount),
-        };
+        const chainId = selectedChain === "Base Sepolia" ? baseSepolia.id : sepolia.id;
+        const chain = selectedChain === "Base Sepolia" ? "Base Sepolia" : "Sepolia";
+        const token = selectedChain === "Base Sepolia" ? baseSepolia.nativeCurrency : sepolia.nativeCurrency;
 
         try {
+            if (selectedChain === "Base Sepolia") {
+                await wallet.switchChain(baseSepolia.id);
+            } else if (selectedChain === "Sepolia") {
+                await wallet.switchChain(sepolia.id);
+            } else {
+                toast({
+                    variant: "destructive",
+                    title: "Error",
+                    description: "Unsupported chain",
+                });
+                setIsLoading(false);
+                return;
+            }
+
+            const provider = await wallet.getEthereumProvider();
+            const transactionRequest = {
+                to: selectedContact.wallet,
+                value: parseEther(amount),
+            };
+
             const result = await provider.request({
                 method: 'eth_sendTransaction',
                 params: [transactionRequest],
             });
 
+            const transactionHistory: Omit<TransactionHistory, "id" | "amount" | "created_at"> & { amount: string } = {
+                from_account_id: user?.id || "",
+                to_account_id: selectedContact.id,
+                from_address: wallet.address,
+                to_address: selectedContact.wallet,
+                amount: parseEther(amount).toString() + 'n',
+                // TODO: native token doesn't have an address, others might do
+                token_address: "0x0000000000000000000000000000000000000000",
+                token_name: token.name,
+                tx: result,
+                transaction_type: "wallet",
+                chain_id: chainId,
+                chain: chain
+            };
+
+            // Save transaction to database
+            const response = await fetch('/api/transactions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(transactionHistory),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to save transaction');
+            }
+
             console.log("Transaction sent:", result);
             toast({
                 title: "Success",
-                description: "Transaction sent successfully!",
+                description: `Transaction sent successfully!\ntx: ${result}`,
             });
             handleReset();
         } catch (error) {
@@ -94,7 +143,9 @@ export function SendMoneyDialog({
             toast({
                 variant: "destructive",
                 title: "Transaction Failed",
-                description: "Failed to send transaction. Please try again.",
+                description: typeof error === 'object' && error !== null && 'message' in error
+                    ? String(error.message)
+                    : "Failed to send transaction. Please try again.",
             });
         } finally {
             setIsLoading(false);
@@ -138,7 +189,7 @@ export function SendMoneyDialog({
                 return (
                     <div className="space-y-4 py-4">
                         <div className="grid grid-cols-1 gap-3">
-                            {["Base Sepolia", "Arbitrum Sepolia", "Arbitrum Goerli", "Sepolia", "Optimism Sepolia"].map((chain) => (
+                            {["Base Sepolia", "Sepolia"].map((chain) => (
                                 <Button
                                     key={chain}
                                     variant={selectedChain === chain ? "secondary" : "outline"}

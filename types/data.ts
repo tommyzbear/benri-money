@@ -40,3 +40,19 @@ export interface Friend {
     friend_id: string;
     created_at: string;
 }
+
+export interface TransactionHistory {
+    id: number;
+    from_account_id: string;
+    to_account_id: string;
+    from_address: string;
+    to_address: string;
+    amount: bigint;
+    token_address: string;
+    tx: string;
+    transaction_type: string;
+    chain_id: number;
+    chain: string;
+    token_name: string;
+    created_at: string;
+}
