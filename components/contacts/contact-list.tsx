@@ -9,6 +9,7 @@ import { SendMoneyDialog } from "@/components/dialogs/send-money-dialog";
 import { Contact } from "@/types/search";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
+import { RequestMoneyDialog } from "@/components/dialogs/request-money-dialog";
 
 function ContactListSkeleton() {
     return (
@@ -44,6 +45,8 @@ export function ContactList({ searchQuery }: ContactListProps) {
     const [addingFriend, setAddingFriend] = useState<string | null>(null);
     const [sendDialogOpen, setSendDialogOpen] = useState(false);
     const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
+    const [requestDialogOpen, setRequestDialogOpen] = useState(false);
+    const [selectedRequestContact, setSelectedRequestContact] = useState<Contact | null>(null);
 
     const handleAddFriend = async (contactId: string) => {
         try {
@@ -83,6 +86,36 @@ export function ContactList({ searchQuery }: ContactListProps) {
         e.stopPropagation();
         setSelectedContact(contact);
         setSendDialogOpen(true);
+    };
+
+    const handleRequestClick = async (e: React.MouseEvent, contact: Contact) => {
+        e.stopPropagation();
+
+        // Check if contact has added user as friend
+        try {
+            const response = await fetch(`/api/contacts/verify-friend?friendId=${contact.id}`);
+            console.log(contact.id);
+            const { isFriend } = await response.json();
+
+            if (!isFriend) {
+                toast({
+                    variant: "destructive",
+                    title: "Error",
+                    description: "Selected account needs to add you as a friend before requesting",
+                });
+                return;
+            }
+
+            setSelectedRequestContact(contact);
+            setRequestDialogOpen(true);
+        } catch (error) {
+            console.error('Error verifying friend:', error);
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Failed to verify friend status. Please try again.",
+            });
+        }
     };
 
     useEffect(() => {
@@ -171,10 +204,7 @@ export function ContactList({ searchQuery }: ContactListProps) {
                                     variant="ghost"
                                     size="icon"
                                     className="h-8 w-8"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        // Handle request action
-                                    }}
+                                    onClick={(e) => handleRequestClick(e, contact)}
                                 >
                                     <HandCoins className="h-4 w-4" />
                                 </Button>
@@ -206,6 +236,12 @@ export function ContactList({ searchQuery }: ContactListProps) {
                 open={sendDialogOpen}
                 onOpenChange={setSendDialogOpen}
                 selectedContact={selectedContact}
+            />
+
+            <RequestMoneyDialog
+                open={requestDialogOpen}
+                onOpenChange={setRequestDialogOpen}
+                selectedContact={selectedRequestContact}
             />
         </>
     );

@@ -70,3 +70,25 @@ CREATE TABLE transaction_history (
     token_name VARCHAR(255) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+CREATE TABLE payment_requests (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    -- Auto-incrementing ID
+    requester VARCHAR(255) NOT NULL REFERENCES Account(id) ON DELETE CASCADE,
+    -- Reference to requester Account
+    payee VARCHAR(255) NOT NULL REFERENCES Account(id) ON DELETE CASCADE,
+    -- Reference to payee Account
+    chain_id BIGINT NOT NULL,
+    -- Blockchain network ID
+    chain VARCHAR(50) NOT NULL,
+    -- Blockchain name (e.g., Ethereum, Polygon)
+    transaction_type VARCHAR(50) NOT NULL,
+    -- Type of transaction (e.g., payment, deposit)
+    amount BIGINT NOT NULL,
+    -- Requested amount
+    token_name VARCHAR(255) NOT NULL,
+    token_address VARCHAR(255) NOT NULL,
+    -- Token name involved in the request
+    requested_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    -- Timestamp of the request
+    cleared BOOLEAN NOT NULL DEFAULT FALSE -- Indicates if the request has been cleared
+);

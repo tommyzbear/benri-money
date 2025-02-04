@@ -56,3 +56,17 @@ export interface TransactionHistory {
     token_name: string;
     created_at: string;
 }
+
+export interface PaymentRequest {
+    id: number;
+    requester: string;
+    payee: string;
+    chain_id: number;
+    chain: string;
+    transaction_type: string;
+    amount: bigint;
+    token_name: string;
+    token_address: string;
+    requested_at: string;
+    cleared: boolean;
+}

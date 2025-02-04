@@ -59,7 +59,7 @@ export function SelectFriendDialog({ open, onOpenChange, onFriendSelect }: Selec
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-[400px] rounded-3xl">
                 <DialogHeader>
                     <DialogTitle>Select Friend</DialogTitle>
                 </DialogHeader>
