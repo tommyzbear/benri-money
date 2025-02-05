@@ -9,9 +9,9 @@ import Image from "next/image";
 import { usePrivy } from "@privy-io/react-auth";
 import { useWallets } from "@privy-io/react-auth";
 import { baseSepolia, sepolia } from "@wagmi/core/chains";
-import { TransactionHistory } from "@/types/data";
 import { useState } from "react";
 import { usePaymentRequestsStore } from "@/stores/use-payment-requests-store";
+import { useTransactionsStore } from "@/stores/use-transactions-store";
 
 interface PendingRequestsDialogProps {
     open: boolean;
@@ -25,6 +25,7 @@ export function PendingRequestsDialog({ open, onOpenChange, requests }: PendingR
     const { wallets } = useWallets();
     const [isLoading, setIsLoading] = useState(false);
     const { clearRequest } = usePaymentRequestsStore();
+    const { addTransaction } = useTransactionsStore();
 
     const handlePay = async (request: PaymentRequestWithWallet) => {
         if (!user || wallets.length === 0) {
@@ -74,7 +75,8 @@ export function PendingRequestsDialog({ open, onOpenChange, requests }: PendingR
                 params: [transactionRequest],
             });
 
-            const transactionHistory: Omit<TransactionHistory, "id" | "amount" | "created_at"> & { amount: string } = {
+            // Save transaction using the store
+            await addTransaction({
                 from_account_id: user.id,
                 to_account_id: request.requester,
                 from_address: wallet.address,
@@ -86,20 +88,7 @@ export function PendingRequestsDialog({ open, onOpenChange, requests }: PendingR
                 transaction_type: "wallet",
                 chain_id: request.chain_id,
                 chain: request.chain
-            };
-
-            // Save transaction to database
-            const response = await fetch('/api/transactions', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(transactionHistory),
             });
-
-            if (!response.ok) {
-                throw new Error('Failed to save transaction');
-            }
 
             // Mark request as cleared
             await clearRequest(request.id);

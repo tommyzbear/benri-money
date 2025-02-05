@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Image from "next/image";
 import { blo } from "blo";
 import { Send, Plus, HandCoins, Check } from "lucide-react";
@@ -10,6 +10,177 @@ import { Contact } from "@/types/search";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RequestMoneyDialog } from "@/components/dialogs/request-money-dialog";
+import { useContactsStore } from "@/stores/use-contacts-store";
+import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
+
+export function ContactList() {
+    const { toast } = useToast();
+    const [sendDialogOpen, setSendDialogOpen] = useState(false);
+    const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
+    const [requestDialogOpen, setRequestDialogOpen] = useState(false);
+    const [selectedRequestContact, setSelectedRequestContact] = useState<Contact | null>(null);
+
+    const {
+        friends,
+        searchResults,
+        searchQuery,
+        isLoading,
+        error,
+        fetchFriends,
+        addFriend
+    } = useContactsStore();
+
+    useEffect(() => {
+        fetchFriends();
+    }, [fetchFriends]);
+
+    useEffect(() => {
+        if (error) {
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: error,
+            });
+        }
+    }, [error, toast]);
+
+    const handleAddFriend = async (contactId: string) => {
+        try {
+            await addFriend(contactId);
+            toast({
+                title: "Success",
+                description: "Friend added successfully",
+            });
+        } catch (error) {
+            console.error("Error adding friend:", error);
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Failed to add friend. Please try again.",
+            });
+        }
+    };
+
+    const handleSendClick = (e: React.MouseEvent, contact: Contact) => {
+        e.stopPropagation();
+        setSelectedContact(contact);
+        setSendDialogOpen(true);
+    };
+
+    const handleRequestClick = (e: React.MouseEvent, contact: Contact) => {
+        e.stopPropagation();
+        setSelectedRequestContact(contact);
+        setRequestDialogOpen(true);
+    };
+
+    if (isLoading) {
+        return <ContactListSkeleton />;
+    }
+
+    const displayContacts = searchQuery ? searchResults : friends;
+
+    return (
+        <>
+            <div className="space-y-2">
+                <AnimatePresence>
+                    {displayContacts.map((contact, index) => (
+                        <motion.div
+                            key={contact.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: index * 0.05 }}
+                        >
+                            <Button
+                                variant="ghost"
+                                className="w-full p-4 h-auto bg-slate-50 hover:bg-slate-100"
+                            >
+                                <div className="flex items-center justify-between w-full">
+                                    <div className="flex items-center space-x-4">
+                                        <div className="flex items-center justify-center">
+                                            <Image
+                                                src={blo(contact.wallet as `0x${string}`)}
+                                                alt={contact.wallet}
+                                                width={40}
+                                                height={40}
+                                            />
+                                        </div>
+                                        <div>
+                                            {contact.email && (
+                                                <p className="font-medium text-left">
+                                                    {contact.email}
+                                                </p>
+                                            )}
+                                            {contact.wallet && (
+                                                <p className="text-sm text-gray-500 text-left">
+                                                    {`${contact.wallet.slice(0, 6)}...${contact.wallet.slice(-4)}`}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center space-x-2">
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-8 w-8"
+                                            onClick={(e) => handleSendClick(e, contact)}
+                                        >
+                                            <Send className="h-4 w-4" />
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-8 w-8"
+                                            onClick={(e) => handleRequestClick(e, contact)}
+                                        >
+                                            <HandCoins className="h-4 w-4" />
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-8 w-8"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                if (!contact.isFriend) {
+                                                    handleAddFriend(contact.id);
+                                                }
+                                            }}
+                                        >
+                                            {contact.isFriend ? (
+                                                <Check className="h-4 w-4 text-green-500" />
+                                            ) : (
+                                                <Plus className="h-4 w-4" />
+                                            )}
+                                        </Button>
+                                    </div>
+                                </div>
+                            </Button>
+                        </motion.div>
+                    ))}
+                </AnimatePresence>
+
+                {displayContacts.length === 0 && (
+                    <div className="text-center py-4 text-muted-foreground">
+                        {searchQuery ? "No results found" : "No contacts yet"}
+                    </div>
+                )}
+            </div>
+
+            <SendMoneyDialog
+                open={sendDialogOpen}
+                onOpenChange={setSendDialogOpen}
+                selectedContact={selectedContact}
+            />
+
+            <RequestMoneyDialog
+                open={requestDialogOpen}
+                onOpenChange={setRequestDialogOpen}
+                selectedContact={selectedRequestContact}
+            />
+        </>
+    );
+}
 
 function ContactListSkeleton() {
     return (
@@ -31,219 +202,5 @@ function ContactListSkeleton() {
                 </div>
             ))}
         </div>
-    );
-}
-
-type ContactListProps = {
-    searchQuery?: string;
-};
-
-export function ContactList({ searchQuery }: ContactListProps) {
-    const { toast } = useToast();
-    const [contacts, setContacts] = useState<Contact[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [addingFriend, setAddingFriend] = useState<string | null>(null);
-    const [sendDialogOpen, setSendDialogOpen] = useState(false);
-    const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
-    const [requestDialogOpen, setRequestDialogOpen] = useState(false);
-    const [selectedRequestContact, setSelectedRequestContact] = useState<Contact | null>(null);
-
-    const handleAddFriend = async (contactId: string) => {
-        try {
-            setAddingFriend(contactId);
-            const response = await fetch('/api/contacts/friends', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ friendId: contactId }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to add friend');
-            }
-
-            setContacts(prevContacts =>
-                prevContacts.map(contact =>
-                    contact.id === contactId
-                        ? { ...contact, isFriend: true }
-                        : contact
-                )
-            );
-        } catch (error) {
-            console.error('Error adding friend:', error);
-            toast({
-                variant: "destructive",
-                title: "Error",
-                description: "Failed to add friend. Please try again.",
-            });
-        } finally {
-            setAddingFriend(null);
-        }
-    };
-
-    const handleSendClick = (e: React.MouseEvent, contact: Contact) => {
-        e.stopPropagation();
-        setSelectedContact(contact);
-        setSendDialogOpen(true);
-    };
-
-    const handleRequestClick = async (e: React.MouseEvent, contact: Contact) => {
-        e.stopPropagation();
-
-        // Check if contact has added user as friend
-        try {
-            const response = await fetch(`/api/contacts/verify-friend?friendId=${contact.id}`);
-            console.log(contact.id);
-            const { isFriend } = await response.json();
-
-            if (!isFriend) {
-                toast({
-                    variant: "destructive",
-                    title: "Error",
-                    description: "Selected account needs to add you as a friend before requesting",
-                });
-                return;
-            }
-
-            setSelectedRequestContact(contact);
-            setRequestDialogOpen(true);
-        } catch (error) {
-            console.error('Error verifying friend:', error);
-            toast({
-                variant: "destructive",
-                title: "Error",
-                description: "Failed to verify friend status. Please try again.",
-            });
-        }
-    };
-
-    useEffect(() => {
-        const fetchContacts = async () => {
-            try {
-                setLoading(true);
-                if (searchQuery) {
-                    const response = await fetch(`/api/contacts/search?q=${encodeURIComponent(searchQuery)}`);
-                    const { data } = await response.json();
-
-                    if (!response.ok) {
-                        throw new Error('Failed to fetch contacts');
-                    }
-                    setContacts(data);
-                } else {
-                    const response = await fetch('/api/contacts/friends');
-                    const { data } = await response.json();
-
-
-                    if (!response.ok) {
-                        throw new Error('Failed to fetch friends');
-                    }
-                    setContacts(data.map(contact => ({ ...contact, isFriend: true })));
-                }
-            } catch (error) {
-                console.error('Error fetching contacts:', error);
-                toast({
-                    variant: "destructive",
-                    title: "Error",
-                    description: "Failed to load contacts. Please try again.",
-                });
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchContacts();
-    }, [searchQuery, toast]);
-
-    if (loading) {
-        return <ContactListSkeleton />;
-    }
-
-    return (
-        <>
-            <div className="space-y-2">
-                {contacts.map((contact) => (
-                    <Button
-                        key={contact.id}
-                        variant="ghost"
-                        className="w-full justify-start p-4 h-auto hover:bg-slate-50 rounded-lg border border-slate-200 shadow-sm hover:shadow-md"
-                    >
-                        <div className="flex items-center justify-between w-full">
-                            <div className="flex items-center space-x-3">
-                                <div className="flex items-center justify-center">
-                                    <Image
-                                        src={blo(contact.wallet as `0x${string}`)}
-                                        alt={contact.wallet}
-                                        width={40}
-                                        height={40}
-                                    />
-                                </div>
-                                <div>
-                                    {contact.email && (
-                                        <p className="font-medium text-left">
-                                            {contact.email}
-                                        </p>
-                                    )}
-                                    {contact.wallet && (
-                                        <p className="text-sm text-gray-500 text-left">
-                                            {`${contact.wallet.slice(0, 6)}...${contact.wallet.slice(-4)}`}
-                                        </p>
-                                    )}
-                                </div>
-                            </div>
-
-                            <div className="flex items-center space-x-2">
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8"
-                                    onClick={(e) => handleSendClick(e, contact)}
-                                >
-                                    <Send className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8"
-                                    onClick={(e) => handleRequestClick(e, contact)}
-                                >
-                                    <HandCoins className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8"
-                                    disabled={addingFriend === contact.id}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        if (!contact.isFriend) {
-                                            handleAddFriend(contact.id);
-                                        }
-                                    }}
-                                >
-                                    {contact.isFriend ? (
-                                        <Check className="h-4 w-4 text-green-500" />
-                                    ) : (
-                                        <Plus className="h-4 w-4" />
-                                    )}
-                                </Button>
-                            </div>
-                        </div>
-                    </Button>
-                ))}
-            </div>
-
-            <SendMoneyDialog
-                open={sendDialogOpen}
-                onOpenChange={setSendDialogOpen}
-                selectedContact={selectedContact}
-            />
-
-            <RequestMoneyDialog
-                open={requestDialogOpen}
-                onOpenChange={setRequestDialogOpen}
-                selectedContact={selectedRequestContact}
-            />
-        </>
     );
 } 

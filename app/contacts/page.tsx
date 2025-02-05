@@ -2,11 +2,10 @@
 
 import { ContactSearch } from "@/components/contacts/contact-search";
 import { ContactList } from "@/components/contacts/contact-list";
-import { useState } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
 import React from "react";
+import { Skeleton } from "@mui/material";
 
-function ContactListSkeleton() {
+const ContactListSkeleton = () => {
     return (
         <div className="space-y-4">
             {[...Array(8)].map((_, i) => (
@@ -29,14 +28,12 @@ function ContactListSkeleton() {
 }
 
 export default function ContactsPage() {
-    const [searchQuery, setSearchQuery] = useState("");
-
     return (
         <div className="flex-1 p-4">
             <div className="max-w-3xl mx-auto space-y-4">
-                <ContactSearch onSearch={setSearchQuery} />
+                <ContactSearch />
                 <React.Suspense fallback={<ContactListSkeleton />}>
-                    <ContactList searchQuery={searchQuery} />
+                    <ContactList />
                 </React.Suspense>
             </div>
         </div>
