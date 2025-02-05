@@ -92,3 +92,56 @@ CREATE TABLE payment_requests (
     -- Timestamp of the request
     cleared BOOLEAN NOT NULL DEFAULT FALSE -- Indicates if the request has been cleared
 );
+CREATE TABLE google (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    -- Auto-incrementing ID
+    account_id VARCHAR(255) NOT NULL REFERENCES Account(id) ON DELETE CASCADE,
+    -- Unique object identifier
+    subject VARCHAR(32) NOT NULL UNIQUE,
+    -- Unique email address
+    name VARCHAR(255) NOT NULL,
+    -- Name of the user
+    type VARCHAR(50) NOT NULL,
+    -- Type (e.g., user, admin, etc.)
+    verified_at TIMESTAMP,
+    -- Verification timestamp
+    first_verified_at TIMESTAMP,
+    -- First verification timestamp
+    latest_verified_at TIMESTAMP -- Latest verification timestamp
+);
+CREATE TABLE twitter (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    -- Auto-incrementing ID
+    account_id VARCHAR(255) NOT NULL REFERENCES Account(id) ON DELETE CASCADE,
+    -- Unique subject identifier
+    username VARCHAR(255) NOT NULL,
+    -- Twitter username
+    name VARCHAR(255) NOT NULL,
+    -- Name of the user
+    type VARCHAR(50) NOT NULL,
+    -- Type (e.g., user, admin, etc.)
+    profile_picture_url VARCHAR(255),
+    -- Profile picture URL
+    verified_at TIMESTAMP,
+    -- Verification timestamp
+    first_verified_at TIMESTAMP,
+    -- First verification timestamp
+    latest_verified_at TIMESTAMP -- Latest verification timestamp
+);
+CREATE TABLE discord (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    -- Auto-incrementing ID
+    account_id VARCHAR(255) NOT NULL REFERENCES Account(id) ON DELETE CASCADE,
+    -- Unique subject identifier
+    username VARCHAR(255) NOT NULL,
+    -- Discord username
+    email VARCHAR(255) NOT NULL,
+    -- Email address associated with Discord
+    type VARCHAR(50) NOT NULL,
+    -- Type (e.g., user, admin, etc.)
+    verified_at TIMESTAMP,
+    -- Verification timestamp
+    first_verified_at TIMESTAMP,
+    -- First verification timestamp
+    latest_verified_at TIMESTAMP -- Latest verification timestamp
+);

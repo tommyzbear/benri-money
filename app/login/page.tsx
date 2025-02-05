@@ -4,6 +4,7 @@ import { useLogin, User } from "@privy-io/react-auth";
 import Head from "next/head";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { toast } from "@/hooks/use-toast";
 
 export default function Login() {
     const router = useRouter();
@@ -24,6 +25,11 @@ export default function Login() {
 
             return await response.json();
         } catch (error) {
+            toast({
+                title: 'Error',
+                description: 'Error sending user data to backend',
+                variant: 'destructive',
+            });
             console.error('Error sending user data to backend:', error);
         }
     };

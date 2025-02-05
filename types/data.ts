@@ -74,3 +74,40 @@ export interface PaymentRequest {
 export interface PaymentRequestWithWallet extends PaymentRequest {
     requester_wallet: string;
 }
+
+export interface Google {
+    id: number;
+    account_id: string;
+    subject: string;
+    email: string;
+    name: string;
+    type: string;
+    verified_at: string;
+    first_verified_at: string;
+    latest_verified_at: string;
+}
+
+export interface Twitter {
+    id: number;
+    account_id: string;
+    subject: string;
+    username: string;
+    name: string;
+    profile_picture_url: string;
+    type: string;
+    verified_at: string;
+    first_verified_at: string;
+    latest_verified_at: string;
+}
+
+export interface Discord {
+    id: number;
+    account_id: string;
+    subject: string;
+    username: string;
+    email: string;
+    type: string;
+    verified_at: string;
+    first_verified_at: string;
+    latest_verified_at: string;
+}
