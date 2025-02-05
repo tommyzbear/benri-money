@@ -7,13 +7,11 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useLogout, usePrivy } from "@privy-io/react-auth";
 import { PendingRequestsDialog } from "./dialogs/pending-requests-dialog";
-import { PaymentRequestWithWallet } from "@/types/data";
 import { useRouter } from "next/navigation";
+import { usePaymentRequestsStore } from "@/stores/use-payment-requests-store";
 
 export function DesktopHeader() {
     const router = useRouter();
-    const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
-    const [pendingRequests, setPendingRequests] = useState<PaymentRequestWithWallet[]>([]);
     const [dialogOpen, setDialogOpen] = useState(false);
     const { ready } = usePrivy();
     const { logout } = useLogout({
@@ -21,31 +19,15 @@ export function DesktopHeader() {
             router.push("/login");
         }
     });
+    const { count, pendingRequests, fetchPendingRequests } = usePaymentRequestsStore();
 
     useEffect(() => {
-        const fetchPendingRequestsCount = async () => {
-            if (!ready) return;
+        if (!ready) return;
 
-            try {
-                const response = await fetch('/api/requests/pending');
-                if (!response.ok) {
-                    throw new Error('Failed to fetch pending requests count');
-                }
-                const { data } = await response.json();
-                setPendingRequestsCount(data.length || 0);
-                setPendingRequests(data);
-            } catch (error) {
-                console.error('Error fetching pending requests count:', error);
-            }
-        };
-
-        fetchPendingRequestsCount();
-
-        // Refresh count every minute
-        const interval = setInterval(fetchPendingRequestsCount, 60000);
-
-        return () => clearInterval(interval);
-    }, [ready]);
+        fetchPendingRequests();
+        // const interval = setInterval(fetchPendingRequests, 60000);
+        // return () => clearInterval(interval);
+    }, [ready, fetchPendingRequests]);
 
     const handleLogout = async (): Promise<void> => {
         await logout();
@@ -68,12 +50,12 @@ export function DesktopHeader() {
                     variant="ghost"
                     size="icon"
                     className="relative"
-                    onClick={() => pendingRequestsCount > 0 && setDialogOpen(true)}
+                    onClick={() => count > 0 && setDialogOpen(true)}
                 >
                     <Bell className="h-6 w-6" />
-                    {pendingRequestsCount > 0 && (
+                    {count > 0 && (
                         <span className="absolute top-0 right-0 h-4 w-4 bg-red-500 rounded-full text-xs flex items-center justify-center">
-                            {pendingRequestsCount > 99 ? '99+' : pendingRequestsCount}
+                            {count > 99 ? '99+' : count}
                         </span>
                     )}
                 </Button>

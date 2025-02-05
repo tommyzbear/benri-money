@@ -1,7 +1,7 @@
 "use client";
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { PaymentRequest, PaymentRequestWithWallet } from "@/types/data";
+import { PaymentRequestWithWallet } from "@/types/data";
 import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
@@ -11,6 +11,7 @@ import { useWallets } from "@privy-io/react-auth";
 import { baseSepolia, sepolia } from "@wagmi/core/chains";
 import { TransactionHistory } from "@/types/data";
 import { useState } from "react";
+import { usePaymentRequestsStore } from "@/stores/use-payment-requests-store";
 
 interface PendingRequestsDialogProps {
     open: boolean;
@@ -23,6 +24,7 @@ export function PendingRequestsDialog({ open, onOpenChange, requests }: PendingR
     const { user } = usePrivy();
     const { wallets } = useWallets();
     const [isLoading, setIsLoading] = useState(false);
+    const { clearRequest } = usePaymentRequestsStore();
 
     const handlePay = async (request: PaymentRequestWithWallet) => {
         if (!user || wallets.length === 0) {
@@ -100,15 +102,8 @@ export function PendingRequestsDialog({ open, onOpenChange, requests }: PendingR
             }
 
             // Mark request as cleared
-            const clearResponse = await fetch(`/api/requests/${request.id}/clear`, {
-                method: 'POST',
-            });
+            await clearRequest(request.id);
 
-            if (!clearResponse.ok) {
-                throw new Error('Failed to clear request');
-            }
-
-            console.log("Transaction history:", transactionHistory);
             toast({
                 title: "Success",
                 description: `Payment sent successfully!\ntx: ${result}`,

@@ -73,11 +73,7 @@ export function RecentActivity() {
         return `${address.slice(0, 6)}...${address.slice(-4)}`;
     };
 
-    if (!ready) {
-        return <RecentActivitySkeleton />;
-    }
-
-    if (loading) {
+    if (!ready || loading) {
         return <RecentActivitySkeleton />;
     }
 

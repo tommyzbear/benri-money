@@ -3,60 +3,60 @@
 import { Bell, Menu } from "lucide-react";
 import { Button } from "./ui/button";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { usePrivy } from "@privy-io/react-auth";
 import { PendingRequestsDialog } from "./dialogs/pending-requests-dialog";
-import { PaymentRequest } from "@/types/data";
+import { useState } from "react";
+import { usePaymentRequestsStore } from "@/stores/use-payment-requests-store";
+import { motion, AnimatePresence } from "framer-motion";
 
 export function MobileHeader() {
-    const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
-    const [pendingRequests, setPendingRequests] = useState<PaymentRequest[]>([]);
     const [dialogOpen, setDialogOpen] = useState(false);
     const { ready } = usePrivy();
+    const { count, pendingRequests, fetchPendingRequests } = usePaymentRequestsStore();
 
     useEffect(() => {
-        const fetchPendingRequestsCount = async () => {
-            if (!ready) return;
+        if (!ready) return;
 
-            try {
-                const response = await fetch('/api/requests/pending');
-                if (!response.ok) {
-                    throw new Error('Failed to fetch pending requests count');
-                }
-                const { data } = await response.json();
-                setPendingRequestsCount(data.length || 0);
-                setPendingRequests(data);
-            } catch (error) {
-                console.error('Error fetching pending requests count:', error);
-            }
-        };
-
-        fetchPendingRequestsCount();
-
-        // Refresh count every minute
-        const interval = setInterval(fetchPendingRequestsCount, 60000);
-
-        return () => clearInterval(interval);
-    }, [ready]);
+        fetchPendingRequests();
+        // const interval = setInterval(fetchPendingRequests, 60000);
+        // return () => clearInterval(interval);
+    }, [ready, fetchPendingRequests]);
 
     return (
-        <header className="flex items-center justify-between p-4 bg-[#1546a3] text-white">
-            <Button variant="ghost" size="icon">
+        <header className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-700 to-indigo-700 text-white">
+            <Button variant="ghost" size="icon" className="hover:bg-white/10">
                 <Menu className="h-6 w-6" />
             </Button>
-            <Image src="/logo.png" alt="Logo" width={32} height={32} />
+
+            <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.3 }}
+            >
+                <Image src="/logo.png" alt="Logo" width={32} height={32} />
+            </motion.div>
+
             <Button
                 variant="ghost"
                 size="icon"
-                className="relative"
-                onClick={() => pendingRequestsCount > 0 && setDialogOpen(true)}
+                className="relative hover:bg-white/10"
+                onClick={() => count > 0 && setDialogOpen(true)}
             >
                 <Bell className="h-6 w-6" />
-                {pendingRequestsCount > 0 && (
-                    <span className="absolute top-0 right-0 h-4 w-4 bg-red-500 rounded-full text-xs flex items-center justify-center">
-                        {pendingRequestsCount > 99 ? '99+' : pendingRequestsCount}
-                    </span>
-                )}
+                <AnimatePresence>
+                    {count > 0 && (
+                        <motion.span
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            exit={{ scale: 0 }}
+                            className="absolute top-0 right-0 h-4 w-4 bg-red-500 rounded-full 
+                                     text-xs flex items-center justify-center"
+                        >
+                            {count > 99 ? '99+' : count}
+                        </motion.span>
+                    )}
+                </AnimatePresence>
             </Button>
 
             <PendingRequestsDialog

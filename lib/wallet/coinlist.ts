@@ -1,14 +1,14 @@
-export const nativeTokenList = {
+export const approvedTokens = {
     "Base Sepolia": {
-        name: "Ether",
-        symbol: "ETH",
-        address: "0x0000000000000000000000000000000000000000",
+        name: "ChainLink Token",
+        symbol: "LINK",
+        address: "0xE4aB69C077896252FAFBD49EFD26B5D171A32410",
         decimals: 18
     },
     "Sepolia": {
-        name: "Ether",
-        symbol: "ETH",
-        address: "0x0000000000000000000000000000000000000000",
+        name: "ChainLink Token",
+        symbol: "LINK",
+        address: "0x779877A7B0D9E8603169DdbD7836e478b4624789",
         decimals: 18
     }
 }
