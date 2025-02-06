@@ -1,61 +1,86 @@
 import { create } from 'zustand';
 import { PaymentRequestWithWallet } from '@/types/data';
 
-interface PaymentRequestsState {
+interface PaymentRequestsStore {
     pendingRequests: PaymentRequestWithWallet[];
-    count: number;
+    sentRequests: PaymentRequestWithWallet[];
     isLoading: boolean;
     error: string | null;
     fetchPendingRequests: () => Promise<void>;
+    fetchSentRequests: () => Promise<void>;
     clearRequest: (requestId: number) => Promise<void>;
+    rejectRequest: (requestId: number) => Promise<void>;
 }
 
-export const usePaymentRequestsStore = create<PaymentRequestsState>((set, get) => ({
+export const usePaymentRequestsStore = create<PaymentRequestsStore>((set, get) => ({
     pendingRequests: [],
-    count: 0,
+    sentRequests: [],
     isLoading: false,
     error: null,
 
     fetchPendingRequests: async () => {
-        set({ isLoading: true, error: null });
         try {
-            const response = await fetch('/api/requests/pending');
+            set({ isLoading: true });
+            const response = await fetch('/api/payment-requests/pending');
             if (!response.ok) throw new Error('Failed to fetch pending requests');
-
             const { data } = await response.json();
-            set({
-                pendingRequests: data,
-                count: data.length,
-                isLoading: false
-            });
+            set({ pendingRequests: data });
         } catch (error) {
-            set({
-                error: error instanceof Error ? error.message : 'Failed to fetch requests',
-                isLoading: false
-            });
+            set({ error: 'Failed to fetch pending requests' });
+        } finally {
+            set({ isLoading: false });
         }
     },
 
-    clearRequest: async (requestId: number) => {
+    fetchSentRequests: async () => {
         try {
-            const response = await fetch(`/api/requests/${requestId}/clear`, {
+            set({ isLoading: true });
+            const response = await fetch('/api/payment-requests/sent');
+            if (!response.ok) throw new Error('Failed to fetch sent requests');
+            const { data } = await response.json();
+            set({ sentRequests: data });
+        } catch (error) {
+            set({ error: 'Failed to fetch sent requests' });
+        } finally {
+            set({ isLoading: false });
+        }
+    },
+
+    clearRequest: async (requestId) => {
+        try {
+            const response = await fetch(`/api/payment-requests/${requestId}/clear`, {
                 method: 'POST',
             });
-
             if (!response.ok) throw new Error('Failed to clear request');
 
-            // Update local state by removing the cleared request
-            const currentRequests = get().pendingRequests;
-            const updatedRequests = currentRequests.filter(req => req.id !== requestId);
-
-            set({
-                pendingRequests: updatedRequests,
-                count: updatedRequests.length
-            });
+            // Update local state
+            set(state => ({
+                pendingRequests: state.pendingRequests.filter(req => req.id !== requestId),
+                sentRequests: state.sentRequests.map(req =>
+                    req.id === requestId ? { ...req, cleared: true } : req
+                )
+            }));
         } catch (error) {
-            set({
-                error: error instanceof Error ? error.message : 'Failed to clear request'
-            });
+            throw new Error('Failed to clear request');
         }
     },
+
+    rejectRequest: async (requestId) => {
+        try {
+            const response = await fetch(`/api/payment-requests/${requestId}/reject`, {
+                method: 'POST',
+            });
+            if (!response.ok) throw new Error('Failed to reject request');
+
+            // Update local state
+            set(state => ({
+                pendingRequests: state.pendingRequests.filter(req => req.id !== requestId),
+                sentRequests: state.sentRequests.map(req =>
+                    req.id === requestId ? { ...req, rejected: true } : req
+                )
+            }));
+        } catch (error) {
+            throw new Error('Failed to reject request');
+        }
+    }
 })); 

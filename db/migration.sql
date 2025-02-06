@@ -91,6 +91,7 @@ CREATE TABLE payment_requests (
     requested_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     -- Timestamp of the request
     cleared BOOLEAN NOT NULL DEFAULT FALSE -- Indicates if the request has been cleared
+    rejected BOOLEAN NOT NULL DEFAULT FALSE -- Indicates if the request has been rejected
 );
 CREATE TABLE google (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,

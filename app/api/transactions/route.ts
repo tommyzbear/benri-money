@@ -21,21 +21,23 @@ export async function POST(request: Request) {
 
         const transaction: Omit<TransactionHistory, "id" | "amount" | "created_at"> & { amount: string } = await request.json();
 
-        const { error } = await supabase
+        const { data, error } = await supabase
             .from('transaction_history')
             .insert({
                 from_account_id: transaction.from_account_id,
                 to_account_id: transaction.to_account_id,
                 from_address: transaction.from_address,
                 to_address: transaction.to_address,
-                amount: transaction.amount.slice(0, -1).toString(), // Convert BigInt to string for storage
+                amount: transaction.amount, // Convert BigInt to string for storage
                 token_address: transaction.token_address,
                 tx: transaction.tx,
                 transaction_type: transaction.transaction_type,
                 chain_id: transaction.chain_id,
                 chain: transaction.chain,
                 token_name: transaction.token_name
-            });
+            })
+            .select()
+            .single();
 
         if (error) {
             console.error('Error inserting transaction:', error);
@@ -45,7 +47,7 @@ export async function POST(request: Request) {
             );
         }
 
-        return NextResponse.json({ success: true });
+        return NextResponse.json({ data });
     } catch (error) {
         console.error('Error processing transaction:', error);
         return NextResponse.json(

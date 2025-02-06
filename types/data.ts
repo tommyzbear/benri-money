@@ -69,6 +69,7 @@ export interface PaymentRequest {
     token_address: string;
     requested_at: string;
     cleared: boolean;
+    rejected: boolean;
 }
 
 export interface PaymentRequestWithWallet extends PaymentRequest {

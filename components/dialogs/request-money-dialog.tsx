@@ -9,8 +9,13 @@ import { usePrivy } from "@privy-io/react-auth";
 import { useToast } from "@/hooks/use-toast";
 import { dialogSlideUp, fadeIn, stepVariants } from "@/lib/animations";
 import { motion, AnimatePresence } from "framer-motion";
+import { parseEther } from "viem";
+import Image from "next/image";
+import { baseSepolia, sepolia } from "viem/chains";
 
-const steps = ['Enter Amount', 'Confirm'];
+const steps = ['Select Chain', 'Enter Amount', 'Confirm'];
+
+type Chain = "Base Sepolia" | "Sepolia" | null;
 
 const StepperIcon = ({ active, completed, icon }: { active: boolean; completed: boolean; icon: React.ReactNode }) => {
     return (
@@ -63,6 +68,7 @@ export function RequestMoneyDialog({
 }) {
     const [step, setStep] = useState(0);
     const [direction, setDirection] = useState(0);
+    const [selectedChain, setSelectedChain] = useState<Chain>(null);
     const [amount, setAmount] = useState<string>("");
     const [isLoading, setIsLoading] = useState(false);
     const { user } = usePrivy();
@@ -91,7 +97,19 @@ export function RequestMoneyDialog({
     };
 
     const handleConfirm = async () => {
+        if (!selectedContact || !selectedChain || !amount || !user) {
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Missing required transaction details",
+            });
+            return;
+        }
+
+        const chainId = selectedChain === "Base Sepolia" ? baseSepolia.id : sepolia.id;
+
         setIsLoading(true);
+        console.log("parseEther(amount).toString()", parseEther(amount).toString());
         try {
             const response = await fetch('/api/payment-requests', {
                 method: 'POST',
@@ -99,9 +117,14 @@ export function RequestMoneyDialog({
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    amount: parseFloat(amount),
-                    from_account_id: selectedContact?.id,
-                    to_account_id: user?.id,
+                    amount: parseEther(amount).toString(),
+                    requester: user.id,
+                    payee: selectedContact.id,
+                    chain_id: chainId,
+                    chain: selectedChain,
+                    token_name: "ETH",
+                    token_address: "0x0000000000000000000000000000000000000000",
+                    transaction_type: "wallet"
                 }),
             });
 
@@ -143,6 +166,108 @@ export function RequestMoneyDialog({
             resetDialog();
         }
         onOpenChange(newOpen);
+    };
+
+    const renderStepContent = () => {
+        switch (step) {
+            case 0:
+                return (
+                    <div className="space-y-4 py-4">
+                        <div className="grid grid-cols-1 gap-3">
+                            {["Base Sepolia", "Sepolia"].map((chain) => (
+                                <Button
+                                    key={chain}
+                                    variant={selectedChain === chain ? "secondary" : "outline"}
+                                    className="w-full justify-between h-16 relative"
+                                    onClick={() => {
+                                        setSelectedChain(chain as Chain);
+                                        goToNextStep();
+                                    }}
+                                >
+                                    <div className="flex items-center space-x-3">
+                                        {chain === "Base Sepolia" && (
+                                            <Image
+                                                src="/icons/base-logo.svg"
+                                                alt="Base Network Logo"
+                                                width={32}
+                                                height={32}
+                                                className="rounded-full"
+                                            />
+                                        )}
+                                        {chain === "Sepolia" && (
+                                            <Image
+                                                src="/icons/ethereum-eth-logo.svg"
+                                                alt="Ethereum Network Logo"
+                                                width={24}
+                                                height={24}
+                                                className="rounded-full"
+                                            />
+                                        )}
+                                        <div className="text-left">
+                                            <p className="font-medium">{chain}</p>
+                                            <p className="text-sm text-muted-foreground">
+                                                {chain === "Base Sepolia" ? "Base Testnet" : "Ethereum Testnet"}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </Button>
+                            ))}
+                        </div>
+                    </div>
+                );
+            case 1:
+                return (
+                    <div className="space-y-4 py-4">
+                        <div className="relative">
+                            <div className="flex flex-col items-center space-y-2">
+                                <input
+                                    type="number"
+                                    value={amount}
+                                    onChange={(e) => setAmount(e.target.value)}
+                                    placeholder="0.00"
+                                    className="text-4xl w-full bg-transparent border-none focus:outline-none text-center"
+                                />
+                                <p className="text-center text-sm text-muted-foreground">ETH</p>
+                            </div>
+                        </div>
+                        <Button
+                            className="w-full"
+                            onClick={handleSubmit}
+                        >
+                            Continue
+                        </Button>
+                    </div>
+                );
+            case 2:
+                return (
+                    <div className="space-y-4 py-4">
+                        <div className="space-y-4">
+                            <h3 className="font-medium">Request Details</h3>
+                            <div className="space-y-2 text-sm">
+                                <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Network:</span>
+                                    <span className="font-medium">{selectedChain}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Amount:</span>
+                                    <span className="font-medium">{amount} ETH</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-muted-foreground">From:</span>
+                                    <span className="font-medium">{selectedContact?.email}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <Button
+                            className="w-full"
+                            onClick={handleConfirm}
+                            disabled={isLoading}
+                        >
+                            {isLoading ? 'Confirming...' : 'Confirm Request'}
+                        </Button>
+                    </div>
+                );
+        }
     };
 
     return (
@@ -189,8 +314,8 @@ export function RequestMoneyDialog({
                                             <StepLabel
                                                 StepIconComponent={(props) => (
                                                     <StepperIcon
-                                                        active={props.active}
-                                                        completed={props.completed}
+                                                        active={props.active ?? false}
+                                                        completed={props.completed ?? false}
                                                         icon={props.icon}
                                                     />
                                                 )}
@@ -224,53 +349,7 @@ export function RequestMoneyDialog({
                                         damping: 30
                                     }}
                                 >
-                                    {step === 0 ? (
-                                        <div className="space-y-4 py-4">
-                                            <div className="relative">
-                                                <div className="flex flex-col items-center space-y-2">
-                                                    <input
-                                                        type="number"
-                                                        value={amount}
-                                                        onChange={(e) => setAmount(e.target.value)}
-                                                        placeholder="0.00"
-                                                        className="text-4xl w-full bg-transparent border-none focus:outline-none text-center"
-                                                    />
-                                                    <p className="text-center text-sm text-muted-foreground">
-                                                        ETH
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <Button
-                                                className="w-full"
-                                                onClick={handleSubmit}
-                                            >
-                                                Continue
-                                            </Button>
-                                        </div>
-                                    ) : (
-                                        <div className="space-y-4 py-4">
-                                            <div className="space-y-4">
-                                                <h3 className="font-medium">Request Details</h3>
-                                                <div className="space-y-2 text-sm">
-                                                    <div className="flex justify-between">
-                                                        <span className="text-muted-foreground">Amount:</span>
-                                                        <span className="font-medium">{amount} ETH</span>
-                                                    </div>
-                                                    <div className="flex justify-between">
-                                                        <span className="text-muted-foreground">From:</span>
-                                                        <span className="font-medium">{selectedContact?.email}</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <Button
-                                                className="w-full"
-                                                onClick={handleConfirm}
-                                                disabled={isLoading}
-                                            >
-                                                {isLoading ? 'Confirming...' : 'Confirm Request'}
-                                            </Button>
-                                        </div>
-                                    )}
+                                    {renderStepContent()}
                                 </motion.div>
                             </AnimatePresence>
 

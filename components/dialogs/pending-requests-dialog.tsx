@@ -12,7 +12,8 @@ import { baseSepolia, sepolia } from "@wagmi/core/chains";
 import { useState } from "react";
 import { usePaymentRequestsStore } from "@/stores/use-payment-requests-store";
 import { useTransactionsStore } from "@/stores/use-transactions-store";
-
+import { motion } from "framer-motion";
+import { PaymentRequest } from "@/types/data";
 interface PendingRequestsDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
@@ -24,7 +25,8 @@ export function PendingRequestsDialog({ open, onOpenChange, requests }: PendingR
     const { user } = usePrivy();
     const { wallets } = useWallets();
     const [isLoading, setIsLoading] = useState(false);
-    const { clearRequest } = usePaymentRequestsStore();
+    const [rejectingId, setRejectingId] = useState<number | null>(null);
+    const { clearRequest, rejectRequest, fetchPendingRequests } = usePaymentRequestsStore();
     const { addTransaction } = useTransactionsStore();
 
     const handlePay = async (request: PaymentRequestWithWallet) => {
@@ -81,7 +83,7 @@ export function PendingRequestsDialog({ open, onOpenChange, requests }: PendingR
                 to_account_id: request.requester,
                 from_address: wallet.address,
                 to_address: request.requester_wallet,
-                amount: request.amount.toString() + 'n',
+                amount: request.amount.toString(),
                 token_address: request.token_address,
                 token_name: request.token_name,
                 tx: result,
@@ -109,6 +111,27 @@ export function PendingRequestsDialog({ open, onOpenChange, requests }: PendingR
             });
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const handleReject = async (request: PaymentRequest) => {
+        setRejectingId(request.id);
+        try {
+            await rejectRequest(request.id);
+            toast({
+                title: "Success",
+                description: "Payment request rejected",
+            });
+            await fetchPendingRequests();
+        } catch (error) {
+            console.error('Failed to reject request:', error);
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Failed to reject request. Please try again.",
+            });
+        } finally {
+            setRejectingId(null);
         }
     };
 
@@ -157,6 +180,24 @@ export function PendingRequestsDialog({ open, onOpenChange, requests }: PendingR
                                         disabled={isLoading}
                                     >
                                         {isLoading ? "Paying..." : "Pay"}
+                                    </Button>
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => handleReject(request)}
+                                        disabled={isLoading || rejectingId === request.id}
+                                    >
+                                        {rejectingId === request.id ? (
+                                            <motion.div
+                                                initial={{ scale: 1 }}
+                                                animate={{ scale: 0.8 }}
+                                                transition={{ repeat: Infinity, duration: 0.5 }}
+                                            >
+                                                Rejecting...
+                                            </motion.div>
+                                        ) : (
+                                            "Reject"
+                                        )}
                                     </Button>
                                 </div>
                             </div>

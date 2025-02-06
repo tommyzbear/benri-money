@@ -47,6 +47,7 @@ export const useTransactionsStore = create<TransactionsState>((set) => ({
 
             // Refetch transactions to get the latest data
             const { data } = await response.json();
+
             set((state) => ({
                 transactions: [data, ...state.transactions],
             }));

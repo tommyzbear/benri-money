@@ -10,10 +10,10 @@ import { Contact } from "@/types/search";
 import { parseEther } from 'viem';
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { useToast } from "@/hooks/use-toast";
-import { TransactionHistory } from "@/types/data";
 import { baseSepolia, sepolia } from "viem/chains";
 import { dialogSlideUp, fadeIn, stepVariants } from "@/lib/animations";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTransactionsStore } from "@/stores/use-transactions-store";
 
 const steps = ['Select Type', 'Select Network', 'Enter Amount', 'Confirm'];
 
@@ -78,6 +78,7 @@ export function SendMoneyDialog({
     const { wallets } = useWallets();
     const { toast } = useToast();
     const { user } = usePrivy();
+    const { addTransaction } = useTransactionsStore();
 
     const goToNextStep = () => {
         setDirection(1);
@@ -137,35 +138,20 @@ export function SendMoneyDialog({
                 params: [transactionRequest],
             });
 
-            const transactionHistory: Omit<TransactionHistory, "id" | "amount" | "created_at"> & { amount: string } = {
+            await addTransaction({
                 from_account_id: user?.id || "",
                 to_account_id: selectedContact.id,
                 from_address: wallet.address,
                 to_address: selectedContact.wallet,
-                amount: parseEther(amount).toString() + 'n',
-                // TODO: native token doesn't have an address, others might do
+                amount: parseEther(amount).toString(),
                 token_address: "0x0000000000000000000000000000000000000000",
                 token_name: token.name,
                 tx: result,
                 transaction_type: "wallet",
                 chain_id: chainId,
                 chain: chain
-            };
-
-            // Save transaction to database
-            const response = await fetch('/api/transactions', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(transactionHistory),
             });
 
-            if (!response.ok) {
-                throw new Error('Failed to save transaction');
-            }
-
-            console.log("Transaction sent:", result);
             toast({
                 title: "Success",
                 description: `Transaction sent successfully!\ntx: ${result}`,
