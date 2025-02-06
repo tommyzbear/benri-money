@@ -20,6 +20,17 @@ export async function POST(request: Request) {
 
         const body = (await request.json()) as Omit<PaymentRequest, "id" | "requested_at" | "cleared" | "amount"> & { amount: string };
 
+        const { data: friendData, error: friendError } = await supabase
+            .from("friends")
+            .select("*")
+            .eq("account_id", body.payee)
+            .eq("friend_id", claims.userId)
+            .single();
+
+        if (friendError || !friendData) {
+            return NextResponse.json({ error: 'You must be friends with the payee to request money.' }, { status: 401 });
+        }
+
         const { data, error } = await supabase
             .from('payment_requests')
             .insert({
