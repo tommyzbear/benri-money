@@ -1,7 +1,7 @@
 "use client";
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Contact } from "@/types/search";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
@@ -9,6 +9,8 @@ import { blo } from "blo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
+import { useContactsStore } from "@/stores/use-contacts-store";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface SelectFriendDialogProps {
     open: boolean;
@@ -17,98 +19,144 @@ interface SelectFriendDialogProps {
 }
 
 export function SelectFriendDialog({ open, onOpenChange, onFriendSelect }: SelectFriendDialogProps) {
-    const [friends, setFriends] = useState<Contact[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [searchQuery, setSearchQuery] = useState("");
+    const {
+        friends,
+        searchResults,
+        searchQuery,
+        isLoading,
+        error,
+        setSearchQuery,
+        fetchFriends
+    } = useContactsStore();
     const { toast } = useToast();
 
     useEffect(() => {
-        const fetchFriends = async () => {
-            try {
-                const response = await fetch('/api/contacts/friends');
-                if (!response.ok) {
-                    throw new Error('Failed to fetch friends');
-                }
-                const { data } = await response.json();
-                setFriends(data);
-            } catch (error) {
-                console.error('Error fetching friends:', error);
-                toast({
-                    variant: "destructive",
-                    title: "Error",
-                    description: "Failed to load friends. Please try again.",
-                });
-            } finally {
-                setLoading(false);
-            }
-        };
-
         if (open) {
             fetchFriends();
         }
-    }, [open, toast]);
+    }, [open, fetchFriends]);
+
+    useEffect(() => {
+        if (error) {
+            toast({
+                title: "Error",
+                description: error,
+                variant: "destructive",
+            });
+        }
+    }, [error, toast]);
 
     const formatAddress = (address: string) => {
         return `${address.slice(0, 6)}...${address.slice(-4)}`;
     };
 
-    const filteredFriends = friends.filter(friend =>
-        friend.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        friend.wallet?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const displayContacts = searchQuery ? searchResults : friends;
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[400px] rounded-3xl">
-                <DialogHeader>
+            <DialogContent className="sm:max-w-md rounded-3xl">
+                <DialogHeader className="text-left">
                     <DialogTitle>Select Friend</DialogTitle>
                 </DialogHeader>
-                <div className="relative">
-                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                        placeholder="Search friends..."
-                        className="pl-8"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                </div>
-                <div className="mt-4 space-y-2 max-h-[300px] overflow-y-auto">
-                    {loading ? (
-                        <div className="text-center py-4">Loading...</div>
-                    ) : filteredFriends.length === 0 ? (
-                        <div className="text-center py-4 text-muted-foreground">
-                            No friends found
-                        </div>
-                    ) : (
-                        filteredFriends.map((friend) => (
-                            <Button
-                                key={friend.id}
-                                variant="ghost"
-                                className="w-full justify-start p-4 h-auto hover:bg-slate-50"
-                                onClick={() => {
-                                    onFriendSelect(friend);
-                                    onOpenChange(false);
-                                }}
-                            >
-                                <div className="flex items-center space-x-3">
-                                    <Image
-                                        src={blo(friend.wallet as `0x${string}`)}
-                                        alt={friend.wallet}
-                                        width={40}
-                                        height={40}
-                                    />
-                                    <div className="text-left">
-                                        <p className="font-medium">
-                                            {friend.email}
-                                        </p>
-                                        <p className="text-sm text-muted-foreground">
-                                            {formatAddress(friend.wallet)}
-                                        </p>
-                                    </div>
-                                </div>
-                            </Button>
-                        ))
-                    )}
+                <div className="space-y-4">
+                    <div className="relative">
+                        <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            placeholder="Search by email or wallet address"
+                            className="pl-9"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
+
+                    <motion.div
+                        className="space-y-2 overflow-y-auto"
+                        layout
+                        style={{
+                            minHeight: 200,
+                            maxHeight: 400,
+                            paddingRight: "8px"
+                        }}
+                    >
+                        <AnimatePresence mode="wait">
+                            {isLoading ? (
+                                <motion.div
+                                    key="loading"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    layout
+                                >
+                                    {[...Array(3)].map((_, i) => (
+                                        <div key={i} className="flex items-center space-x-3 p-2">
+                                            <div className="h-10 w-10 rounded-full bg-slate-200 animate-pulse" />
+                                            <div className="space-y-2 flex-1">
+                                                <div className="h-4 w-48 bg-slate-200 animate-pulse rounded" />
+                                                <div className="h-3 w-32 bg-slate-200 animate-pulse rounded" />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </motion.div>
+                            ) : (
+                                <motion.div
+                                    key="content"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    layout
+                                >
+                                    {displayContacts.map((friend, index) => (
+                                        <motion.div
+                                            key={friend.id}
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: index * 0.05 }}
+                                            layout
+                                        >
+                                            <Button
+                                                variant="ghost"
+                                                className="w-full p-2 h-auto bg-slate-50 hover:bg-slate-100"
+                                                onClick={() => {
+                                                    onFriendSelect(friend);
+                                                    onOpenChange(false);
+                                                }}
+                                            >
+                                                <div className="flex items-center w-full">
+                                                    <div className="flex items-center space-x-3 flex-1">
+                                                        <Image
+                                                            src={blo(friend.wallet as `0x${string}`)}
+                                                            alt={friend.wallet}
+                                                            width={40}
+                                                            height={40}
+                                                        />
+                                                        <div className="text-left flex-1">
+                                                            <p className="font-medium">
+                                                                {friend.email}
+                                                            </p>
+                                                            <p className="text-sm text-muted-foreground">
+                                                                {formatAddress(friend.wallet)}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </Button>
+                                        </motion.div>
+                                    ))}
+
+                                    {displayContacts.length === 0 && (
+                                        <motion.div
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            layout
+                                            className="text-left py-4 text-muted-foreground"
+                                        >
+                                            {searchQuery ? "No results found" : "No friends yet"}
+                                        </motion.div>
+                                    )}
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </motion.div>
                 </div>
             </DialogContent>
         </Dialog>

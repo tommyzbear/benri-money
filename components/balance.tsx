@@ -23,7 +23,6 @@ export function Balance() {
 
     useEffect(() => {
         if (wallets.length > 0) {
-            console.log("fetching balances");
             fetchBalances(wallets[0].address);
         }
     }, [wallets, fetchBalances]);
