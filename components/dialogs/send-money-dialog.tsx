@@ -1,6 +1,6 @@
 "use client";
 
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useState } from "react";
 import { CreditCard, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,11 +12,53 @@ import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { useToast } from "@/hooks/use-toast";
 import { TransactionHistory } from "@/types/data";
 import { baseSepolia, sepolia } from "viem/chains";
+import { dialogSlideUp, fadeIn, stepVariants } from "@/lib/animations";
+import { motion, AnimatePresence } from "framer-motion";
 
 const steps = ['Select Type', 'Select Network', 'Enter Amount', 'Confirm'];
 
 type SendOption = "crypto" | "cash" | null;
 type Chain = "Base Sepolia" | "Arbitrum Sepolia" | "Arbitrum Goerli" | "Sepolia" | "Optimism Sepolia" | null;
+
+const StepperIcon = ({ active, completed, icon }: { active: boolean; completed: boolean; icon: React.ReactNode }) => {
+    return (
+        <motion.div
+            className="relative"
+            initial={false}
+        >
+            <motion.div
+                className="absolute inset-0 rounded-full bg-blue-400/80 blur-md"
+                initial={false}
+                animate={{
+                    scale: active ? 1.8 : 0,
+                    opacity: active ? 1 : 0
+                }}
+                transition={{
+                    type: "spring",
+                    stiffness: 300,
+                    damping: 20,
+                    opacity: { duration: 0.2 }
+                }}
+            />
+
+            <motion.div
+                className="relative z-10"
+                initial={false}
+                animate={{
+                    scale: active ? 1.2 : 1,
+                    color: active ? "rgb(59, 130, 246)" : completed ? "rgb(34, 197, 94)" : "rgb(156, 163, 175)"
+                }}
+                transition={{
+                    type: "spring",
+                    stiffness: 500,
+                    damping: 30
+                }}
+            >
+                {icon}
+            </motion.div>
+        </motion.div>
+    );
+};
 
 export function SendMoneyDialog({
     open,
@@ -27,7 +69,8 @@ export function SendMoneyDialog({
     onOpenChange: (open: boolean) => void;
     selectedContact: Contact | null;
 }) {
-    const [activeStep, setActiveStep] = useState(0);
+    const [step, setStep] = useState(0);
+    const [direction, setDirection] = useState(0);
     const [sendOption, setSendOption] = useState<SendOption>(null);
     const [selectedChain, setSelectedChain] = useState<Chain>(null);
     const [amount, setAmount] = useState<string>("");
@@ -36,28 +79,18 @@ export function SendMoneyDialog({
     const { toast } = useToast();
     const { user } = usePrivy();
 
-    const handleNext = () => {
-        if (activeStep === 0 && sendOption === "cash") {
-            handleReset();
-            return;
-        }
-        setActiveStep((prev) => prev + 1);
+    const goToNextStep = () => {
+        setDirection(1);
+        setStep((prev) => prev + 1);
     };
 
-    const handleBack = () => {
-        setActiveStep((prev) => prev - 1);
-    };
-
-    const handleReset = () => {
-        setActiveStep(0);
-        setSendOption(null);
-        setSelectedChain(null);
-        setAmount("");
-        onOpenChange(false);
+    const goToPreviousStep = () => {
+        setDirection(-1);
+        setStep((prev) => prev - 1);
     };
 
     const handleSubmit = () => {
-        handleNext();
+        goToNextStep();
     };
 
     const handleConfirm = async () => {
@@ -152,8 +185,16 @@ export function SendMoneyDialog({
         }
     };
 
+    const handleReset = () => {
+        setStep(0);
+        setSendOption(null);
+        setSelectedChain(null);
+        setAmount("");
+        onOpenChange(false);
+    };
+
     const renderStepContent = () => {
-        switch (activeStep) {
+        switch (step) {
             case 0:
                 return (
                     <div className="space-y-4 py-4">
@@ -163,7 +204,7 @@ export function SendMoneyDialog({
                                 className="h-32 flex flex-col items-center justify-center space-y-2"
                                 onClick={() => {
                                     setSendOption("crypto");
-                                    handleNext();
+                                    goToNextStep();
                                 }}
                             >
                                 <Wallet className="h-8 w-8" />
@@ -175,7 +216,7 @@ export function SendMoneyDialog({
                                 className="h-32 flex flex-col items-center justify-center space-y-2"
                                 onClick={() => {
                                     setSendOption("cash");
-                                    handleNext();
+                                    goToNextStep();
                                 }}
                             >
                                 <CreditCard className="h-8 w-8" />
@@ -196,7 +237,7 @@ export function SendMoneyDialog({
                                     className="w-full justify-between h-16 relative"
                                     onClick={() => {
                                         setSelectedChain(chain as Chain);
-                                        handleNext();
+                                        goToNextStep();
                                     }}
                                 >
                                     <div className="flex items-center space-x-3">
@@ -329,25 +370,123 @@ export function SendMoneyDialog({
         }
     };
 
+    const resetDialog = () => {
+        setStep(0);
+        setDirection(0);
+        setSendOption(null);
+        setSelectedChain(null);
+        setAmount("");
+    };
+
+    const handleOpenChange = (newOpen: boolean) => {
+        if (!newOpen) {
+            resetDialog();
+        }
+        onOpenChange(newOpen);
+    };
+
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[400px] rounded-3xl">
-                <Box sx={{ width: '100%' }}>
-                    <Stepper activeStep={activeStep} alternativeLabel>
-                        {steps.map((label) => (
-                            <Step key={label}>
-                                <StepLabel>{label}</StepLabel>
-                            </Step>
-                        ))}
-                    </Stepper>
-                </Box>
-                {renderStepContent()}
-                {activeStep > 0 && (
-                    <Button variant="outline" onClick={handleBack} className="w-full">
-                        Back
-                    </Button>
-                )}
-            </DialogContent>
-        </Dialog>
+        <AnimatePresence mode="wait">
+            {open && (
+                <Dialog open={open} onOpenChange={handleOpenChange}>
+                    <motion.div
+                        className="fixed inset-0 bg-black/40 z-50"
+                        initial="initial"
+                        animate="animate"
+                        exit="exit"
+                        variants={fadeIn}
+                    />
+                    <DialogContent className="sm:max-w-md rounded-3xl border-none bg-gradient-to-b from-white to-slate-50/95 backdrop-blur-sm">
+                        <motion.div
+                            initial="initial"
+                            animate="animate"
+                            exit="exit"
+                            variants={dialogSlideUp}
+                        >
+                            <DialogHeader className="text-left p-4">
+                                <DialogTitle>Send Money</DialogTitle>
+                            </DialogHeader>
+
+                            <Box sx={{ width: '100%', mb: 4, mt: 4 }}>
+                                <Stepper
+                                    activeStep={step}
+                                    alternativeLabel
+                                    sx={{
+                                        '& .MuiStepConnector-line': {
+                                            transition: 'border-color 0.3s ease'
+                                        }
+                                    }}
+                                >
+                                    {steps.map((label, index) => (
+                                        <Step
+                                            key={label}
+                                            sx={{
+                                                '& .MuiStepLabel-root': {
+                                                    transition: 'all 0.3s ease'
+                                                }
+                                            }}
+                                        >
+                                            <StepLabel
+                                                StepIconComponent={(props) => (
+                                                    <StepperIcon
+                                                        active={props.active}
+                                                        completed={props.completed}
+                                                        icon={props.icon}
+                                                    />
+                                                )}
+                                            >
+                                                <motion.span
+                                                    initial={false}
+                                                    animate={{
+                                                        color: step === index ? "rgb(59, 130, 246)" : "rgb(107, 114, 128)",
+                                                        fontWeight: step === index ? 600 : 400
+                                                    }}
+                                                >
+                                                    {label}
+                                                </motion.span>
+                                            </StepLabel>
+                                        </Step>
+                                    ))}
+                                </Stepper>
+                            </Box>
+
+                            <AnimatePresence mode="wait" custom={direction}>
+                                <motion.div
+                                    key={step}
+                                    custom={direction}
+                                    variants={stepVariants}
+                                    initial="enter"
+                                    animate="center"
+                                    exit="exit"
+                                    transition={{
+                                        type: "spring",
+                                        stiffness: 300,
+                                        damping: 30
+                                    }}
+                                >
+                                    {renderStepContent()}
+                                </motion.div>
+                            </AnimatePresence>
+
+                            {step > 0 && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: 10 }}
+                                >
+                                    <Button
+                                        variant="outline"
+                                        onClick={goToPreviousStep}
+                                        className="w-full mt-4"
+                                    >
+                                        Back
+                                    </Button>
+                                </motion.div>
+                            )}
+                        </motion.div>
+                    </DialogContent>
+                </Dialog>
+            )}
+        </AnimatePresence>
     );
 } 
