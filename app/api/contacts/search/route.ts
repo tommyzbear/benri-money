@@ -29,11 +29,11 @@ export async function GET(request: Request) {
                 .select(`
                     id,
                     wallet:wallet!inner(address),
-                    email:email!inner(address),
-                    isFriend:friends!friend_id(account_id)
+                    email:email!inner(address)
                 `)
                 .neq('id', claims.userId)
-                .ilike('wallet.address', `${query}%`);
+                .ilike('wallet.address', `${query}%`)
+                .limit(10);
 
             if (walletError) {
                 console.error('Error searching accounts:', walletError);
@@ -44,21 +44,20 @@ export async function GET(request: Request) {
                 id: account.id,
                 email: account.email[0]?.address,
                 wallet: account.wallet[0]?.address,
-                isFriend: account.isFriend.length > 0
+                isFriend: false
             }));
         }
-
 
         const { data: emailMatches, error: emailError } = await supabase
             .from('account')
             .select(`
                 id,
                 wallet:wallet!inner(address),
-                email:email!inner(address),
-                isFriend:friends!friend_id(account_id)
+                email:email!inner(address)
             `)
             .neq('id', claims.userId)
-            .ilike('email.address', `${query}%`);
+            .ilike('email.address', `${query}%`)
+            .limit(10);
 
         if (emailError) {
             console.error('Error searching accounts:', emailError);
@@ -69,10 +68,21 @@ export async function GET(request: Request) {
             id: account.id,
             email: account.email[0]?.address,
             wallet: account.wallet[0]?.address,
-            isFriend: account.isFriend.length > 0 && account.isFriend[0].account_id === claims.userId
+            isFriend: false
         }));
 
         data = [...data, ...emailData.filter(item => !data.some(d => d.id === item.id))];
+
+        const { data: friends, error: friendsError } = await supabase
+            .from('friends')
+            .select('friend_id')
+            .eq('account_id', claims.userId)
+            .in('friend_id', data.map(item => item.id));
+
+        data = data.map(item => ({
+            ...item,
+            isFriend: friends?.some(friend => friend.friend_id === item.id)
+        }));
 
         return NextResponse.json({ data });
     } catch (error) {

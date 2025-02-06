@@ -20,6 +20,7 @@ export function ContactList() {
     const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
     const [requestDialogOpen, setRequestDialogOpen] = useState(false);
     const [selectedRequestContact, setSelectedRequestContact] = useState<Contact | null>(null);
+    const [unfriendingId, setUnfriendingId] = useState<string | null>(null);
 
     const {
         friends,
@@ -28,7 +29,8 @@ export function ContactList() {
         isLoading,
         error,
         fetchFriends,
-        addFriend
+        addFriend,
+        unfriend
     } = useContactsStore();
 
     useEffect(() => {
@@ -72,6 +74,26 @@ export function ContactList() {
         e.stopPropagation();
         setSelectedRequestContact(contact);
         setRequestDialogOpen(true);
+    };
+
+    const handleUnfriend = async (friendId: string) => {
+        setUnfriendingId(friendId);
+        try {
+            await unfriend(friendId);
+            toast({
+                title: "Success",
+                description: "It's like you never met them in the first place.",
+            });
+        } catch (error) {
+            console.error('Failed to unfriend:', error);
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Failed to remove friend. Please try again.",
+            });
+        } finally {
+            setUnfriendingId(null);
+        }
     };
 
     if (isLoading) {
@@ -142,15 +164,38 @@ export function ContactList() {
                                             className="h-8 w-8"
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                if (!contact.isFriend) {
+                                                if (contact.isFriend) {
+                                                    handleUnfriend(contact.id);
+                                                } else {
                                                     handleAddFriend(contact.id);
                                                 }
                                             }}
+                                            disabled={unfriendingId === contact.id}
                                         >
                                             {contact.isFriend ? (
-                                                <Check className="h-4 w-4 text-green-500" />
+                                                unfriendingId === contact.id ? (
+                                                    <motion.div
+                                                        initial={{ scale: 1 }}
+                                                        animate={{ scale: 0.8 }}
+                                                        transition={{ repeat: Infinity, duration: 0.5 }}
+                                                    >
+                                                        <Check className="h-4 w-4 text-green-500" />
+                                                    </motion.div>
+                                                ) : (
+                                                    <motion.div
+                                                        whileHover={{ scale: 1.1 }}
+                                                        whileTap={{ scale: 0.9 }}
+                                                    >
+                                                        <Check className="h-4 w-4 text-green-500" />
+                                                    </motion.div>
+                                                )
                                             ) : (
-                                                <Plus className="h-4 w-4" />
+                                                <motion.div
+                                                    whileHover={{ scale: 1.1 }}
+                                                    whileTap={{ scale: 0.9 }}
+                                                >
+                                                    <Plus className="h-4 w-4" />
+                                                </motion.div>
                                             )}
                                         </Button>
                                     </div>
