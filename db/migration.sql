@@ -3,7 +3,9 @@ CREATE TABLE Account (
     id VARCHAR(255) PRIMARY KEY,
     created_at TIMESTAMP NOT NULL,
     has_accepted_terms BOOLEAN DEFAULT FALSE,
-    is_guest BOOLEAN DEFAULT FALSE
+    is_guest BOOLEAN DEFAULT FALSE,
+    profile_img VARCHAR(255),
+    username VARCHAR(255) NOT NULL
 );
 -- Table 2: Email
 CREATE TABLE Email (

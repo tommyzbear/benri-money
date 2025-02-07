@@ -4,6 +4,8 @@ export interface Account {
     created_at: string;
     has_accepted_terms: boolean | null;
     is_guest: boolean | null;
+    profile_img: string | null;
+    username: string;
 }
 
 // Email Interface
