@@ -44,16 +44,18 @@ export async function POST(request: Request) {
             .getPublicUrl(fileDir + '/' + fileName);
 
         // Update user profile in database
-        const { error: updateError } = await supabase
+        const { data, error: updateError } = await supabase
             .from('account')
             .update({ profile_img: publicUrl })
-            .eq('id', claims.userId);
+            .eq('id', claims.userId)
+            .select()
+            .single();
 
         if (updateError) {
             throw updateError;
         }
 
-        return NextResponse.json({ success: true });
+        return NextResponse.json({ profile_img: data.profile_img });
     } catch (error) {
         console.error('Server error:', error);
         return NextResponse.json(

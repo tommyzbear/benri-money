@@ -3,11 +3,11 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
-import { usePrivy } from "@privy-io/react-auth";
 import { useToast } from "@/hooks/use-toast";
 import { Upload, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
+import { useUserStore } from "@/stores/use-user-store";
 
 interface UploadProfileImageDialogProps {
     open: boolean;
@@ -17,12 +17,12 @@ interface UploadProfileImageDialogProps {
 export function UploadProfileImageDialog({ open, onOpenChange }: UploadProfileImageDialogProps) {
     const [isUploading, setIsUploading] = useState(false);
     const [preview, setPreview] = useState<string | null>(null);
-    const { user } = usePrivy();
+    const { uploadProfileImage } = useUserStore();
     const { toast } = useToast();
 
     const onDrop = useCallback(async (acceptedFiles: File[]) => {
         const file = acceptedFiles[0];
-        if (!file || !user) return;
+        if (!file) return;
 
         // Create preview
         const objectUrl = URL.createObjectURL(file);
@@ -30,19 +30,7 @@ export function UploadProfileImageDialog({ open, onOpenChange }: UploadProfileIm
 
         setIsUploading(true);
         try {
-            // Create form data
-            const formData = new FormData();
-            formData.append('file', file);
-
-            // Upload via API endpoint
-            const response = await fetch('/api/user/profile-image', {
-                method: 'POST',
-                body: formData,
-            });
-
-            if (!response.ok) {
-                throw new Error('Upload failed');
-            }
+            await uploadProfileImage(file);
 
             toast({
                 title: "Success",
@@ -60,7 +48,7 @@ export function UploadProfileImageDialog({ open, onOpenChange }: UploadProfileIm
             setIsUploading(false);
             URL.revokeObjectURL(preview || '');
         }
-    }, [user, toast, onOpenChange, preview]);
+    }, [toast, onOpenChange, preview, uploadProfileImage]);
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
