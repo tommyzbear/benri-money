@@ -28,6 +28,7 @@ export async function POST(request: Request) {
                     created_at: user.createdAt,
                     has_accepted_terms: user.hasAcceptedTerms,
                     is_guest: user.isGuest,
+                    username: getDefaultUsername(user),
                 })
                 .select()
                 .single();
@@ -154,4 +155,19 @@ export async function POST(request: Request) {
         console.error('Error processing request:', error);
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
-} 
+}
+
+const getDefaultUsername = (user: User) => {
+    switch (user.linkedAccounts[0].type) {
+        case 'email':
+            return (user.linkedAccounts[0] as EmailWithMetadata).address;
+        case 'google_oauth':
+            return (user.linkedAccounts[0] as GoogleOAuthWithMetadata).name;
+        case 'twitter_oauth':
+            return (user.linkedAccounts[0] as TwitterOAuthWithMetadata).username;
+        case 'discord_oauth':
+            return (user.linkedAccounts[0] as DiscordOAuthWithMetadata).username;
+        default:
+            return "anon_" + user.id.slice(-4);
+    }
+}
