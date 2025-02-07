@@ -14,6 +14,7 @@ import { usePaymentRequestsStore } from "@/stores/use-payment-requests-store";
 import { useTransactionsStore } from "@/stores/use-transactions-store";
 import { motion } from "framer-motion";
 import { PaymentRequest } from "@/types/data";
+
 interface PendingRequestsDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
@@ -137,72 +138,77 @@ export function PendingRequestsDialog({ open, onOpenChange, requests }: PendingR
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[400px] rounded-3xl">
-                <DialogHeader>
-                    <DialogTitle>Pending Payment Requests</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4">
-                    {requests.map((request) => (
-                        <div
-                            key={request.id}
-                            className="p-4 bg-slate-50 rounded-lg space-y-3"
-                        >
-                            <div className="flex items-center justify-between">
-                                <div className="space-y-1">
-                                    <p className="font-medium">
-                                        {(Number(request.amount) / 1e18).toFixed(4)} {request.token_name}
-                                    </p>
-                                    <p className="text-sm text-muted-foreground">
-                                        Requested {formatDistanceToNow(new Date(request.requested_at), { addSuffix: true })}
-                                    </p>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                    {request.chain === "Base Sepolia" ? (
-                                        <Image
-                                            src="/icons/base-logo.svg"
-                                            alt="Base Network"
-                                            width={24}
-                                            height={24}
-                                            className="rounded-full"
-                                        />
-                                    ) : (
-                                        <Image
-                                            src="/icons/ethereum-eth-logo.svg"
-                                            alt="Ethereum Network"
-                                            width={24}
-                                            height={24}
-                                            className="rounded-full"
-                                        />
-                                    )}
-                                    <Button
-                                        size="sm"
-                                        onClick={() => handlePay(request)}
-                                        disabled={isLoading}
-                                    >
-                                        {isLoading ? "Paying..." : "Pay"}
-                                    </Button>
-                                    <Button
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={() => handleReject(request)}
-                                        disabled={isLoading || rejectingId === request.id}
-                                    >
-                                        {rejectingId === request.id ? (
-                                            <motion.div
-                                                initial={{ scale: 1 }}
-                                                animate={{ scale: 0.8 }}
-                                                transition={{ repeat: Infinity, duration: 0.5 }}
-                                            >
-                                                Rejecting...
-                                            </motion.div>
+            <DialogContent className="sm:max-w-[400px] rounded-3xl flex flex-col max-h-[80vh] p-0">
+                <div className="px-6 py-4 border-b">
+                    <DialogHeader>
+                        <DialogTitle>Pending Payment Requests</DialogTitle>
+                    </DialogHeader>
+                </div>
+
+                <div className="flex-1 p-6 overflow-y-auto">
+                    <div className="space-y-4">
+                        {requests.map((request) => (
+                            <div
+                                key={request.id}
+                                className="p-4 bg-slate-50 rounded-lg space-y-3"
+                            >
+                                <div className="flex items-center justify-between">
+                                    <div className="space-y-1">
+                                        <p className="font-medium">
+                                            {(Number(request.amount) / 1e18).toFixed(4)} {request.token_name}
+                                        </p>
+                                        <p className="text-sm text-muted-foreground">
+                                            Requested {formatDistanceToNow(new Date(request.requested_at), { addSuffix: true })}
+                                        </p>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        {request.chain === "Base Sepolia" ? (
+                                            <Image
+                                                src="/icons/base-logo.svg"
+                                                alt="Base Network"
+                                                width={24}
+                                                height={24}
+                                                className="rounded-full"
+                                            />
                                         ) : (
-                                            "Reject"
+                                            <Image
+                                                src="/icons/ethereum-eth-logo.svg"
+                                                alt="Ethereum Network"
+                                                width={24}
+                                                height={24}
+                                                className="rounded-full"
+                                            />
                                         )}
-                                    </Button>
+                                        <Button
+                                            size="sm"
+                                            onClick={() => handlePay(request)}
+                                            disabled={isLoading}
+                                        >
+                                            Pay
+                                        </Button>
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            onClick={() => handleReject(request)}
+                                            disabled={isLoading || rejectingId === request.id}
+                                        >
+                                            {rejectingId === request.id ? (
+                                                <motion.div
+                                                    initial={{ scale: 1 }}
+                                                    animate={{ scale: 0.8 }}
+                                                    transition={{ repeat: Infinity, duration: 0.5 }}
+                                                >
+                                                    Rejecting...
+                                                </motion.div>
+                                            ) : (
+                                                "Reject"
+                                            )}
+                                        </Button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
                 </div>
             </DialogContent>
         </Dialog>

@@ -109,7 +109,6 @@ export function RequestMoneyDialog({
         const chainId = selectedChain === "Base Sepolia" ? baseSepolia.id : sepolia.id;
 
         setIsLoading(true);
-        console.log("parseEther(amount).toString()", parseEther(amount).toString());
         try {
             const response = await fetch('/api/payment-requests', {
                 method: 'POST',

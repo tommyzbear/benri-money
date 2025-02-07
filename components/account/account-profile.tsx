@@ -36,19 +36,6 @@ export function AccountProfile() {
                             Change Name
                         </Button>
                     </div>
-                    <div className="mt-4 p-4 bg-slate-50 rounded-lg">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-white rounded-lg">
-                                <User className="w-5 h-5 text-blue-600" />
-                            </div>
-                            <div className="flex-1">
-                                <p className="font-medium">Look and sell like a pro with Seller Profile</p>
-                                <Link href="/seller" className="text-blue-600 text-sm">
-                                    Create profile
-                                </Link>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </CardContent>
         </Card>

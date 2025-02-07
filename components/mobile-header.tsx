@@ -9,19 +9,39 @@ import { PendingRequestsDialog } from "./dialogs/pending-requests-dialog";
 import { useState } from "react";
 import { usePaymentRequestsStore } from "@/stores/use-payment-requests-store";
 import { motion, AnimatePresence } from "framer-motion";
+import { supabase } from "@/lib/supabase";
+import { toast } from "@/hooks/use-toast";
 
 export function MobileHeader() {
     const [dialogOpen, setDialogOpen] = useState(false);
-    const { ready } = usePrivy();
+    const { user, ready } = usePrivy();
     const { pendingRequests, fetchPendingRequests } = usePaymentRequestsStore();
 
     useEffect(() => {
         if (!ready) return;
 
         fetchPendingRequests();
-        // const interval = setInterval(fetchPendingRequests, 60000);
-        // return () => clearInterval(interval);
     }, [ready, fetchPendingRequests]);
+
+    useEffect(() => {
+        const channel = supabase.channel("payment_requests").on("postgres_changes", {
+            event: "INSERT",
+            schema: "public",
+            table: "payment_requests",
+            filter: `payee=eq.${user?.id}`
+        }, () => {
+            toast({
+                title: "New payment request",
+                description: "You have received a new payment request",
+            });
+            fetchPendingRequests();
+        }).subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        }
+
+    }, [supabase, user?.id, fetchPendingRequests]);
 
     return (
         <header className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-700 to-indigo-700 text-white">

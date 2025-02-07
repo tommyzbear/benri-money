@@ -19,14 +19,12 @@ export function DesktopHeader() {
             router.push("/login");
         }
     });
-    const { count, pendingRequests, fetchPendingRequests } = usePaymentRequestsStore();
+    const { pendingRequests, fetchPendingRequests } = usePaymentRequestsStore();
 
     useEffect(() => {
         if (!ready) return;
 
         fetchPendingRequests();
-        // const interval = setInterval(fetchPendingRequests, 60000);
-        // return () => clearInterval(interval);
     }, [ready, fetchPendingRequests]);
 
     const handleLogout = async (): Promise<void> => {
@@ -50,12 +48,12 @@ export function DesktopHeader() {
                     variant="ghost"
                     size="icon"
                     className="relative"
-                    onClick={() => count > 0 && setDialogOpen(true)}
+                    onClick={() => pendingRequests.length > 0 && setDialogOpen(true)}
                 >
                     <Bell className="h-6 w-6" />
-                    {count > 0 && (
+                    {pendingRequests.length > 0 && (
                         <span className="absolute top-0 right-0 h-4 w-4 bg-red-500 rounded-full text-xs flex items-center justify-center">
-                            {count > 99 ? '99+' : count}
+                            {pendingRequests.length > 99 ? '99+' : pendingRequests.length}
                         </span>
                     )}
                 </Button>
