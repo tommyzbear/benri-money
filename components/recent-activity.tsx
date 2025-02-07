@@ -9,6 +9,7 @@ import { formatEther } from "viem";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTransactionsStore } from "@/stores/use-transactions-store";
 import { motion, AnimatePresence } from "framer-motion";
+import { supabase } from "@/lib/supabase";
 
 export function RecentActivity() {
     const { user, ready } = usePrivy();
@@ -19,6 +20,27 @@ export function RecentActivity() {
         if (!ready) return;
         fetchTransactions();
     }, [ready, fetchTransactions]);
+
+    useEffect(() => {
+        const channel = supabase
+            .channel("transaction_history")
+            .on("postgres_changes", {
+                event: "INSERT",
+                schema: "public",
+                table: "transaction_history",
+                filter: `to_account_id=eq.${user?.id}`
+            }, (payload) => {
+                toast({
+                    title: "Received payment",
+                    description: "You have received a payment",
+                });
+                fetchTransactions();
+            })
+            .subscribe();
+        return () => {
+            channel.unsubscribe();
+        }
+    }, [supabase, user?.id, fetchTransactions]);
 
     useEffect(() => {
         if (error) {

@@ -1,7 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { User, Pencil } from "lucide-react";
-import Link from "next/link";
 
 export function AccountProfile() {
     return (
