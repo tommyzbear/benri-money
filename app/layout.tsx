@@ -5,12 +5,18 @@ import Providers from "@/components/providers";
 import { Toaster } from "@/components/ui/toaster";
 import { cookies } from "next/headers";
 import { privyClient } from "@/lib/privy";
+import { Head } from "next/document";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "PaymentApp",
   description: "A modern payment application",
+  appleWebApp: {
+    capable: true,
+    title: "Wanderer",
+    statusBarStyle: "black-translucent",
+  },
 };
 
 async function checkAuth() {

@@ -1,6 +1,17 @@
 import { DesktopHeader } from "@/components/desktop-header";
 import { MobileHeader } from "@/components/mobile-header";
 import { QuickActions } from "@/components/quick-actions";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+    title: "PaymentApp",
+    description: "A modern payment application",
+    appleWebApp: {
+        capable: true,
+        title: "Wanderer",
+        statusBarStyle: "black-translucent",
+    },
+};
 
 export default function MyAccountLayout({
     children,

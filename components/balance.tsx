@@ -12,6 +12,7 @@ import { Skeleton } from "./ui/skeleton";
 import { useWalletStore } from "@/stores/use-wallet-store";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
+import { Separator } from "@radix-ui/react-separator";
 
 export function Balance() {
     const [sendDialogOpen, setSendDialogOpen] = useState(false);
@@ -74,9 +75,9 @@ export function Balance() {
 
                     {/* Web3 Balance */}
                     <AnimatePresence>
-                        {balances.map((b, index) => (
+                        {Object.entries(balances).map(([chain, balances], index) => (
                             <motion.div
-                                key={b.chain.id}
+                                key={chain}
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: index * 0.1 }}
@@ -87,11 +88,15 @@ export function Balance() {
                                 </div>
                                 <div className="flex-1">
                                     <p className="text-sm text-muted-foreground mb-1">
-                                        {b.chain.name} Wallet
+                                        {chain} Wallet
                                     </p>
-                                    <p className="text-2xl font-bold">
-                                        {Number(b.balance.formatted).toFixed(4)} {b.balance.symbol}
-                                    </p>
+                                    {balances.map((balance, index) => (
+                                        <>
+                                            <p className="text-2xl font-bold">
+                                                {Number(balance.formatted).toFixed(4)} {balance.symbol}
+                                            </p>
+                                        </>
+                                    ))}
                                     <p className="text-sm text-muted-foreground">Available</p>
                                 </div>
                             </motion.div>
