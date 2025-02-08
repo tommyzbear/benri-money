@@ -9,9 +9,9 @@ type Contact = {
 };
 
 const contacts: Contact[] = [
-    { initials: "CN", name: "Chun H Ng", bgColor: "bg-red-500" },
-    { initials: "SN", name: "Sujit Nair", bgColor: "bg-pink-500" },
-    { initials: "CR", name: "Chirag Rajani", bgColor: "bg-purple-500" },
+    { initials: "PA", name: "Person A", bgColor: "bg-red-500" },
+    { initials: "PB", name: "Person B", bgColor: "bg-pink-500" },
+    { initials: "PC", name: "Person C", bgColor: "bg-purple-500" },
     { initials: "Q", name: "Search", bgColor: "bg-blue-900" },
 ];
 

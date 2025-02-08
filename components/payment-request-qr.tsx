@@ -1,15 +1,14 @@
 import { QRCodeCanvas } from 'qrcode.react';
-import { PaymentRequest } from '@/types/data';
+import { PaymentRequest, SimplePaymentQrCode } from '@/types/data';
 import { formatEther, parseEther } from 'viem';
 
 interface PaymentRequestQRProps {
-    request: PaymentRequest;
+    request: SimplePaymentQrCode;
 }
 
 export function PaymentRequestQR({ request }: PaymentRequestQRProps) {
     // For local development:
-    const qrData = JSON.stringify(request);
-
+    const qrData = `http://localhost:3000/pay/${request.id}`;
     // Later in production:
     // const qrData = `wanderer://payment-request/${request.id}`;
 
@@ -23,7 +22,7 @@ export function PaymentRequestQR({ request }: PaymentRequestQRProps) {
                 className="rounded-lg"
             />
             <p className="text-sm text-muted-foreground">
-                Scan to pay {formatEther(request.amount)} {request.token_name}
+                Scan to pay {formatEther(request.amount)} {request.token_name} on {request.chain}
             </p>
         </div>
     );

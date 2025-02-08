@@ -114,3 +114,10 @@ export interface Discord {
     first_verified_at: string;
     latest_verified_at: string;
 }
+
+export interface SimplePaymentQrCode {
+    id: number;
+    amount: bigint;
+    token_name: string;
+    chain: string;
+}

@@ -20,7 +20,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { PaymentRequest } from "@/types/data";
+import { PaymentRequest, SimplePaymentQrCode } from "@/types/data";
 const steps = ['Select Chain', 'Enter Amount', 'Confirm'];
 
 type Chain = "Base Sepolia" | "Sepolia" | null;
@@ -82,7 +82,7 @@ export function RequestMoneyDialog({
     const { user } = usePrivy();
     const { toast } = useToast();
     const [showQR, setShowQR] = useState(false);
-    const [createdRequest, setCreatedRequest] = useState<PaymentRequest | null>(null);
+    const [createdRequest, setCreatedRequest] = useState<SimplePaymentQrCode | null>(null);
 
     const goToNextStep = () => {
         setDirection(1);
