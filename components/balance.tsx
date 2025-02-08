@@ -86,13 +86,13 @@ export function Balance() {
                                 <div className="p-2 bg-purple-100 rounded-full">
                                     <Wallet className="h-6 w-6 text-purple-600" />
                                 </div>
-                                <div className="flex-1">
+                                <div className="flex-1" key={chain}>
                                     <p className="text-sm text-muted-foreground mb-1">
                                         {chain} Wallet
                                     </p>
                                     {balances.map((balance, index) => (
                                         <>
-                                            <p className="text-2xl font-bold">
+                                            <p className="text-2xl font-bold" key={index}>
                                                 {Number(balance.formatted).toFixed(4)} {balance.symbol}
                                             </p>
                                         </>

@@ -15,7 +15,7 @@ export function BankAccounts() {
                 <div className="flex items-center space-x-4">
                     <CreditCard className="h-8 w-8 text-gray-500" />
                     <div>
-                        <p className="font-medium">The Platinum Card®</p>
+                        <p className="font-medium">Any Bank Card®</p>
                         <p className="text-sm text-muted-foreground">Credit ****03</p>
                     </div>
                 </div>

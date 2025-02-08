@@ -9,10 +9,18 @@ import { usePrivy } from "@privy-io/react-auth";
 import { useToast } from "@/hooks/use-toast";
 import { dialogSlideUp, fadeIn, stepVariants } from "@/lib/animations";
 import { motion, AnimatePresence } from "framer-motion";
-import { parseEther } from "viem";
+import { formatEther, parseEther } from "viem";
 import Image from "next/image";
 import { baseSepolia, sepolia } from "viem/chains";
-
+import { QrCode, Share2 } from "lucide-react";
+import { PaymentRequestQR } from "@/components/payment-request-qr";
+import {
+    AlertDialog,
+    AlertDialogContent,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { PaymentRequest } from "@/types/data";
 const steps = ['Select Chain', 'Enter Amount', 'Confirm'];
 
 type Chain = "Base Sepolia" | "Sepolia" | null;
@@ -73,6 +81,8 @@ export function RequestMoneyDialog({
     const [isLoading, setIsLoading] = useState(false);
     const { user } = usePrivy();
     const { toast } = useToast();
+    const [showQR, setShowQR] = useState(false);
+    const [createdRequest, setCreatedRequest] = useState<PaymentRequest | null>(null);
 
     const goToNextStep = () => {
         setDirection(1);
@@ -84,7 +94,7 @@ export function RequestMoneyDialog({
         setStep((prev) => prev - 1);
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (!amount) {
             toast({
                 variant: "destructive",
@@ -131,6 +141,10 @@ export function RequestMoneyDialog({
                 throw new Error('Failed to create payment request');
             }
 
+            const { data } = await response.json();
+            setCreatedRequest(data);
+            setShowQR(true);
+
             toast({
                 title: "Success",
                 description: "Payment request sent successfully!",
@@ -165,6 +179,31 @@ export function RequestMoneyDialog({
             resetDialog();
         }
         onOpenChange(newOpen);
+    };
+
+    const handleShare = async () => {
+        if (!createdRequest) return;
+
+        try {
+            if (navigator.share) {
+                await navigator.share({
+                    title: 'Payment Request',
+                    text: `Payment request for ${formatEther(createdRequest.amount)} ${createdRequest.token_name} on ${createdRequest.chain}`,
+                    url: window.location.origin + `/pay/${createdRequest.id}`,
+                });
+            } else {
+                // Fallback to copying to clipboard
+                await navigator.clipboard.writeText(
+                    window.location.origin + `/pay/${createdRequest.id}`
+                );
+                toast({
+                    title: "Link copied",
+                    description: "Payment request link copied to clipboard",
+                });
+            }
+        } catch (error) {
+            console.error('Error sharing:', error);
+        }
     };
 
     const renderStepContent = () => {
@@ -270,107 +309,139 @@ export function RequestMoneyDialog({
     };
 
     return (
-        <AnimatePresence mode="wait">
-            {open && (
-                <Dialog open={open} onOpenChange={handleOpenChange}>
-                    <motion.div
-                        className="fixed inset-0 bg-black/40 z-50"
-                        initial="initial"
-                        animate="animate"
-                        exit="exit"
-                        variants={fadeIn}
-                    />
-                    <DialogContent className="sm:max-w-md rounded-3xl border-none bg-gradient-to-b from-white to-slate-50/95 backdrop-blur-sm">
+        <>
+            <AnimatePresence mode="wait">
+                {open && (
+                    <Dialog open={open} onOpenChange={handleOpenChange}>
                         <motion.div
+                            className="fixed inset-0 bg-black/40 z-50"
                             initial="initial"
                             animate="animate"
                             exit="exit"
-                            variants={dialogSlideUp}
-                        >
-                            <DialogHeader className="text-left p-4">
-                                <DialogTitle>Request Money</DialogTitle>
-                            </DialogHeader>
+                            variants={fadeIn}
+                        />
+                        <DialogContent className="sm:max-w-md rounded-3xl border-none bg-gradient-to-b from-white to-slate-50/95 backdrop-blur-sm">
+                            <motion.div
+                                initial="initial"
+                                animate="animate"
+                                exit="exit"
+                                variants={dialogSlideUp}
+                            >
+                                <DialogHeader className="text-left p-4">
+                                    <DialogTitle>Request Money</DialogTitle>
+                                </DialogHeader>
 
-                            <Box sx={{ width: '100%', mb: 4, mt: 4 }}>
-                                <Stepper
-                                    activeStep={step}
-                                    alternativeLabel
-                                    sx={{
-                                        '& .MuiStepConnector-line': {
-                                            transition: 'border-color 0.3s ease'
-                                        }
-                                    }}
-                                >
-                                    {steps.map((label, index) => (
-                                        <Step
-                                            key={label}
-                                            sx={{
-                                                '& .MuiStepLabel-root': {
-                                                    transition: 'all 0.3s ease'
-                                                }
-                                            }}
-                                        >
-                                            <StepLabel
-                                                StepIconComponent={(props) => (
-                                                    <StepperIcon
-                                                        active={props.active ?? false}
-                                                        completed={props.completed ?? false}
-                                                        icon={props.icon}
-                                                    />
-                                                )}
-                                            >
-                                                <motion.span
-                                                    initial={false}
-                                                    animate={{
-                                                        color: step === index ? "rgb(59, 130, 246)" : "rgb(107, 114, 128)",
-                                                        fontWeight: step === index ? 600 : 400
-                                                    }}
-                                                >
-                                                    {label}
-                                                </motion.span>
-                                            </StepLabel>
-                                        </Step>
-                                    ))}
-                                </Stepper>
-                            </Box>
-
-                            <AnimatePresence mode="wait" custom={direction}>
-                                <motion.div
-                                    key={step}
-                                    custom={direction}
-                                    variants={stepVariants}
-                                    initial="enter"
-                                    animate="center"
-                                    exit="exit"
-                                    transition={{
-                                        type: "spring",
-                                        stiffness: 300,
-                                        damping: 30
-                                    }}
-                                >
-                                    {renderStepContent()}
-                                </motion.div>
-                            </AnimatePresence>
-
-                            {step > 0 && (
-                                <motion.div
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: 10 }}
-                                >
-                                    <Button
-                                        variant="outline"
-                                        onClick={goToPreviousStep}
-                                        className="w-full mt-4"
+                                <Box sx={{ width: '100%', mb: 4, mt: 4 }}>
+                                    <Stepper
+                                        activeStep={step}
+                                        alternativeLabel
+                                        sx={{
+                                            '& .MuiStepConnector-line': {
+                                                transition: 'border-color 0.3s ease'
+                                            }
+                                        }}
                                     >
-                                        Back
-                                    </Button>
-                                </motion.div>
-                            )}
-                        </motion.div>
-                    </DialogContent>
-                </Dialog>
-            )}
-        </AnimatePresence>
+                                        {steps.map((label, index) => (
+                                            <Step
+                                                key={label}
+                                                sx={{
+                                                    '& .MuiStepLabel-root': {
+                                                        transition: 'all 0.3s ease'
+                                                    }
+                                                }}
+                                            >
+                                                <StepLabel
+                                                    StepIconComponent={(props) => (
+                                                        <StepperIcon
+                                                            active={props.active ?? false}
+                                                            completed={props.completed ?? false}
+                                                            icon={props.icon}
+                                                        />
+                                                    )}
+                                                >
+                                                    <motion.span
+                                                        initial={false}
+                                                        animate={{
+                                                            color: step === index ? "rgb(59, 130, 246)" : "rgb(107, 114, 128)",
+                                                            fontWeight: step === index ? 600 : 400
+                                                        }}
+                                                    >
+                                                        {label}
+                                                    </motion.span>
+                                                </StepLabel>
+                                            </Step>
+                                        ))}
+                                    </Stepper>
+                                </Box>
+
+                                <AnimatePresence mode="wait" custom={direction}>
+                                    <motion.div
+                                        key={step}
+                                        custom={direction}
+                                        variants={stepVariants}
+                                        initial="enter"
+                                        animate="center"
+                                        exit="exit"
+                                        transition={{
+                                            type: "spring",
+                                            stiffness: 300,
+                                            damping: 30
+                                        }}
+                                    >
+                                        {renderStepContent()}
+                                    </motion.div>
+                                </AnimatePresence>
+
+                                {step > 0 && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: 10 }}
+                                    >
+                                        <Button
+                                            variant="outline"
+                                            onClick={goToPreviousStep}
+                                            className="w-full mt-4"
+                                        >
+                                            Back
+                                        </Button>
+                                    </motion.div>
+                                )}
+                            </motion.div>
+                        </DialogContent>
+                    </Dialog>
+                )}
+            </AnimatePresence>
+
+            <AlertDialog open={showQR} onOpenChange={setShowQR}>
+                <AlertDialogContent className="sm:max-w-md rounded-3xl">
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Payment Request QR Code</AlertDialogTitle>
+                    </AlertDialogHeader>
+
+                    {createdRequest && (
+                        <div className="space-y-4">
+                            <PaymentRequestQR request={createdRequest} />
+
+                            <div className="flex justify-end space-x-2">
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setShowQR(false)}
+                                >
+                                    Close
+                                </Button>
+                                <Button
+                                    onClick={handleShare}
+                                    className="flex items-center space-x-2"
+                                >
+                                    <Share2 className="w-4 h-4" />
+                                    <span>Share Request</span>
+                                </Button>
+                            </div>
+                        </div>
+                    )}
+                </AlertDialogContent>
+            </AlertDialog>
+        </>
     );
 } 
