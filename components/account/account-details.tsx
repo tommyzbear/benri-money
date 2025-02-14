@@ -69,6 +69,7 @@ export function AccountDetails() {
         unlinkTwitter,
         linkDiscord,
         unlinkDiscord,
+        exportWallet
     } = usePrivy();
 
     if (!ready) {
@@ -247,6 +248,17 @@ export function AccountDetails() {
                                 </div>
                             </div>
                         </div>
+                        {user?.wallet?.address && (
+                            <div className="mt-4">
+                                <Button
+                                    variant="outline"
+                                    className="w-full text-blue-600"
+                                    onClick={exportWallet}
+                                >
+                                    Export Wallet
+                                </Button>
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
             </motion.div>
