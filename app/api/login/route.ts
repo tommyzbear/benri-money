@@ -6,6 +6,8 @@ export async function POST(request: Request) {
     try {
         const user = (await request.json()) as User;
 
+        console.log(user);
+
         // Check if user exists
         const { data: existingUser, error: fetchError } = await supabase
             .from('account')
@@ -60,8 +62,34 @@ export async function POST(request: Request) {
             }
         }
 
-        if (user.wallet && user.linkedAccounts.filter(account => account.type === 'wallet').length > 0) {
-            const wallet = user.linkedAccounts.find(account => account.type === 'wallet') as WalletWithMetadata;
+        if (user.wallet && user.linkedAccounts.filter(account => account.type === 'wallet' && account.chainType === 'ethereum').length > 0) {
+            const wallet = user.linkedAccounts.find(account => account.type === 'wallet' && account.chainType === 'ethereum') as WalletWithMetadata;
+            const { error: insertWalletError } = await supabase
+                .from('wallet')
+                .upsert({
+                    account_id: dbUser.id,
+                    address: wallet.address,
+                    type: 'wallet',
+                    verified_at: wallet.verifiedAt,
+                    first_verified_at: wallet.firstVerifiedAt,
+                    latest_verified_at: wallet.latestVerifiedAt,
+                    chain_type: wallet.chainType,
+                    wallet_client_type: wallet.walletClientType,
+                    connector_type: wallet.connectorType,
+                    recovery_method: wallet.recoveryMethod,
+                    imported: wallet.imported,
+                    delegated: wallet.delegated,
+                    wallet_index: wallet.walletIndex,
+                }, { onConflict: 'address' });
+
+            if (insertWalletError) {
+                console.error('Error inserting wallet:', insertWalletError);
+                return NextResponse.json({ error: 'Error creating wallet, please make sure this wallet is not already registered' }, { status: 500 });
+            }
+        }
+
+        if (user.wallet && user.linkedAccounts.filter(account => account.type === 'wallet' && account.chainType === 'solana').length > 0) {
+            const wallet = user.linkedAccounts.find(account => account.type === 'wallet' && account.chainType === 'solana') as WalletWithMetadata;
             const { error: insertWalletError } = await supabase
                 .from('wallet')
                 .upsert({

@@ -10,7 +10,12 @@ export const approvedTokens: Record<string, TokenMetadata[]> = {
         symbol: "LINK",
         address: "0x779877A7B0D9E8603169DdbD7836e478b4624789",
         decimals: 18
-    }]
+    }],
+    "Solana": [],
+    "Arbitrum One": [],
+    "OP Mainnet": [],
+    "Ethereum": [],
+    "Base": [],
 }
 
 

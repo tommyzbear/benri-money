@@ -2,31 +2,35 @@
 
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader } from "./ui/card";
-import { Wallet, Banknote } from "lucide-react";
+import { Wallet, Banknote, Eye, EyeClosed } from "lucide-react";
 import { useEffect, useState } from "react";
 import { SendMoneyDialog } from "./dialogs/send-money-dialog";
-import { useWallets } from "@privy-io/react-auth";
+import { useFundWallet, usePrivy, useWallets } from "@privy-io/react-auth";
 import { SelectFriendDialog } from "./dialogs/select-friend-dialog";
 import { Contact } from "@/types/search";
 import { Skeleton } from "./ui/skeleton";
 import { useWalletStore } from "@/stores/use-wallet-store";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
-import { Separator } from "@radix-ui/react-separator";
+import { base } from "viem/chains";
+import { useBalanceVisibilityStore } from "@/stores/use-balance-visibility-store";
 
 export function Balance() {
     const [sendDialogOpen, setSendDialogOpen] = useState(false);
     const [selectFriendDialogOpen, setSelectFriendDialogOpen] = useState(false);
     const [selectedFriend, setSelectedFriend] = useState<Contact | null>(null);
+    const { user } = usePrivy();
     const { wallets, ready } = useWallets();
+    const { fundWallet } = useFundWallet();
     const { balances, isLoading, error, fetchBalances } = useWalletStore();
     const { toast } = useToast();
+    const { showBalances, toggleBalances } = useBalanceVisibilityStore();
 
     useEffect(() => {
         if (wallets.length > 0) {
-            fetchBalances(wallets[0].address);
+            fetchBalances(wallets.find((wallet) => wallet.address === user?.wallet?.address)?.address ?? wallets[0].address);
         }
-    }, [wallets, fetchBalances]);
+    }, [wallets, fetchBalances, user]);
 
     useEffect(() => {
         if (error) {
@@ -51,6 +55,11 @@ export function Balance() {
         <Card className="mb-6">
             <CardHeader className="flex flex-row items-center justify-between">
                 <h2 className="text-xl font-semibold">Balances</h2>
+                {!showBalances ? (
+                    <EyeClosed onClick={toggleBalances} />
+                ) : (
+                    <Eye onClick={toggleBalances} />
+                )}
             </CardHeader>
             <CardContent>
                 <div className="space-y-6">
@@ -65,7 +74,9 @@ export function Balance() {
                         </div>
                         <div className="flex-1">
                             <p className="text-sm text-muted-foreground mb-1">Bank Account</p>
-                            <p className="text-2xl font-bold">£1,234.56</p>
+                            <p className="text-2xl font-bold">
+                                {showBalances ? "£1,234.56" : "••••••"}
+                            </p>
                             <p className="text-sm text-muted-foreground">Available</p>
                         </div>
                         <Button variant="outline" size="sm">
@@ -77,7 +88,7 @@ export function Balance() {
                     <AnimatePresence>
                         {Object.entries(balances).map(([chain, balances], index) => (
                             <motion.div
-                                key={chain}
+                                key={`${chain}-${index}`}
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: index * 0.1 }}
@@ -91,14 +102,26 @@ export function Balance() {
                                         {chain} Wallet
                                     </p>
                                     {balances.map((balance, index) => (
-                                        <>
-                                            <p className="text-2xl font-bold" key={index}>
-                                                {Number(balance.formatted).toFixed(4)} {balance.symbol}
-                                            </p>
-                                        </>
+                                        <p className="text-2xl font-bold" key={index}>
+                                            {showBalances
+                                                ? `${Number(balance.formatted).toFixed(4)} ${balance.symbol}`
+                                                : "••••••"
+                                            }
+                                        </p>
                                     ))}
                                     <p className="text-sm text-muted-foreground">Available</p>
                                 </div>
+                                {chain === "Base" &&
+                                    <Button variant="outline" size="sm" onClick={() => fundWallet(user?.wallet?.address ?? "", {
+                                        chain: base,
+                                        asset: 'USDC',
+                                        card: {
+                                            preferredProvider: 'moonpay',
+                                        },
+                                    })}>
+                                        Top Up
+                                    </Button>
+                                }
                             </motion.div>
                         ))}
                     </AnimatePresence>

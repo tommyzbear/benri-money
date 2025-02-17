@@ -3,12 +3,23 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Mail, Phone, Wallet, Copy } from "lucide-react";
-import { usePrivy, User } from "@privy-io/react-auth";
+import { usePrivy, User, useSolanaWallets, useWallets } from "@privy-io/react-auth";
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
-
+import { useEffect } from "react";
+import { NetworkIcon } from "@/components/network-icon";
+import { baseSepolia, sepolia } from "viem/chains";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { config } from "@/lib/wallet/config";
+import { getNetworkByChainId, shortenAddress } from "@/lib/utils";
 const containerVariants = {
     hidden: { opacity: 0 },
     show: {
@@ -69,10 +80,12 @@ export function AccountDetails() {
         unlinkTwitter,
         linkDiscord,
         unlinkDiscord,
-        exportWallet
+        exportWallet,
     } = usePrivy();
 
-    if (!ready) {
+    const { wallets, ready: ethereumWalletsReady } = useWallets();
+
+    if (!ready || !ethereumWalletsReady) {
         return <AccountDetailsSkeleton />;
     }
 
@@ -107,6 +120,30 @@ export function AccountDetails() {
                 description: `Failed to unlink ${type}. Please try again.`,
             });
         }
+    };
+
+    const handleSwitchNetwork = async (chainId: string) => {
+        if (!wallets[0]) return;
+        try {
+            await wallets[0].switchChain(
+                chainId === "base-sepolia" ? baseSepolia.id : sepolia.id
+            );
+            toast({
+                description: "Network switched successfully",
+            });
+        } catch (error) {
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Failed to switch network",
+            });
+        }
+    };
+
+    const getCurrentNetwork = () => {
+        if (!wallets[0]) return "Ethereum";
+
+        return getNetworkByChainId(wallets[0].chainId);
     };
 
     return (
@@ -222,7 +259,7 @@ export function AccountDetails() {
                                         <div className="flex items-center gap-2">
                                             <p className="font-medium">
                                                 {user?.wallet?.address
-                                                    ? `${user.wallet.address.slice(0, 6)}...${user.wallet.address.slice(-4)}`
+                                                    ? shortenAddress(user.wallet.address)
                                                     : "No wallet linked"}
                                             </p>
                                             {user?.wallet?.address && (
@@ -259,6 +296,18 @@ export function AccountDetails() {
                                 </Button>
                             </div>
                         )}
+
+                        <div className="mt-4">
+                            <Button variant="outline" className="text-blue-600 w-full" onClick={linkWallet}>
+                                Link Additional Wallet
+                            </Button>
+                        </div>
+
+                        {wallets.map((wallet) => (
+                            <div key={wallet.address} className="mt-2">
+                                <p>{shortenAddress(wallet.address)}</p>
+                            </div>
+                        ))}
                     </CardContent>
                 </Card>
             </motion.div>
@@ -376,6 +425,50 @@ export function AccountDetails() {
                                 </div>
                             </div>
                         </div>
+                    </CardContent>
+                </Card>
+            </motion.div>
+
+            {/* Network Section */}
+            <motion.div variants={cardVariants}>
+                <Card className="hover:shadow-md transition-shadow duration-200">
+                    <CardHeader className="flex flex-row items-center justify-between">
+                        <h2 className="text-xl font-semibold">Networks</h2>
+                    </CardHeader>
+                    <CardContent>
+                        <Select
+                            value={getCurrentNetwork()}
+                            onValueChange={handleSwitchNetwork}
+                            disabled={!wallets[0]}
+                        >
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Select network">
+                                    <div className="flex items-center space-x-3">
+                                        <NetworkIcon
+                                            chain={getCurrentNetwork()}
+                                            className="w-6 h-6"
+                                        />
+                                        <div>
+                                            <p className="font-medium">
+                                                {getCurrentNetwork()}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </SelectValue>
+                            </SelectTrigger>
+                            <SelectContent>
+                                {config.chains.map((chain) => (
+                                    <SelectItem key={chain.id} value={chain.id.toString()}>
+                                        <div className="flex items-center space-x-3">
+                                            <NetworkIcon chain={chain.name} className="w-6 h-6" />
+                                            <div>
+                                                <p className="font-medium">{chain.name}</p>
+                                            </div>
+                                        </div>
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                     </CardContent>
                 </Card>
             </motion.div>

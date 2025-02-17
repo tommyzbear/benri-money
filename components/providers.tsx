@@ -1,15 +1,15 @@
 'use client';
 
 import { PrivyProvider } from '@privy-io/react-auth';
-import { arbitrumGoerli, arbitrumSepolia, baseSepolia, optimismSepolia, sepolia } from 'viem/chains';
-
+import { mainnet, optimism, arbitrum, base } from 'viem/chains';
+import { toSolanaWalletConnectors } from '@privy-io/react-auth/solana';
 export default function Providers({ children }: { children: React.ReactNode }) {
     return (
         <PrivyProvider
             appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID || ""}
             config={{
-                defaultChain: baseSepolia,
-                supportedChains: [baseSepolia, arbitrumSepolia, arbitrumGoerli, sepolia, optimismSepolia],
+                defaultChain: mainnet,
+                supportedChains: [mainnet, arbitrum, optimism, base],
                 // Customize Privy's appearance in your app
                 appearance: {
                     theme: 'light',
@@ -18,7 +18,19 @@ export default function Providers({ children }: { children: React.ReactNode }) {
                 },
                 // Create embedded wallets for users who don't have a wallet
                 embeddedWallets: {
-                    createOnLogin: 'all-users',
+                    createOnLogin: 'users-without-wallets', // defaults to 'off' 
+                },
+                externalWallets: {
+                    solana: {
+                        connectors: toSolanaWalletConnectors(),
+                    }
+                },
+                solanaClusters: [{ name: 'mainnet-beta', rpcUrl: 'https://api.mainnet-beta.solana.com' }],
+                fundingMethodConfig: {
+                    moonpay: {
+                        paymentMethod: 'credit_debit_card', // Purchase with credit or debit card
+                        uiConfig: { accentColor: '#696FFD', theme: 'light' }, // Styling preferences for MoonPay's UIs
+                    },
                 },
             }}
         >
