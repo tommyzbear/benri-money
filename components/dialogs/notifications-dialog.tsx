@@ -15,13 +15,13 @@ import { useTransactionsStore } from "@/stores/use-transactions-store";
 import { motion } from "framer-motion";
 import { PaymentRequest } from "@/types/data";
 
-interface PendingRequestsDialogProps {
+interface NotificationsDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     requests: PaymentRequestWithWallet[];
 }
 
-export function PendingRequestsDialog({ open, onOpenChange, requests }: PendingRequestsDialogProps) {
+export function NotificationsDialog({ open, onOpenChange, requests }: NotificationsDialogProps) {
     const { toast } = useToast();
     const { user } = usePrivy();
     const { wallets } = useWallets();
@@ -74,7 +74,7 @@ export function PendingRequestsDialog({ open, onOpenChange, requests }: PendingR
             };
 
             const result = await provider.request({
-                method: 'eth_sendTransaction',
+                method: "eth_sendTransaction",
                 params: [transactionRequest],
             });
 
@@ -90,7 +90,7 @@ export function PendingRequestsDialog({ open, onOpenChange, requests }: PendingR
                 tx: result,
                 transaction_type: "wallet",
                 chain_id: request.chain_id,
-                chain: request.chain
+                chain: request.chain,
             });
 
             // Mark request as cleared
@@ -106,9 +106,10 @@ export function PendingRequestsDialog({ open, onOpenChange, requests }: PendingR
             toast({
                 variant: "destructive",
                 title: "Transaction Failed",
-                description: typeof error === 'object' && error !== null && 'message' in error
-                    ? String(error.message)
-                    : "Failed to send transaction. Please try again.",
+                description:
+                    typeof error === "object" && error !== null && "message" in error
+                        ? String(error.message)
+                        : "Failed to send transaction. Please try again.",
             });
         } finally {
             setIsLoading(false);
@@ -125,7 +126,7 @@ export function PendingRequestsDialog({ open, onOpenChange, requests }: PendingR
             });
             await fetchPendingRequests();
         } catch (error) {
-            console.error('Failed to reject request:', error);
+            console.error("Failed to reject request:", error);
             toast({
                 variant: "destructive",
                 title: "Error",
@@ -135,6 +136,7 @@ export function PendingRequestsDialog({ open, onOpenChange, requests }: PendingR
             setRejectingId(null);
         }
     };
+    console.log("ran");
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -148,17 +150,18 @@ export function PendingRequestsDialog({ open, onOpenChange, requests }: PendingR
                 <div className="flex-1 p-6 overflow-y-auto">
                     <div className="space-y-4">
                         {requests.map((request) => (
-                            <div
-                                key={request.id}
-                                className="p-4 bg-slate-50 rounded-lg space-y-3"
-                            >
+                            <div key={request.id} className="p-4 bg-slate-50 rounded-lg space-y-3">
                                 <div className="flex items-center justify-between">
                                     <div className="space-y-1">
                                         <p className="font-medium">
-                                            {(Number(request.amount) / 1e18).toFixed(4)} {request.token_name}
+                                            {(Number(request.amount) / 1e18).toFixed(4)}{" "}
+                                            {request.token_name}
                                         </p>
                                         <p className="text-sm text-muted-foreground">
-                                            Requested {formatDistanceToNow(new Date(request.requested_at), { addSuffix: true })}
+                                            Requested{" "}
+                                            {formatDistanceToNow(new Date(request.requested_at), {
+                                                addSuffix: true,
+                                            })}
                                         </p>
                                     </div>
                                     <div className="flex items-center space-x-2">
@@ -213,4 +216,4 @@ export function PendingRequestsDialog({ open, onOpenChange, requests }: PendingR
             </DialogContent>
         </Dialog>
     );
-} 
+}

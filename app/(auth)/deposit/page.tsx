@@ -53,11 +53,11 @@ function RecentActivitySkeleton() {
     );
 }
 
-export default function HomePage() {
+export default function DepositPage() {
     const { setHeaderType } = useHeaderStore();
 
     useEffect(() => {
-        setHeaderType("balance" as HeaderType);
+        setHeaderType("balance-sm" as HeaderType);
         return () => {
             setHeaderType("" as HeaderType);
         };

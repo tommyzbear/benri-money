@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useLogout, usePrivy } from "@privy-io/react-auth";
-import { PendingRequestsDialog } from "./dialogs/pending-requests-dialog";
+import { NotificationsDialog } from "./dialogs/notifications-dialog";
 import { useRouter } from "next/navigation";
 import { usePaymentRequestsStore } from "@/stores/use-payment-requests-store";
 import { cn } from "@/lib/utils";
@@ -85,7 +85,7 @@ export function DesktopHeader({ className }: DesktopHeaderProps) {
                 </Button>
             </div>
 
-            <PendingRequestsDialog
+            <NotificationsDialog
                 open={dialogOpen}
                 onOpenChange={setDialogOpen}
                 requests={pendingRequests}

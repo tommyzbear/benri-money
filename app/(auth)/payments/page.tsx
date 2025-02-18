@@ -2,14 +2,18 @@
 
 import { ContactSearch } from "@/components/contacts/contact-search";
 import { ContactList } from "@/components/contacts/contact-list";
-import React from "react";
+import { useEffect, Suspense } from "react";
 import { Skeleton } from "@mui/material";
+import { useHeaderStore, HeaderType } from "@/stores/use-header-store";
 
 const ContactListSkeleton = () => {
     return (
         <div className="space-y-4">
             {[...Array(8)].map((_, i) => (
-                <div key={i} className="p-4 bg-white rounded-lg border flex items-center justify-between">
+                <div
+                    key={i}
+                    className="p-4 bg-white rounded-lg border flex items-center justify-between"
+                >
                     <div className="flex items-center space-x-3">
                         <Skeleton className="h-12 w-12 rounded-full" />
                         <div className="space-y-2">
@@ -25,17 +29,26 @@ const ContactListSkeleton = () => {
             ))}
         </div>
     );
-}
+};
 
-export default function ContactsPage() {
+export default function PaymentsPage() {
+    const { setHeaderType } = useHeaderStore();
+
+    useEffect(() => {
+        setHeaderType("balance-sm" as HeaderType);
+        return () => {
+            setHeaderType("" as HeaderType);
+        };
+    }, [setHeaderType]);
+
     return (
         <div className="flex-1 p-4">
             <div className="max-w-3xl mx-auto space-y-4">
                 <ContactSearch />
-                <React.Suspense fallback={<ContactListSkeleton />}>
+                <Suspense fallback={<ContactListSkeleton />}>
                     <ContactList />
-                </React.Suspense>
+                </Suspense>
             </div>
         </div>
     );
-} 
+}

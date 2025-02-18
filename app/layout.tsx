@@ -3,13 +3,11 @@ import "./globals.css";
 import Providers from "@/components/providers";
 import localFont from "next/font/local";
 import { Toaster } from "@/components/ui/toaster";
-import { cookies } from "next/headers";
-import { privyClient } from "@/lib/privy";
 
 export const metadata: Metadata = {
     title: {
-        template: "%s · Benri",
-        default: "Benri",
+        template: "%s · benri",
+        default: "benri",
     },
     description: "Money made convenient",
     appleWebApp: {
@@ -55,23 +53,6 @@ const roboto = localFont({
     ],
     variable: "--font-variable",
 });
-
-async function checkAuth() {
-    const cookieStore = cookies();
-    const cookieAuthToken = cookieStore.get("privy-token");
-
-    if (!cookieAuthToken) return null;
-
-    try {
-        const claims = await privyClient.verifyAuthToken(cookieAuthToken.value);
-        return claims;
-    } catch (error) {
-        console.error(error);
-        return null;
-    }
-}
-
-export { checkAuth };
 
 export default function RootLayout({
     children,
