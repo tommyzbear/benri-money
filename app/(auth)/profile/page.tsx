@@ -1,7 +1,7 @@
 "use client";
 
-import { AccountProfile } from "@/components/account/account-profile";
-import { AccountDetails } from "@/components/account/account-details";
+import { AccountProfile } from "@/components/profile/account-profile";
+import { AccountDetails } from "@/components/profile/account-details";
 
 export default function AccountPage() {
     return (
@@ -10,4 +10,4 @@ export default function AccountPage() {
             <AccountDetails />
         </>
     );
-} 
+}

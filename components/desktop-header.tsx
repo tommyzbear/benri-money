@@ -9,15 +9,20 @@ import { useLogout, usePrivy } from "@privy-io/react-auth";
 import { PendingRequestsDialog } from "./dialogs/pending-requests-dialog";
 import { useRouter } from "next/navigation";
 import { usePaymentRequestsStore } from "@/stores/use-payment-requests-store";
+import { cn } from "@/lib/utils";
 
-export function DesktopHeader() {
+interface DesktopHeaderProps {
+    className?: string;
+}
+
+export function DesktopHeader({ className }: DesktopHeaderProps) {
     const router = useRouter();
     const [dialogOpen, setDialogOpen] = useState(false);
     const { ready } = usePrivy();
     const { logout } = useLogout({
         onSuccess: () => {
             router.push("/login");
-        }
+        },
     });
     const { pendingRequests, fetchPendingRequests } = usePaymentRequestsStore();
 
@@ -29,18 +34,33 @@ export function DesktopHeader() {
 
     const handleLogout = async (): Promise<void> => {
         await logout();
-    }
+    };
 
     return (
-        <header className="flex items-center justify-between px-6 py-3 bg-[#1546a3] text-white">
+        <header
+            className={cn(
+                "flex items-center justify-between px-6 py-3 bg-[#1546a3] text-white",
+                className
+            )}
+        >
             <div className="flex items-center space-x-8">
                 <Image src="/logo.png" alt="Logo" width={32} height={32} />
                 <nav className="flex space-x-6">
-                    <Button variant="ghost"><Link href="/">Home</Link></Button>
-                    <Button variant="ghost"><Link href="/contacts">Contacts</Link></Button>
-                    <Button variant="ghost"><Link href="/cards">Cards</Link></Button>
-                    <Button variant="ghost"><Link href="/crypto">Crypto</Link></Button>
-                    <Button variant="ghost"><Link href="/myaccount">Me</Link></Button>
+                    <Button variant="ghost">
+                        <Link href="/">Home</Link>
+                    </Button>
+                    <Button variant="ghost">
+                        <Link href="/contacts">Contacts</Link>
+                    </Button>
+                    <Button variant="ghost">
+                        <Link href="/cards">Cards</Link>
+                    </Button>
+                    <Button variant="ghost">
+                        <Link href="/crypto">Crypto</Link>
+                    </Button>
+                    <Button variant="ghost">
+                        <Link href="/myaccount">Me</Link>
+                    </Button>
                 </nav>
             </div>
             <div className="flex items-center space-x-4">
@@ -53,14 +73,16 @@ export function DesktopHeader() {
                     <Bell className="h-6 w-6" />
                     {pendingRequests.length > 0 && (
                         <span className="absolute top-0 right-0 h-4 w-4 bg-red-500 rounded-full text-xs flex items-center justify-center">
-                            {pendingRequests.length > 99 ? '99+' : pendingRequests.length}
+                            {pendingRequests.length > 99 ? "99+" : pendingRequests.length}
                         </span>
                     )}
                 </Button>
                 <Button variant="ghost" size="icon">
                     <Settings className="h-6 w-6" />
                 </Button>
-                <Button variant="ghost" onClick={() => handleLogout()}>LOG OUT</Button>
+                <Button variant="ghost" onClick={() => handleLogout()}>
+                    LOG OUT
+                </Button>
             </div>
 
             <PendingRequestsDialog
@@ -70,4 +92,4 @@ export function DesktopHeader() {
             />
         </header>
     );
-} 
+}
