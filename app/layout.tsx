@@ -1,12 +1,10 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/providers";
+import localFont from "next/font/local";
 import { Toaster } from "@/components/ui/toaster";
 import { cookies } from "next/headers";
 import { privyClient } from "@/lib/privy";
-
-const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
     title: {
@@ -20,6 +18,43 @@ export const metadata: Metadata = {
         statusBarStyle: "black-translucent",
     },
 };
+
+const libreBaskerville = localFont({
+    src: [
+        {
+            path: "./fonts/LibreBaskerville-Regular.ttf",
+            weight: "400",
+            style: "normal",
+        },
+        {
+            path: "./fonts/LibreBaskerville-Bold.ttf",
+            weight: "700",
+            style: "normal",
+        },
+        {
+            path: "./fonts/LibreBaskerville-Italic.ttf",
+            weight: "400",
+            style: "italic",
+        },
+    ],
+    variable: "--font-libre",
+});
+
+const roboto = localFont({
+    src: [
+        {
+            path: "./fonts/Roboto-VariableFont_wdth,wght.ttf",
+            weight: "100 900",
+            style: "normal",
+        },
+        {
+            path: "./fonts/Roboto-Italic-VariableFont_wdth,wght.ttf",
+            weight: "100 900",
+            style: "italic",
+        },
+    ],
+    variable: "--font-variable",
+});
 
 async function checkAuth() {
     const cookieStore = cookies();
@@ -45,7 +80,7 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
-            <body className={inter.className}>
+            <body className={`${libreBaskerville.variable} ${roboto.className} font-sans`}>
                 <Providers>
                     <main className="min-h-screen bg-background">{children}</main>
                 </Providers>
