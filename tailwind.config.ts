@@ -60,6 +60,10 @@ const config: Config = {
                 "5xl": "calc(var(--radius) * 5)",
                 "6xl": "calc(var(--radius) * 6)",
             },
+            fontFamily: {
+                roboto: ["var(--font-roboto)"],
+                libre: ["var(--font-libre)"],
+            },
         },
     },
     plugins: [animate],

@@ -1,10 +1,7 @@
-"use client";
-
 import { ContactSearch } from "@/components/contacts/contact-search";
 import { ContactList } from "@/components/contacts/contact-list";
-import { useEffect, Suspense } from "react";
+import { Suspense } from "react";
 import { Skeleton } from "@mui/material";
-import { useHeaderStore, HeaderType } from "@/stores/use-header-store";
 
 const ContactListSkeleton = () => {
     return (
@@ -32,15 +29,6 @@ const ContactListSkeleton = () => {
 };
 
 export default function PaymentsPage() {
-    const { setHeaderType } = useHeaderStore();
-
-    useEffect(() => {
-        setHeaderType("balance-sm" as HeaderType);
-        return () => {
-            setHeaderType("" as HeaderType);
-        };
-    }, [setHeaderType]);
-
     return (
         <div className="flex-1 p-4">
             <div className="max-w-3xl mx-auto space-y-4">

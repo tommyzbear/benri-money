@@ -2,13 +2,10 @@
 
 import { Balance } from "@/components/balance";
 import { RecentActivity } from "@/components/recent-activity";
-import { QuickActions } from "@/components/quick-actions";
 import { SendAgain } from "@/components/send-again";
 import { BankAccounts } from "@/components/bank-accounts";
 import { Skeleton } from "@/components/ui/skeleton";
 import React from "react";
-import { useHeaderStore, HeaderType } from "@/stores/use-header-store";
-import { useEffect } from "react";
 
 function BalanceSkeleton() {
     return (
@@ -54,15 +51,6 @@ function RecentActivitySkeleton() {
 }
 
 export default function DepositPage() {
-    const { setHeaderType } = useHeaderStore();
-
-    useEffect(() => {
-        setHeaderType("balance-sm" as HeaderType);
-        return () => {
-            setHeaderType("" as HeaderType);
-        };
-    }, [setHeaderType]);
-
     return (
         <div className="flex flex-col min-h-screen">
             <div className="flex flex-1 lg:flex-row lg:mx-auto lg:max-w-7xl pb-24 lg:pb-8">
@@ -76,7 +64,6 @@ export default function DepositPage() {
                 </div>
 
                 <div className="hidden lg:block lg:max-w-xl lg:p-4 lg:border-l">
-                    <QuickActions />
                     <SendAgain />
                     <BankAccounts />
                 </div>

@@ -51,7 +51,7 @@ const roboto = localFont({
             style: "italic",
         },
     ],
-    variable: "--font-variable",
+    variable: "--font-roboto",
 });
 
 export default function RootLayout({
@@ -61,7 +61,7 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
-            <body className={`${libreBaskerville.variable} ${roboto.className} font-sans`}>
+            <body className={`${libreBaskerville.variable} ${roboto.variable}`}>
                 <Providers>
                     <main className="min-h-screen bg-background">{children}</main>
                 </Providers>

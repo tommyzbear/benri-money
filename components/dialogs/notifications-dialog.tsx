@@ -136,7 +136,6 @@ export function NotificationsDialog({ open, onOpenChange, requests }: Notificati
             setRejectingId(null);
         }
     };
-    console.log("ran");
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>

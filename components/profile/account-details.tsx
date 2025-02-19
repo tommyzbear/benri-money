@@ -25,14 +25,14 @@ const containerVariants = {
     show: {
         opacity: 1,
         transition: {
-            staggerChildren: 0.1
-        }
-    }
+            staggerChildren: 0.1,
+        },
+    },
 };
 
 const cardVariants = {
     hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0 }
+    show: { opacity: 1, y: 0 },
 };
 
 function AccountDetailsSkeleton() {
@@ -100,7 +100,7 @@ export function AccountDetails() {
                 duration: 2000,
             });
         } catch (error) {
-            console.error('Failed to copy:', error);
+            console.error("Failed to copy:", error);
             toast({
                 variant: "destructive",
                 title: "Error",
@@ -109,7 +109,11 @@ export function AccountDetails() {
         }
     };
 
-    const handleUnlink = async (type: string, value: string, unlinkFn: (value: string) => Promise<User>) => {
+    const handleUnlink = async (
+        type: string,
+        value: string,
+        unlinkFn: (value: string) => Promise<User>
+    ) => {
         try {
             await unlinkFn(value);
         } catch (error) {
@@ -125,9 +129,7 @@ export function AccountDetails() {
     const handleSwitchNetwork = async (chainId: string) => {
         if (!wallets[0]) return;
         try {
-            await wallets[0].switchChain(
-                chainId === "base-sepolia" ? baseSepolia.id : sepolia.id
-            );
+            await wallets[0].switchChain(chainId === "base-sepolia" ? baseSepolia.id : sepolia.id);
             toast({
                 description: "Network switched successfully",
             });
@@ -169,7 +171,9 @@ export function AccountDetails() {
                             <div className="flex-1">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
-                                        <p className="font-medium">{user?.email?.address ?? "No email linked"}</p>
+                                        <p className="font-medium">
+                                            {user?.email?.address ?? "No email linked"}
+                                        </p>
                                         {user?.email?.address && (
                                             <motion.div
                                                 whileHover={{ scale: 1.1 }}
@@ -177,23 +181,38 @@ export function AccountDetails() {
                                             >
                                                 <Copy
                                                     className="w-4 h-4 cursor-pointer text-gray-500 hover:text-gray-700"
-                                                    onClick={() => copyToClipboard(user?.email?.address || "")}
+                                                    onClick={() =>
+                                                        copyToClipboard(user?.email?.address || "")
+                                                    }
                                                 />
                                             </motion.div>
                                         )}
                                     </div>
-                                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                                    <motion.div
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                    >
                                         {user?.email ? (
                                             <Button
                                                 variant="ghost"
                                                 className="text-blue-600"
-                                                onClick={() => handleUnlink('email', user?.email?.address || "", unlinkEmail)}
+                                                onClick={() =>
+                                                    handleUnlink(
+                                                        "email",
+                                                        user?.email?.address || "",
+                                                        unlinkEmail
+                                                    )
+                                                }
                                                 disabled={!canRemoveAccount}
                                             >
                                                 Unlink
                                             </Button>
                                         ) : (
-                                            <Button variant="ghost" className="text-blue-600" onClick={linkEmail}>
+                                            <Button
+                                                variant="ghost"
+                                                className="text-blue-600"
+                                                onClick={linkEmail}
+                                            >
                                                 Link Email
                                             </Button>
                                         )}
@@ -217,22 +236,43 @@ export function AccountDetails() {
                             <div className="flex-1">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
-                                        <p className="font-medium">{user?.phone?.number ?? "No phone number linked"}</p>
+                                        <p className="font-medium">
+                                            {user?.phone?.number ?? "No phone number linked"}
+                                        </p>
                                         {user?.phone?.number && (
                                             <Copy
                                                 className="w-4 h-4 cursor-pointer text-gray-500 hover:text-gray-700"
-                                                onClick={() => copyToClipboard(user?.phone?.number || "")}
+                                                onClick={() =>
+                                                    copyToClipboard(user?.phone?.number || "")
+                                                }
                                             />
                                         )}
                                     </div>
-                                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                                    <motion.div
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                    >
                                         {user?.phone ? (
-                                            <Button variant="ghost" className="text-blue-600" onClick={() => handleUnlink('phone', user?.phone?.number || "", unlinkPhone)}
-                                                disabled={!canRemoveAccount}>
+                                            <Button
+                                                variant="ghost"
+                                                className="text-blue-600"
+                                                onClick={() =>
+                                                    handleUnlink(
+                                                        "phone",
+                                                        user?.phone?.number || "",
+                                                        unlinkPhone
+                                                    )
+                                                }
+                                                disabled={!canRemoveAccount}
+                                            >
                                                 Unlink
                                             </Button>
                                         ) : (
-                                            <Button variant="ghost" className="text-blue-600" onClick={linkPhone}>
+                                            <Button
+                                                variant="ghost"
+                                                className="text-blue-600"
+                                                onClick={linkPhone}
+                                            >
                                                 Link Phone
                                             </Button>
                                         )}
@@ -265,19 +305,38 @@ export function AccountDetails() {
                                             {user?.wallet?.address && (
                                                 <Copy
                                                     className="w-4 h-4 cursor-pointer text-gray-500 hover:text-gray-700"
-                                                    onClick={() => copyToClipboard(user?.wallet?.address || "")}
+                                                    onClick={() =>
+                                                        copyToClipboard(user?.wallet?.address || "")
+                                                    }
                                                 />
                                             )}
                                         </div>
                                     </div>
-                                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                                    <motion.div
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                    >
                                         {user?.wallet ? (
-                                            <Button variant="ghost" className="text-blue-600" onClick={() => handleUnlink('wallet', user?.wallet?.address || "", unlinkWallet)}
-                                                disabled={!canRemoveAccount}>
+                                            <Button
+                                                variant="ghost"
+                                                className="text-blue-600"
+                                                onClick={() =>
+                                                    handleUnlink(
+                                                        "wallet",
+                                                        user?.wallet?.address || "",
+                                                        unlinkWallet
+                                                    )
+                                                }
+                                                disabled={!canRemoveAccount}
+                                            >
                                                 Unlink
                                             </Button>
                                         ) : (
-                                            <Button variant="ghost" className="text-blue-600" onClick={linkWallet}>
+                                            <Button
+                                                variant="ghost"
+                                                className="text-blue-600"
+                                                onClick={linkWallet}
+                                            >
                                                 Link Wallet
                                             </Button>
                                         )}
@@ -298,7 +357,11 @@ export function AccountDetails() {
                         )}
 
                         <div className="mt-4">
-                            <Button variant="outline" className="text-blue-600 w-full" onClick={linkWallet}>
+                            <Button
+                                variant="outline"
+                                className="text-blue-600 w-full"
+                                onClick={linkWallet}
+                            >
                                 Link Additional Wallet
                             </Button>
                         </div>
@@ -320,26 +383,53 @@ export function AccountDetails() {
                     </CardHeader>
                     <CardContent>
                         <div className="flex items-start gap-4">
-                            <Image src={"/icons/discord.svg"} alt="Instagram" width={24} height={24} className="mt-1" />
+                            <Image
+                                src={"/icons/discord.svg"}
+                                alt="Instagram"
+                                width={24}
+                                height={24}
+                                className="mt-1"
+                            />
                             <div className="flex-1">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
-                                        <p className="font-medium">{user?.discord?.username ?? "No discord linked"}</p>
+                                        <p className="font-medium">
+                                            {user?.discord?.username ?? "No discord linked"}
+                                        </p>
                                         {user?.discord?.username && (
                                             <Copy
                                                 className="w-4 h-4 cursor-pointer text-gray-500 hover:text-gray-700"
-                                                onClick={() => copyToClipboard(user?.discord?.username || "")}
+                                                onClick={() =>
+                                                    copyToClipboard(user?.discord?.username || "")
+                                                }
                                             />
                                         )}
                                     </div>
-                                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                                    <motion.div
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                    >
                                         {user?.discord ? (
-                                            <Button variant="ghost" className="text-blue-600" onClick={() => handleUnlink('discord', user?.discord?.username || "", unlinkDiscord)}
-                                                disabled={!canRemoveAccount}>
+                                            <Button
+                                                variant="ghost"
+                                                className="text-blue-600"
+                                                onClick={() =>
+                                                    handleUnlink(
+                                                        "discord",
+                                                        user?.discord?.username || "",
+                                                        unlinkDiscord
+                                                    )
+                                                }
+                                                disabled={!canRemoveAccount}
+                                            >
                                                 Unlink
                                             </Button>
                                         ) : (
-                                            <Button variant="ghost" className="text-blue-600" onClick={linkDiscord}>
+                                            <Button
+                                                variant="ghost"
+                                                className="text-blue-600"
+                                                onClick={linkDiscord}
+                                            >
                                                 Link Discord
                                             </Button>
                                         )}
@@ -359,26 +449,53 @@ export function AccountDetails() {
                     </CardHeader>
                     <CardContent>
                         <div className="flex items-start gap-4">
-                            <Image src={"/icons/x.svg"} alt="Instagram" width={24} height={24} className="mt-1" />
+                            <Image
+                                src={"/icons/x.svg"}
+                                alt="Instagram"
+                                width={24}
+                                height={24}
+                                className="mt-1"
+                            />
                             <div className="flex-1">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
-                                        <p className="font-medium">{user?.twitter?.username ?? "No X linked"}</p>
+                                        <p className="font-medium">
+                                            {user?.twitter?.username ?? "No X linked"}
+                                        </p>
                                         {user?.twitter?.username && (
                                             <Copy
                                                 className="w-4 h-4 cursor-pointer text-gray-500 hover:text-gray-700"
-                                                onClick={() => copyToClipboard(user?.twitter?.username || "")}
+                                                onClick={() =>
+                                                    copyToClipboard(user?.twitter?.username || "")
+                                                }
                                             />
                                         )}
                                     </div>
-                                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                                    <motion.div
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                    >
                                         {user?.twitter ? (
-                                            <Button variant="ghost" className="text-blue-600" onClick={() => handleUnlink('twitter', user?.twitter?.username || "", unlinkTwitter)}
-                                                disabled={!canRemoveAccount}>
+                                            <Button
+                                                variant="ghost"
+                                                className="text-blue-600"
+                                                onClick={() =>
+                                                    handleUnlink(
+                                                        "twitter",
+                                                        user?.twitter?.username || "",
+                                                        unlinkTwitter
+                                                    )
+                                                }
+                                                disabled={!canRemoveAccount}
+                                            >
                                                 Unlink
                                             </Button>
                                         ) : (
-                                            <Button variant="ghost" className="text-blue-600" onClick={linkTwitter}>
+                                            <Button
+                                                variant="ghost"
+                                                className="text-blue-600"
+                                                onClick={linkTwitter}
+                                            >
                                                 Link X
                                             </Button>
                                         )}
@@ -398,26 +515,53 @@ export function AccountDetails() {
                     </CardHeader>
                     <CardContent>
                         <div className="flex items-start gap-4">
-                            <Image src={"/icons/google.svg"} alt="Instagram" width={24} height={24} className="mt-1" />
+                            <Image
+                                src={"/icons/google.svg"}
+                                alt="Instagram"
+                                width={24}
+                                height={24}
+                                className="mt-1"
+                            />
                             <div className="flex-1">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
-                                        <p className="font-medium">{user?.google?.email ?? "No Google linked"}</p>
+                                        <p className="font-medium">
+                                            {user?.google?.email ?? "No Google linked"}
+                                        </p>
                                         {user?.google?.email && (
                                             <Copy
                                                 className="w-4 h-4 cursor-pointer text-gray-500 hover:text-gray-700"
-                                                onClick={() => copyToClipboard(user?.google?.email || "")}
+                                                onClick={() =>
+                                                    copyToClipboard(user?.google?.email || "")
+                                                }
                                             />
                                         )}
                                     </div>
-                                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                                    <motion.div
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                    >
                                         {user?.google ? (
-                                            <Button variant="ghost" className="text-blue-600" onClick={() => handleUnlink('google', user?.google?.email || "", unlinkGoogle)}
-                                                disabled={!canRemoveAccount}>
+                                            <Button
+                                                variant="ghost"
+                                                className="text-blue-600"
+                                                onClick={() =>
+                                                    handleUnlink(
+                                                        "google",
+                                                        user?.google?.email || "",
+                                                        unlinkGoogle
+                                                    )
+                                                }
+                                                disabled={!canRemoveAccount}
+                                            >
                                                 Unlink
                                             </Button>
                                         ) : (
-                                            <Button variant="ghost" className="text-blue-600" onClick={linkGoogle}>
+                                            <Button
+                                                variant="ghost"
+                                                className="text-blue-600"
+                                                onClick={linkGoogle}
+                                            >
                                                 Link Google
                                             </Button>
                                         )}
@@ -449,9 +593,7 @@ export function AccountDetails() {
                                             className="w-6 h-6"
                                         />
                                         <div>
-                                            <p className="font-medium">
-                                                {getCurrentNetwork()}
-                                            </p>
+                                            <p className="font-medium">{getCurrentNetwork()}</p>
                                         </div>
                                     </div>
                                 </SelectValue>
@@ -474,4 +616,4 @@ export function AccountDetails() {
             </motion.div>
         </motion.div>
     );
-} 
+}

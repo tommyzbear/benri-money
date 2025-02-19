@@ -1,5 +1,5 @@
 import { DesktopHeader } from "@/components/desktop-header";
-import { MobileHeader } from "@/components/mobile-header";
+import { MobileHeader } from "@/components/header/mobile-header";
 import { MobileNav } from "@/components/mobile-nav";
 import { Metadata } from "next";
 import { cookies } from "next/headers";
