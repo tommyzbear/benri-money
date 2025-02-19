@@ -3,7 +3,7 @@ import { RecentActivity } from "@/components/recent-activity";
 import { SendAgain } from "@/components/send-again";
 import { BankAccounts } from "@/components/bank-accounts";
 import { Skeleton } from "@/components/ui/skeleton";
-import React from "react";
+import { Suspense } from "react";
 
 function BalanceSkeleton() {
     return (
@@ -53,12 +53,12 @@ export default function HomePage() {
         <div className="flex flex-col min-h-screen">
             <div className="flex flex-1 lg:flex-row lg:mx-auto lg:max-w-7xl pb-24 lg:pb-8">
                 <div className="flex-1 lg:max-w-3xl">
-                    <React.Suspense fallback={<BalanceSkeleton />}>
+                    <Suspense fallback={<BalanceSkeleton />}>
                         <Balance />
-                    </React.Suspense>
-                    <React.Suspense fallback={<RecentActivitySkeleton />}>
+                    </Suspense>
+                    <Suspense fallback={<RecentActivitySkeleton />}>
                         <RecentActivity />
-                    </React.Suspense>
+                    </Suspense>
                 </div>
 
                 <div className="hidden lg:block lg:max-w-xl lg:p-4 lg:border-l">
