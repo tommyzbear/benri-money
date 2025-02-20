@@ -47,12 +47,12 @@ export interface TransactionHistory {
     id: number;
     from_account_id: string;
     from_address: string;
-    from_username: string;
-    from_profile_img: string;
+    from_username?: string;
+    from_profile_img?: string;
     to_account_id: string;
     to_address: string;
-    to_username: string;
-    to_profile_img: string;
+    to_username?: string;
+    to_profile_img?: string;
     amount: bigint;
     token_address: string;
     tx: string;

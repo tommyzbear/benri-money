@@ -8,7 +8,7 @@ type HeaderState = {
 };
 
 const defaultHeader = {
-    type: "balance" as HeaderType,
+    type: "balance-sm" as HeaderType,
 };
 
 export const useHeaderStore = create<HeaderState>((set) => ({

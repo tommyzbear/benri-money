@@ -71,26 +71,45 @@ export function MobileHeader({ className }: MobileHeaderProps) {
     const headerCardContent = () => {
         switch (type) {
             case "balance":
+            case "balance-sm":
                 return (
-                    <div className="flex flex-col justify-start items-center relative w-full h-full">
-                        <div className="flex flex-col h-full w-full">
-                            <div className="w-full flex justify-start items-center">
+                    <div className="flex relative w-full h-full animate-fade-in">
+                        <div className="w-full h-full">
+                            <div
+                                className={cn(
+                                    "absolute transition-all duration-300",
+                                    type === "balance-sm" ? "left-0 top-0" : "left-0 top-0"
+                                )}
+                            >
                                 <h3 className="header-text">balance</h3>
                             </div>
-                            <div className="h-full w-full flex items-center relative">
-                                {!isTextScaled && (
-                                    <div className="absolute inset-0 flex items-center">
-                                        <Skeleton className="h-12 w-4/5 bg-muted" />
-                                    </div>
+                            <div
+                                className={cn(
+                                    "absolute transition-all duration-300",
+                                    type === "balance-sm"
+                                        ? "left-24 -top-1 right-0"
+                                        : "left-0 top-12 right-0"
                                 )}
+                            >
+                                {!isTextScaled &&
+                                    (type === "balance-sm" ? (
+                                        <div className="absolute inset-0 flex items-center justify-end top-2">
+                                            <Skeleton className="h-8 w-4/5 bg-muted" />
+                                        </div>
+                                    ) : (
+                                        <div className="absolute inset-0 flex items-center">
+                                            <Skeleton className="h-12 w-4/5 bg-muted" />
+                                        </div>
+                                    ))}
                                 <Textfit
                                     mode="single"
                                     forceSingleModeWidth={true}
-                                    min={20}
-                                    max={40}
+                                    min={type === "balance-sm" ? 16 : 20}
+                                    max={type === "balance-sm" ? 24 : 40}
                                     onReady={() => setIsTextScaled(true)}
                                     className={cn(
-                                        "font-libre font-bold not-italic text-white w-full",
+                                        "font-libre font-bold not-italic text-white h-full w-full transition-all duration-300",
+                                        type === "balance-sm" ? "text-right" : "text-left",
                                         !isTextScaled ? "opacity-0" : "animate-fade-in"
                                     )}
                                 >
@@ -100,11 +119,10 @@ export function MobileHeader({ className }: MobileHeaderProps) {
                         </div>
                     </div>
                 );
-            case "balance-sm":
-                return <h1 className="text-2xl font-serif italic text-white">balance-sm here</h1>;
+
             case "profile":
                 return (
-                    <div className="w-full h-full flex flex-row justify-start items-center relative gap-6">
+                    <div className="w-full h-full flex flex-row justify-start items-center relative gap-6 animate-fade-in">
                         <div className="relative w-fit h-full mb-auto">
                             <Button
                                 className="w-20 h-20 bg-neutral-600 rounded-lg p-2"
@@ -151,7 +169,7 @@ export function MobileHeader({ className }: MobileHeaderProps) {
                     className={cn(
                         "flex items-center gap-4 flex-1",
                         "bg-primary rounded-4xl",
-                        "p-5 shadow-md h-full"
+                        "p-5 pt-4 shadow-md h-full"
                     )}
                 >
                     {headerCardContent()}
