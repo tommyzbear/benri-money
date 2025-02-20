@@ -40,7 +40,7 @@ export default async function HomeLayout({
     }
 
     return (
-        <div className="flex flex-col min-h-screen px-4 border bg-neutral-300">
+        <div className="flex flex-col min-h-screen px-4 border bg-background">
             <MobileHeader className="lg:hidden" />
             <DesktopHeader className="hidden lg:block" />
             <main className="py-6 w-full lg:pb-8 lg:p-8">{children}</main>

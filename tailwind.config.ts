@@ -59,14 +59,24 @@ const config: Config = {
                 "4xl": "calc(var(--radius) * 4)",
                 "5xl": "calc(var(--radius) * 5)",
                 "6xl": "calc(var(--radius) * 6)",
+                "7xl": "calc(var(--radius) * 7)",
             },
             fontFamily: {
                 roboto: ["var(--font-roboto)"],
                 libre: ["var(--font-libre)"],
             },
+            animation: {
+                "fade-in": "fade-in 300ms ease-in forwards",
+            },
+            keyframes: {
+                "fade-in": {
+                    from: { opacity: "0" },
+                    to: { opacity: "1" },
+                },
+            },
         },
     },
     plugins: [animate],
-};
+} satisfies Config;
 
 export default config;

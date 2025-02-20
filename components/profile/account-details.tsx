@@ -129,11 +129,14 @@ export function AccountDetails() {
     const handleSwitchNetwork = async (chainId: string) => {
         if (!wallets[0]) return;
         try {
-            await wallets[0].switchChain(chainId === "base-sepolia" ? baseSepolia.id : sepolia.id);
+            console.log(chainId);
+            // await wallets[0].switchChain(chainId === "84532" ? Number(baseSepolia.id) : sepolia.id);
+            await wallets[0].switchChain(84532);
             toast({
                 description: "Network switched successfully",
             });
         } catch (error) {
+            console.error("Network switch error:", error);
             toast({
                 variant: "destructive",
                 title: "Error",
@@ -144,7 +147,7 @@ export function AccountDetails() {
 
     const getCurrentNetwork = () => {
         if (!wallets[0]) return "Ethereum";
-
+        console.log(getNetworkByChainId(wallets[0].chainId));
         return getNetworkByChainId(wallets[0].chainId);
     };
 
@@ -575,7 +578,7 @@ export function AccountDetails() {
 
             {/* Network Section */}
             <motion.div variants={cardVariants}>
-                <Card className="hover:shadow-md transition-shadow duration-200">
+                <Card className="hover:shadow-md transition-shadow duration-200 mb-20">
                     <CardHeader className="flex flex-row items-center justify-between">
                         <h2 className="text-xl font-semibold">Networks</h2>
                     </CardHeader>

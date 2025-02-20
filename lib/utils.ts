@@ -1,6 +1,15 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { optimism, base, mainnet, arbitrum } from "viem/chains";
+import {
+    optimism,
+    base,
+    mainnet,
+    arbitrum,
+    sepolia,
+    baseSepolia,
+    optimismSepolia,
+    arbitrumSepolia,
+} from "viem/chains";
 
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
@@ -21,11 +30,28 @@ export function getNetworkByChainId(chainId: string) {
                 return "OP Mainnet";
             case mainnet.id:
                 return "Ethereum";
+            case sepolia.id:
+                return "Sepolia";
+            case baseSepolia.id:
+                return "Base Sepolia";
+            case optimismSepolia.id:
+                return "OP Sepolia";
+            case arbitrumSepolia.id:
+                return "Arbitrum Sepolia";
             default:
                 return "Unknown";
         }
     } else if (caip2.namespace === "solana") {
-        return "Solana";
+        switch (caip2.chainId) {
+            case "mainnet":
+                return "Solana";
+            case "testnet":
+                return "Solana Testnet";
+            case "devnet":
+                return "Solana Devnet";
+            default:
+                return "Unknown Solana Network";
+        }
     }
 
     return "Unknown";
@@ -66,4 +92,8 @@ export function getGreetingsByHour() {
     if (hour >= 12 && hour < 17) return "afternoon";
     if (hour >= 17 && hour < 22) return "evening";
     return "time to sleep";
+}
+
+export function formatAddress(address: string) {
+    return `${address.slice(0, 6)}...${address.slice(-4)}`;
 }

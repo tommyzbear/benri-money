@@ -7,6 +7,7 @@ import { usePrivy } from "@privy-io/react-auth";
 import { supabase } from "@/lib/supabase";
 import { toast } from "@/hooks/use-toast";
 import { Textfit } from "react-textfit";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import { cn, formatValue, getGreetingsByHour } from "@/lib/utils";
 import { ProfileImgMask } from "../profile/profile-img-mask";
@@ -33,6 +34,7 @@ export function MobileHeader({ className }: MobileHeaderProps) {
     const { type } = useHeaderStore();
     const { totalBalance } = useWalletStore();
     const { user: userStore, fetchUser } = useUserStore();
+    const [isTextScaled, setIsTextScaled] = useState(false);
 
     useEffect(() => {
         if (!ready) return;
@@ -73,17 +75,24 @@ export function MobileHeader({ className }: MobileHeaderProps) {
                     <div className="flex flex-col justify-start items-center relative w-full h-full">
                         <div className="flex flex-col h-full w-full">
                             <div className="w-full flex justify-start items-center">
-                                <h3 className="font-libre italic text-white text-lg text-left">
-                                    balance
-                                </h3>
+                                <h3 className="header-text">balance</h3>
                             </div>
-                            <div className="h-full w-full flex items-center">
+                            <div className="h-full w-full flex items-center relative">
+                                {!isTextScaled && (
+                                    <div className="absolute inset-0 flex items-center">
+                                        <Skeleton className="h-12 w-4/5 bg-muted" />
+                                    </div>
+                                )}
                                 <Textfit
                                     mode="single"
                                     forceSingleModeWidth={true}
                                     min={20}
                                     max={40}
-                                    className="font-libre font-bold not-italic text-white w-full truncate"
+                                    onReady={() => setIsTextScaled(true)}
+                                    className={cn(
+                                        "font-libre font-bold not-italic text-white w-full",
+                                        !isTextScaled ? "opacity-0" : "animate-fade-in"
+                                    )}
                                 >
                                     {formatValue(totalBalance.toString())}
                                 </Textfit>
@@ -132,7 +141,7 @@ export function MobileHeader({ className }: MobileHeaderProps) {
     return (
         <div
             className={cn(
-                "mt-14 w-full z-5 transition-all duration-300",
+                "mt-14 w-full z-5 transition-[height] duration-300",
                 type === "balance-sm" ? "h-14" : "h-40",
                 className
             )}
@@ -142,7 +151,7 @@ export function MobileHeader({ className }: MobileHeaderProps) {
                     className={cn(
                         "flex items-center gap-4 flex-1",
                         "bg-primary rounded-4xl",
-                        "p-4 shadow-md h-full"
+                        "p-5 shadow-md h-full"
                     )}
                 >
                     {headerCardContent()}
@@ -154,7 +163,7 @@ export function MobileHeader({ className }: MobileHeaderProps) {
                         onClick={() => setNotificationsDialogOpen(true)}
                     >
                         <Mail className="h-[100%] w-[100%] text-primary-foreground" />
-                        {pendingRequests.length === 0 && (
+                        {pendingRequests.length > 0 && (
                             <div className="absolute top-[25%] right-[25%] h-2 w-2 bg-red-500 rounded-full z-10" />
                         )}
                     </Button>

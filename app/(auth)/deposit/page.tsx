@@ -1,71 +1,63 @@
-"use client";
-
-import { Balance } from "@/components/balance";
-import { RecentActivity } from "@/components/recent-activity";
-import { SendAgain } from "@/components/send-again";
-import { BankAccounts } from "@/components/bank-accounts";
-import { Skeleton } from "@/components/ui/skeleton";
 import React from "react";
-
-function BalanceSkeleton() {
-    return (
-        <div className="space-y-4 p-6 bg-white rounded-lg border">
-            <div className="flex justify-between items-center">
-                <Skeleton className="h-7 w-24" />
-            </div>
-            <div className="space-y-3">
-                <div className="flex justify-between">
-                    <Skeleton className="h-5 w-32" />
-                    <Skeleton className="h-5 w-24" />
-                </div>
-                <div className="flex justify-between">
-                    <Skeleton className="h-5 w-28" />
-                    <Skeleton className="h-5 w-20" />
-                </div>
-            </div>
-            <Skeleton className="h-10 w-full mt-4" />
-        </div>
-    );
-}
-
-function RecentActivitySkeleton() {
-    return (
-        <div className="space-y-4 p-6 bg-white rounded-lg border">
-            <Skeleton className="h-7 w-32" />
-            <div className="space-y-3">
-                {[...Array(5)].map((_, i) => (
-                    <div key={i} className="flex justify-between items-center">
-                        <div className="flex items-center space-x-3">
-                            <Skeleton className="h-10 w-10 rounded-full" />
-                            <div className="space-y-2">
-                                <Skeleton className="h-4 w-48" />
-                                <Skeleton className="h-3 w-32" />
-                            </div>
-                        </div>
-                        <Skeleton className="h-4 w-16" />
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
-}
+import Link from "next/link";
 
 export default function DepositPage() {
     return (
-        <div className="flex flex-col min-h-screen">
-            <div className="flex flex-1 lg:flex-row lg:mx-auto lg:max-w-7xl pb-24 lg:pb-8">
-                <div className="flex-1 lg:max-w-3xl">
-                    <React.Suspense fallback={<BalanceSkeleton />}>
-                        <Balance />
-                    </React.Suspense>
-                    <React.Suspense fallback={<RecentActivitySkeleton />}>
-                        <RecentActivity />
-                    </React.Suspense>
-                </div>
+        <div className="flex flex-col">
+            <div className="flex flex-1 lg:flex-row lg:mx-auto lg:max-w-7xl lg:pb-8">
+                <div className="flex flex-col flex-1 lg:max-w-3xl gap-2">
+                    <div className="flex gap-2 h-56">
+                        <Link
+                            href="/deposit"
+                            className="flex flex-1 h-full border flex-col justify-center items-start text-left bg-primary rounded-4xl p-5 text-primary-foreground"
+                        >
+                            <h2 className="mt-[35%] text-2xl font-libre italic mb-2">deposit</h2>
+                            <p className="text-muted-foreground text-roboto text-sm">
+                                cash or cryptocurrencies
+                            </p>
+                        </Link>
 
-                <div className="hidden lg:block lg:max-w-xl lg:p-4 lg:border-l">
-                    <SendAgain />
-                    <BankAccounts />
+                        <Link
+                            href="/withdraw"
+                            className="flex flex-1 h-full border flex-col justify-center items-start text-left bg-primary rounded-4xl p-5 text-primary-foreground"
+                        >
+                            <h2 className="mt-[35%] text-2xl font-libre italic mb-2">withdraw</h2>
+                            <p className="text-muted-foreground text-roboto text-sm">
+                                to your bank or crypto wallet
+                            </p>
+                        </Link>
+                    </div>
+                    <div className="flex gap-2 h-36">
+                        <Link
+                            href="/convert"
+                            className="flex w-32 h-full border flex-col justify-center items-start text-left bg-secondary rounded-7xl p-5 text-secondary-foreground"
+                        ></Link>
+                        <Link
+                            href="/convert"
+                            className="flex flex-1 h-full border flex-col justify-center items-start text-left bg-secondary rounded-4xl p-5 text-secondary-foreground"
+                        >
+                            <h2 className="mt-[20%] text-2xl font-libre italic mb-2">convert</h2>
+                            <p className="text-muted-foreground text-roboto text-sm">
+                                between cash or cryptocurrencies
+                            </p>
+                        </Link>
+                    </div>
+
+                    {/* Bottom links */}
+                    <div className="space-y-2 mt-6 bg-white text-secondary-foreground rounded-4xl">
+                        <Link
+                            href="/payment-details"
+                            className="flex items-center justify-between mx-5 py-5 border-b border-secondary"
+                        >
+                            <span className="text-lg text-zinc-600">payment details</span>
+                            <span className="text-xl">›</span>
+                        </Link>
+
+                        <Link href="/history" className="flex items-center justify-between p-5">
+                            <span className="text-lg text-zinc-600">history</span>
+                            <span className="text-xl">›</span>
+                        </Link>
+                    </div>
                 </div>
             </div>
         </div>

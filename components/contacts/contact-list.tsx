@@ -30,7 +30,7 @@ export function ContactList() {
         error,
         fetchFriends,
         addFriend,
-        unfriend
+        unfriend,
     } = useContactsStore();
 
     useEffect(() => {
@@ -85,7 +85,7 @@ export function ContactList() {
                 description: "It's like you never met them in the first place.",
             });
         } catch (error) {
-            console.error('Failed to unfriend:', error);
+            console.error("Failed to unfriend:", error);
             toast({
                 variant: "destructive",
                 title: "Error",
@@ -104,7 +104,7 @@ export function ContactList() {
 
     return (
         <>
-            <div className="space-y-2">
+            <div className="">
                 <AnimatePresence>
                     {displayContacts.map((contact, index) => (
                         <motion.div
@@ -135,7 +135,10 @@ export function ContactList() {
                                             )}
                                             {contact.wallet && (
                                                 <p className="text-sm text-gray-500 text-left">
-                                                    {`${contact.wallet.slice(0, 6)}...${contact.wallet.slice(-4)}`}
+                                                    {`${contact.wallet.slice(
+                                                        0,
+                                                        6
+                                                    )}...${contact.wallet.slice(-4)}`}
                                                 </p>
                                             )}
                                         </div>
@@ -177,7 +180,10 @@ export function ContactList() {
                                                     <motion.div
                                                         initial={{ scale: 1 }}
                                                         animate={{ scale: 0.8 }}
-                                                        transition={{ repeat: Infinity, duration: 0.5 }}
+                                                        transition={{
+                                                            repeat: Infinity,
+                                                            duration: 0.5,
+                                                        }}
                                                     >
                                                         <Check className="h-4 w-4 text-green-500" />
                                                     </motion.div>
@@ -231,7 +237,10 @@ function ContactListSkeleton() {
     return (
         <div className="space-y-2">
             {[...Array(5)].map((_, i) => (
-                <div key={i} className="p-4 bg-white rounded-lg border flex items-center justify-between">
+                <div
+                    key={i}
+                    className="p-4 bg-white rounded-lg border flex items-center justify-between"
+                >
                     <div className="flex items-center space-x-3">
                         <Skeleton className="h-10 w-10 rounded-full" />
                         <div className="space-y-2">
@@ -248,4 +257,4 @@ function ContactListSkeleton() {
             ))}
         </div>
     );
-} 
+}
