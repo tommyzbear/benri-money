@@ -61,9 +61,11 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
-            <body className={`${libreBaskerville.variable} ${roboto.variable}`}>
+            <body
+                className={`${libreBaskerville.variable} ${roboto.variable} min-h-screen min-w-screen bg-background`}
+            >
                 <Providers>
-                    <main className="min-h-screen bg-background">{children}</main>
+                    <main className="">{children}</main>
                 </Providers>
                 <Toaster />
             </body>

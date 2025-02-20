@@ -72,7 +72,7 @@ export function shortenAddress(address: string) {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
 }
 
-export function formatValue(value: string) {
+export function formatValue(value: string | number) {
     const numValue = Number(value);
     if (numValue < 0.01) {
         return "< $0.01";

@@ -1,33 +1,6 @@
+import Link from "next/link";
 import { ContactSearchBar } from "@/components/contacts/contact-search-bar";
 import { ContactList } from "@/components/contacts/contact-list";
-import { Suspense } from "react";
-import { Skeleton } from "@mui/material";
-import Link from "next/link";
-
-const ContactListSkeleton = () => {
-    return (
-        <div className="space-y-4">
-            {[...Array(8)].map((_, i) => (
-                <div
-                    key={i}
-                    className="p-4 bg-white rounded-lg border flex items-center justify-between"
-                >
-                    <div className="flex items-center space-x-3">
-                        <Skeleton className="h-12 w-12 rounded-full" />
-                        <div className="space-y-2">
-                            <Skeleton className="h-4 w-48" />
-                            <Skeleton className="h-3 w-32" />
-                        </div>
-                    </div>
-                    <div className="flex space-x-2">
-                        <Skeleton className="h-9 w-9 rounded-lg" />
-                        <Skeleton className="h-9 w-9 rounded-lg" />
-                    </div>
-                </div>
-            ))}
-        </div>
-    );
-};
 
 export default function PaymentsPage() {
     return (
@@ -52,9 +25,7 @@ export default function PaymentsPage() {
                     <h3 className="header-text text-primary-foreground">contacts</h3>
                 </div>
                 <ContactSearchBar />
-                <Suspense fallback={<ContactListSkeleton />}>
-                    <ContactList />
-                </Suspense>
+                <ContactList />
             </div>
         </div>
     );

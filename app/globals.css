@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 body {
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: var(--font-roboto), Arial, Helvetica, sans-serif;
 }
 
 @layer utilities {
@@ -81,4 +81,8 @@ body {
     .header-text {
         @apply font-libre italic text-white text-xl text-left;
     }
+}
+
+*:focus {
+    @apply focus:ring-0 focus:outline-none;
 }

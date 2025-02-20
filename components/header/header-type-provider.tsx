@@ -9,14 +9,13 @@ interface HeaderTypeProviderProps {
 }
 
 export function HeaderTypeProvider({ headerType, children }: HeaderTypeProviderProps) {
-    const { setHeaderType } = useHeaderStore();
+    const { setHeaderType, type: currentType } = useHeaderStore();
 
     useEffect(() => {
-        setHeaderType(headerType);
-        return () => {
-            setHeaderType("" as HeaderType);
-        };
-    }, [setHeaderType, headerType]);
+        if (headerType !== currentType) {
+            setHeaderType(headerType);
+        }
+    }, [setHeaderType, headerType, currentType]);
 
     return <>{children}</>;
 }

@@ -3,11 +3,24 @@
 import { Input } from "@/components/ui/input";
 import { Plus, Search, Filter } from "lucide-react";
 import { useDebounce } from "@/hooks/use-debounce";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useContactsStore } from "@/stores/use-contacts-store";
 import { Button } from "@/components/ui/button";
+import { AddFriendDialog } from "@/components/dialogs/add-friend-dialog";
+
 export function ContactSearchBar() {
-    const { searchQuery, setSearchQuery } = useContactsStore();
+    const [addFriendOpen, setAddFriendOpen] = useState(false);
+    const {
+        friends,
+        searchResults,
+        searchQuery,
+        isLoading,
+        error,
+        setSearchQuery,
+        fetchFriends,
+        addFriend,
+        unfriend,
+    } = useContactsStore();
 
     const debouncedSearch = useDebounce((value: string) => {
         setSearchQuery(value);
@@ -36,9 +49,10 @@ export function ContactSearchBar() {
                     <Filter className="h-4 w-4" />
                 </Button>
                 <Button className="h-full rounded-xl bg-muted-foreground p-3">
-                    <Plus className="h-4 w-4" />
+                    <Plus className="h-4 w-4" onClick={() => setAddFriendOpen(true)} />
                 </Button>
             </div>
+            <AddFriendDialog open={addFriendOpen} onOpenChange={setAddFriendOpen} contact={null} />
         </div>
     );
 }

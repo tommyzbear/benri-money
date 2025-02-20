@@ -82,12 +82,8 @@ export function NotificationsDialog({ open, onOpenChange, requests }: Notificati
             await addTransaction({
                 from_account_id: user.id,
                 to_account_id: request.requester,
-                from_username: user.username,
-                to_username: request.requester_username,
                 from_address: wallet.address,
                 to_address: request.requester_wallet,
-                from_profile_img: user.profileImage?.url || null,
-                to_profile_img: request.requester_profile_img || null,
                 amount: request.amount.toString(),
                 token_address: request.token_address,
                 token_name: request.token_name,

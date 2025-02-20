@@ -43,6 +43,15 @@ export interface Friend {
     created_at: string;
 }
 
+export interface Contact {
+    id: string;
+    email?: string;
+    wallet?: string;
+    isFriend?: boolean;
+    username: string;
+    profileImg: string | null;
+}
+
 export interface TransactionHistory {
     id: number;
     from_account_id: string;

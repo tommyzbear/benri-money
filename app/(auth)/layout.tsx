@@ -5,7 +5,7 @@ import { Metadata } from "next";
 import { cookies } from "next/headers";
 import { privyClient } from "@/lib/privy";
 import { redirect } from "next/navigation";
-
+import { AnimatePresence } from "framer-motion";
 export const metadata: Metadata = {
     title: {
         template: "%s · benri",
@@ -40,11 +40,13 @@ export default async function HomeLayout({
     }
 
     return (
-        <div className="flex flex-col min-h-screen px-4 border bg-background">
-            <MobileHeader className="lg:hidden" />
-            <DesktopHeader className="hidden lg:block" />
-            <main className="py-6 w-full lg:pb-8 lg:p-8">{children}</main>
-            <MobileNav />
+        <div className="flex flex-col min-h-screen px-4 bg-background">
+            <AnimatePresence initial={false} mode="popLayout">
+                <MobileHeader className="lg:hidden" />
+                <DesktopHeader className="hidden lg:block" />
+                <main className="py-6 w-full lg:pb-8 lg:p-8">{children}</main>
+                <MobileNav />
+            </AnimatePresence>
         </div>
     );
 }
