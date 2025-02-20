@@ -1,5 +1,5 @@
-import { create } from 'zustand';
-import { Contact } from '@/types/search';
+import { create } from "zustand";
+import { Contact } from "@/types/data";
 
 interface ContactsStore {
     friends: Contact[];
@@ -17,7 +17,7 @@ export const useContactsStore = create<ContactsStore>((set, get) => ({
     friends: [],
     searchResults: [],
     searchQuery: "",
-    isLoading: false,
+    isLoading: true,
     error: null,
 
     setSearchQuery: async (query) => {
@@ -30,11 +30,11 @@ export const useContactsStore = create<ContactsStore>((set, get) => ({
         try {
             set({ isLoading: true });
             const response = await fetch(`/api/contacts/search?q=${query}`);
-            if (!response.ok) throw new Error('Search failed');
+            if (!response.ok) throw new Error("Search failed");
             const { data } = await response.json();
             set({ searchResults: data });
         } catch (error) {
-            set({ error: 'Failed to search contacts' });
+            set({ error: "Failed to search contacts" });
         } finally {
             set({ isLoading: false });
         }
@@ -43,12 +43,12 @@ export const useContactsStore = create<ContactsStore>((set, get) => ({
     fetchFriends: async () => {
         try {
             set({ isLoading: true });
-            const response = await fetch('/api/contacts/friends');
-            if (!response.ok) throw new Error('Failed to fetch friends');
+            const response = await fetch("/api/contacts/friends");
+            if (!response.ok) throw new Error("Failed to fetch friends");
             const { data } = await response.json();
             set({ friends: data });
         } catch (error) {
-            set({ error: 'Failed to fetch friends' });
+            set({ error: "Failed to fetch friends" });
         } finally {
             set({ isLoading: false });
         }
@@ -56,41 +56,41 @@ export const useContactsStore = create<ContactsStore>((set, get) => ({
 
     addFriend: async (contactId) => {
         try {
-            const response = await fetch('/api/contacts/friends', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+            const response = await fetch("/api/contacts/friends", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ friendId: contactId }),
             });
 
-            if (!response.ok) throw new Error('Failed to add friend');
+            if (!response.ok) throw new Error("Failed to add friend");
 
-            set(state => ({
-                searchResults: state.searchResults.map(contact =>
+            set((state) => ({
+                searchResults: state.searchResults.map((contact) =>
                     contact.id === contactId ? { ...contact, isFriend: true } : contact
-                )
+                ),
             }));
             await get().fetchFriends();
         } catch (error) {
-            throw new Error('Failed to add friend');
+            throw new Error("Failed to add friend");
         }
     },
 
     unfriend: async (contactId) => {
         try {
             const response = await fetch(`/api/contacts/friends/${contactId}`, {
-                method: 'DELETE',
+                method: "DELETE",
             });
-            if (!response.ok) throw new Error('Failed to unfriend');
+            if (!response.ok) throw new Error("Failed to unfriend");
 
             // Update both friends and search results
-            set(state => ({
-                friends: state.friends.filter(friend => friend.id !== contactId),
-                searchResults: state.searchResults.map(contact =>
+            set((state) => ({
+                friends: state.friends.filter((friend) => friend.id !== contactId),
+                searchResults: state.searchResults.map((contact) =>
                     contact.id === contactId ? { ...contact, isFriend: false } : contact
-                )
+                ),
             }));
         } catch (error) {
-            throw new Error('Failed to remove friend');
+            throw new Error("Failed to remove friend");
         }
     },
-})); 
+}));

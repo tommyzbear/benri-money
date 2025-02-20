@@ -8,40 +8,57 @@ export async function GET(request: Request) {
         const cookieStore = cookies();
         const cookieAuthToken = cookieStore.get("privy-token");
 
-        if (!cookieAuthToken) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        if (!cookieAuthToken) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
         const claims = await privyClient.verifyAuthToken(cookieAuthToken.value);
 
-        if (!claims) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        if (!claims) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
         const { data, error } = await supabase
-            .from('friends')
-            .select(`
+            .from("friends")
+            .select(
+                `
                 friend:friend_id(
                     id,
+                    username,
+                    profile_img,
                     email:email(address),
                     wallet:wallet(address)
                 )
-            `)
-            .eq('account_id', claims.userId);
+            `
+            )
+            .eq("account_id", claims.userId)
+            .returns<
+                {
+                    friend: {
+                        id: string;
+                        username: string;
+                        profile_img: string | null;
+                        email: Array<{ address: string }>;
+                        wallet: Array<{ address: string }>;
+                    };
+                }[]
+            >();
 
         if (error) {
-            console.error('Error fetching friends:', error);
-            return NextResponse.json({ error: 'Error fetching friends' }, { status: 500 });
+            console.error("Error fetching friends:", error);
+            return NextResponse.json({ error: "Error fetching friends" }, { status: 500 });
         }
 
         // Transform the data to match the expected format
         const friends = data.map(({ friend }) => ({
             id: friend.id,
+            username: friend.username,
+            profileImg: friend.profile_img,
             email: friend.email[0]?.address,
             wallet: friend.wallet[0]?.address,
-            isFriend: true
+            isFriend: true,
         }));
 
         return NextResponse.json({ data: friends });
     } catch (error) {
-        console.error('Error processing request:', error);
-        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+        console.error("Error processing request:", error);
+        return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }
 }
 
@@ -50,33 +67,31 @@ export async function POST(request: Request) {
         const cookieStore = cookies();
         const cookieAuthToken = cookieStore.get("privy-token");
 
-        if (!cookieAuthToken) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        if (!cookieAuthToken) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
         const claims = await privyClient.verifyAuthToken(cookieAuthToken.value);
 
-        if (!claims) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        if (!claims) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
         const { friendId } = await request.json();
 
         if (!friendId) {
-            return NextResponse.json({ error: 'Friend ID is required' }, { status: 400 });
+            return NextResponse.json({ error: "Friend ID is required" }, { status: 400 });
         }
 
-        const { error } = await supabase
-            .from('friends')
-            .insert({
-                account_id: claims.userId,
-                friend_id: friendId,
-            });
+        const { error } = await supabase.from("friends").insert({
+            account_id: claims.userId,
+            friend_id: friendId,
+        });
 
         if (error) {
-            console.error('Error adding friend:', error);
-            return NextResponse.json({ error: 'Error adding friend' }, { status: 500 });
+            console.error("Error adding friend:", error);
+            return NextResponse.json({ error: "Error adding friend" }, { status: 500 });
         }
 
         return NextResponse.json({ success: true });
     } catch (error) {
-        console.error('Error processing request:', error);
-        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+        console.error("Error processing request:", error);
+        return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }
-} 
+}

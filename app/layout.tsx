@@ -1,55 +1,74 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/providers";
+import localFont from "next/font/local";
 import { Toaster } from "@/components/ui/toaster";
-import { cookies } from "next/headers";
-import { privyClient } from "@/lib/privy";
-
-const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "PaymentApp",
-  description: "A modern payment application",
-  appleWebApp: {
-    capable: true,
-    title: "Wanderer",
-    statusBarStyle: "black-translucent",
-  },
+    title: {
+        template: "%s · benri",
+        default: "benri",
+    },
+    description: "Money made convenient",
+    appleWebApp: {
+        capable: true,
+        title: "Benri",
+        statusBarStyle: "black-translucent",
+    },
 };
 
-async function checkAuth() {
-  const cookieStore = cookies();
-  const cookieAuthToken = cookieStore.get("privy-token");
+const libreBaskerville = localFont({
+    src: [
+        {
+            path: "./fonts/LibreBaskerville-Regular.ttf",
+            weight: "400",
+            style: "normal",
+        },
+        {
+            path: "./fonts/LibreBaskerville-Bold.ttf",
+            weight: "700",
+            style: "normal",
+        },
+        {
+            path: "./fonts/LibreBaskerville-Italic.ttf",
+            weight: "400",
+            style: "italic",
+        },
+    ],
+    variable: "--font-libre",
+});
 
-  if (!cookieAuthToken) return null;
-
-  try {
-    const claims = await privyClient.verifyAuthToken(cookieAuthToken.value);
-    return claims;
-  } catch (error) {
-    console.error(error);
-    return null;
-  }
-}
-
-export { checkAuth };
+const roboto = localFont({
+    src: [
+        {
+            path: "./fonts/Roboto-VariableFont_wdth,wght.ttf",
+            weight: "100 900",
+            style: "normal",
+        },
+        {
+            path: "./fonts/Roboto-Italic-VariableFont_wdth,wght.ttf",
+            weight: "100 900",
+            style: "italic",
+        },
+    ],
+    variable: "--font-roboto",
+});
 
 export default function RootLayout({
-  children,
+    children,
 }: Readonly<{
-  children: React.ReactNode;
+    children: React.ReactNode;
 }>) {
-  return (
-    <html lang="en">
-      <body className={inter.className}>
-        <Providers>
-          <main className="min-h-screen bg-background">
-            {children}
-          </main>
-        </Providers>
-        <Toaster />
-      </body>
-    </html>
-  );
+    return (
+        <html lang="en">
+            <body
+                className={`${libreBaskerville.variable} ${roboto.variable} min-h-screen min-w-screen bg-background`}
+            >
+                <Providers>
+                    <main className="">{children}</main>
+                </Providers>
+                <Toaster />
+            </body>
+        </html>
+    );
 }

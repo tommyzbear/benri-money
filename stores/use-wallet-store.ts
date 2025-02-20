@@ -1,10 +1,10 @@
-import { create } from 'zustand';
-import { Chain } from '@wagmi/core/chains';
-import { getBalance, GetBalanceReturnType } from '@wagmi/core';
-import { config } from '@/lib/wallet/config';
-import { approvedTokens, TokenMetadata } from '@/lib/wallet/coinlist';
+import { create } from "zustand";
+import { getBalance, GetBalanceReturnType } from "@wagmi/core";
+import { config } from "@/lib/wallet/config";
+import { approvedTokens } from "@/lib/wallet/coinlist";
 
 interface WalletState {
+    totalBalance: number;
     balances: Record<string, GetBalanceReturnType[]>;
     isLoading: boolean;
     error: string | null;
@@ -12,6 +12,7 @@ interface WalletState {
 }
 
 export const useWalletStore = create<WalletState>((set) => ({
+    totalBalance: 12345.67,
     balances: {},
     isLoading: false,
     error: null,
@@ -25,12 +26,16 @@ export const useWalletStore = create<WalletState>((set) => ({
                         chainId: chain.id,
                     });
 
-                    const altCoinBalances = await Promise.all(approvedTokens[chain.name]
-                        .map(async (token) => await getBalance(config, {
-                            address: address as `0x${string}`,
-                            chainId: chain.id,
-                            token: token.address as `0x${string}`,
-                        })))
+                    const altCoinBalances = await Promise.all(
+                        approvedTokens[chain.name].map(
+                            async (token) =>
+                                await getBalance(config, {
+                                    address: address as `0x${string}`,
+                                    chainId: chain.id,
+                                    token: token.address as `0x${string}`,
+                                })
+                        )
+                    );
 
                     return { [chain.name]: [balance, ...altCoinBalances] };
                 })
@@ -38,17 +43,18 @@ export const useWalletStore = create<WalletState>((set) => ({
 
             set({
                 balances: balancesByChain.reduce((acc, curr) => {
-                    Object.keys(curr).forEach(key => {
+                    Object.keys(curr).forEach((key) => {
                         acc[key] = curr[key];
                     });
                     return acc;
-                }, {}), isLoading: false
+                }, {}),
+                isLoading: false,
             });
         } catch (error) {
             set({
-                error: error instanceof Error ? error.message : 'Failed to fetch balances',
-                isLoading: false
+                error: error instanceof Error ? error.message : "Failed to fetch balances",
+                isLoading: false,
             });
         }
     },
-})); 
+}));

@@ -1,13 +1,7 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: "PaymentApp",
-    description: "A modern payment application",
-    appleWebApp: {
-        capable: true,
-        title: "Wanderer",
-        statusBarStyle: "black-translucent",
-    },
+    title: "Login",
 };
 
 export default function LoginLayout({
@@ -15,9 +9,5 @@ export default function LoginLayout({
 }: Readonly<{
     children: React.ReactNode;
 }>) {
-    return (
-        <div className="min-h-screen">
-            {children}
-        </div>
-    );
+    return <div className="min-h-screen">{children}</div>;
 }
