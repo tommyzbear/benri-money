@@ -26,6 +26,7 @@ export default function DepositPage() {
                         destination_currency: "usdc",
                         destination_exchange_amount: "100",
                         destination_network: "polygon",
+                        destination_wallet_address: privyWalletAddress,
                     },
                 }),
             });
