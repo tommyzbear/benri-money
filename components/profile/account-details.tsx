@@ -167,6 +167,43 @@ export function AccountDetails() {
             animate="show"
             className="space-y-6"
         >
+            {/* Privy Wallet Section */}
+            <motion.div variants={cardVariants}>
+                <Card className="hover:shadow-md transition-shadow duration-200">
+                    <CardHeader className="flex flex-row items-center justify-between">
+                        <h2 className="text-xl font-semibold">Embedded Wallet</h2>
+                    </CardHeader>
+                    <CardContent>
+                        <motion.div
+                            className="flex items-start gap-4"
+                            whileHover={{ scale: 1.01 }}
+                            transition={{ type: "spring", stiffness: 300 }}
+                        >
+                            <Mail className="w-5 h-5 mt-1 text-gray-500" />
+                            <div className="flex-1">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <p className="font-medium">
+                                            {privyWalletAddress
+                                                ? shortenAddress(privyWalletAddress)
+                                                : "No wallet linked"}
+                                        </p>
+                                        {privyWalletAddress && (
+                                            <Copy
+                                                className="w-4 h-4 cursor-pointer text-gray-500 hover:text-gray-700"
+                                                onClick={() =>
+                                                    copyToClipboard(privyWalletAddress)
+                                                }
+                                            />
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </CardContent>
+                </Card>
+            </motion.div>
+
             {/* Emails Section */}
             <motion.div variants={cardVariants}>
                 <Card className="hover:shadow-md transition-shadow duration-200">
@@ -300,42 +337,42 @@ export function AccountDetails() {
             <motion.div variants={cardVariants}>
                 <Card className="hover:shadow-md transition-shadow duration-200">
                     <CardHeader className="flex flex-row items-center justify-between">
-                        <h2 className="text-xl font-semibold">Wallet</h2>
+                        <h2 className="text-xl font-semibold">External Wallets</h2>
                     </CardHeader>
                     <CardContent>
                         <div className="flex items-start gap-4">
                             <Wallet className="w-5 h-5 mt-1 text-gray-500" />
                             <div className="flex-1">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <div className="flex items-center gap-2">
-                                            <p className="font-medium">
-                                                {user?.wallet?.address
-                                                    ? shortenAddress(user.wallet.address)
-                                                    : "No wallet linked"}
-                                            </p>
-                                            {user?.wallet?.address && (
-                                                <Copy
-                                                    className="w-4 h-4 cursor-pointer text-gray-500 hover:text-gray-700"
-                                                    onClick={() =>
-                                                        copyToClipboard(user?.wallet?.address || "")
-                                                    }
-                                                />
-                                            )}
+                                {externalWalletAddresses.length > 0 ? externalWalletAddresses.map((address) => (
+                                    <div key={address} className="flex items-center justify-between">
+                                        <div>
+                                            <div className="flex items-center gap-2">
+                                                <p className="font-medium">
+                                                    {address
+                                                        ? shortenAddress(address)
+                                                        : "No wallet linked"}
+                                                </p>
+                                                {address && (
+                                                    <Copy
+                                                        className="w-4 h-4 cursor-pointer text-gray-500 hover:text-gray-700"
+                                                        onClick={() =>
+                                                            copyToClipboard(address)
+                                                        }
+                                                    />
+                                                )}
+                                            </div>
                                         </div>
-                                    </div>
-                                    <motion.div
-                                        whileHover={{ scale: 1.05 }}
-                                        whileTap={{ scale: 0.95 }}
-                                    >
-                                        {user?.wallet ? (
+                                        <motion.div
+                                            whileHover={{ scale: 1.05 }}
+                                            whileTap={{ scale: 0.95 }}
+                                        >
                                             <Button
                                                 variant="ghost"
                                                 className="text-blue-600"
                                                 onClick={() =>
                                                     handleUnlink(
                                                         "wallet",
-                                                        user?.wallet?.address || "",
+                                                        address,
                                                         unlinkWallet
                                                     )
                                                 }
@@ -343,17 +380,19 @@ export function AccountDetails() {
                                             >
                                                 Unlink
                                             </Button>
-                                        ) : (
-                                            <Button
-                                                variant="ghost"
-                                                className="text-blue-600"
-                                                onClick={linkWallet}
-                                            >
-                                                Link Wallet
-                                            </Button>
-                                        )}
-                                    </motion.div>
-                                </div>
+                                        </motion.div>
+                                    </div>
+                                )) : (
+                                    <div className="flex items-center justify-between">
+                                        <Button
+                                            variant="ghost"
+                                            className="text-blue-600"
+                                            onClick={linkWallet}
+                                        >
+                                            Link Wallet
+                                        </Button>
+                                    </div>
+                                )}
                             </div>
                         </div>
                         {user?.wallet?.address && (
@@ -377,12 +416,6 @@ export function AccountDetails() {
                                 Link Additional Wallet
                             </Button>
                         </div>
-
-                        {wallets.map((wallet) => (
-                            <div key={wallet.address} className="mt-2">
-                                <p>{shortenAddress(wallet.address)}</p>
-                            </div>
-                        ))}
                     </CardContent>
                 </Card>
             </motion.div>
