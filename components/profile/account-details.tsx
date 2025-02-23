@@ -8,7 +8,7 @@ import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { NetworkIcon } from "@/components/network-icon";
 import { baseSepolia, sepolia } from "viem/chains";
 import {
@@ -83,9 +83,18 @@ export function AccountDetails() {
         exportWallet,
     } = usePrivy();
 
-    const { wallets, ready: ethereumWalletsReady } = useWallets();
+    const { wallets, ready: walletsReady } = useWallets();
+    const [privyWalletAddress, setPrivyWalletAddress] = useState<string | undefined>(undefined);
+    const [externalWalletAddresses, setExternalWalletAddresses] = useState<string[]>([]);
 
-    if (!ready || !ethereumWalletsReady) {
+    useEffect(() => {
+        if (ready && wallets.length > 0) {
+            setPrivyWalletAddress(wallets.find((wallet) => wallet.walletClientType === "privy")?.address);
+            setExternalWalletAddresses(wallets.filter((wallet) => wallet.walletClientType !== "privy").map((wallet) => wallet.address));
+        }
+    }, [ready, wallets]);
+
+    if (!ready || !walletsReady) {
         return <AccountDetailsSkeleton />;
     }
 
