@@ -81,7 +81,7 @@ export function MobileHeader({ className }: MobileHeaderProps) {
                                     type === "balance-sm" ? "left-0 top-0" : "left-0 top-0"
                                 )}
                             >
-                                <h3 className="header-text">balance</h3>
+                                <h3 className="header-text text-primary-foreground">balance</h3>
                             </div>
                             <div
                                 className={cn(
@@ -108,7 +108,7 @@ export function MobileHeader({ className }: MobileHeaderProps) {
                                     max={type === "balance-sm" ? 24 : 40}
                                     onReady={() => setIsTextScaled(true)}
                                     className={cn(
-                                        "font-libre font-bold not-italic text-white h-full w-full transition-all duration-300",
+                                        "font-libre font-bold not-italic h-full w-full transition-all duration-300",
                                         type === "balance-sm" ? "text-right" : "text-left",
                                         !isTextScaled ? "opacity-0" : "animate-fade-in"
                                     )}
@@ -169,7 +169,7 @@ export function MobileHeader({ className }: MobileHeaderProps) {
                     className={cn(
                         "flex items-center gap-4 flex-1",
                         "bg-primary rounded-4xl",
-                        "p-5 pt-4 shadow-md h-full"
+                        "p-5 pt-4 shadow-md h-full text-primary-foreground"
                     )}
                 >
                     {headerCardContent()}
