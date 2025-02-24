@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Mail, Phone, Wallet, Copy } from "lucide-react";
-import { usePrivy, User, useSolanaWallets, useWallets } from "@privy-io/react-auth";
+import { ConnectedWallet, useMfaEnrollment, usePrivy, User, useSolanaWallets, useWallets } from "@privy-io/react-auth";
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -84,12 +84,13 @@ export function AccountDetails() {
     } = usePrivy();
 
     const { wallets, ready: walletsReady } = useWallets();
-    const [privyWalletAddress, setPrivyWalletAddress] = useState<string | undefined>(undefined);
+    const [privyWallet, setPrivyWallet] = useState<ConnectedWallet | undefined>(undefined);
     const [externalWalletAddresses, setExternalWalletAddresses] = useState<string[]>([]);
+    const { showMfaEnrollmentModal } = useMfaEnrollment();
 
     useEffect(() => {
         if (ready && wallets.length > 0) {
-            setPrivyWalletAddress(wallets.find((wallet) => wallet.walletClientType === "privy")?.address);
+            setPrivyWallet(wallets.find((wallet) => wallet.walletClientType === "privy"));
             setExternalWalletAddresses(wallets.filter((wallet) => wallet.walletClientType !== "privy").map((wallet) => wallet.address));
         }
     }, [ready, wallets]);
@@ -136,11 +137,10 @@ export function AccountDetails() {
     };
 
     const handleSwitchNetwork = async (chainId: string) => {
-        if (!wallets[0]) return;
+        if (!walletsReady) return;
         try {
-            console.log(chainId);
             // await wallets[0].switchChain(chainId === "84532" ? Number(baseSepolia.id) : sepolia.id);
-            await wallets[0].switchChain(84532);
+            await privyWallet?.switchChain(Number(chainId));
             toast({
                 description: "Network switched successfully",
             });
@@ -155,9 +155,9 @@ export function AccountDetails() {
     };
 
     const getCurrentNetwork = () => {
-        if (!wallets[0]) return "Ethereum";
-        console.log(getNetworkByChainId(wallets[0].chainId));
-        return getNetworkByChainId(wallets[0].chainId);
+        if (!walletsReady) return "Unknown";
+
+        return getNetworkByChainId(privyWallet?.chainId || "");
     };
 
     return (
@@ -179,27 +179,77 @@ export function AccountDetails() {
                             whileHover={{ scale: 1.01 }}
                             transition={{ type: "spring", stiffness: 300 }}
                         >
-                            <Mail className="w-5 h-5 mt-1 text-gray-500" />
+                            <Wallet className="w-5 h-5 mt-1 text-gray-500" />
                             <div className="flex-1">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
                                         <p className="font-medium">
-                                            {privyWalletAddress
-                                                ? shortenAddress(privyWalletAddress)
+                                            {privyWallet
+                                                ? shortenAddress(privyWallet.address)
                                                 : "No wallet linked"}
                                         </p>
-                                        {privyWalletAddress && (
+                                        {privyWallet && (
                                             <Copy
                                                 className="w-4 h-4 cursor-pointer text-gray-500 hover:text-gray-700"
                                                 onClick={() =>
-                                                    copyToClipboard(privyWalletAddress)
+                                                    copyToClipboard(privyWallet.address)
                                                 }
                                             />
                                         )}
                                     </div>
+                                    <Button
+                                        variant="ghost"
+                                        className="text-blue-600"
+                                        onClick={exportWallet}
+                                    >
+                                        Export Wallet
+                                    </Button>
                                 </div>
                             </div>
                         </motion.div>
+                    </CardContent>
+                </Card>
+            </motion.div>
+
+            {/* MFA Section */}
+            <motion.div variants={cardVariants}>
+                <Card className="hover:shadow-md transition-shadow duration-200">
+                    <CardHeader className="flex flex-row items-center justify-between">
+                        <h2 className="text-xl font-semibold">{user?.mfaMethods && user?.mfaMethods.length > 0 ? "(Enabled) Multi-Factor Authentication" : "Multi-Factor Authentication"}</h2>
+                    </CardHeader>
+                    <CardContent className="flex items-center justify-between">
+                        <div className="flex items-start gap-4">
+                            {user?.mfaMethods && user?.mfaMethods.length > 0 ? (
+                                user.mfaMethods.map((method) => (
+                                    <p className="font-medium" key={method}>
+                                        {method === "totp" ? "Authenticator App" : method.toUpperCase()}
+                                    </p>
+                                ))
+                            ) : (
+                                <p className="font-medium">
+                                    MFA is disabled
+                                </p>
+                            )}
+                        </div>
+                        {!user?.mfaMethods || user?.mfaMethods.length === 0 && (
+                            <Button
+                                variant="ghost"
+                                className="text-blue-600"
+                                onClick={showMfaEnrollmentModal}
+                            >
+                                Enable MFA
+                            </Button>
+                        )}
+
+                        {user?.mfaMethods && user?.mfaMethods.length > 0 && (
+                            <Button
+                                variant="ghost"
+                                className="text-blue-600"
+                                onClick={showMfaEnrollmentModal}
+                            >
+                                Configure MFA
+                            </Button>
+                        )}
                     </CardContent>
                 </Card>
             </motion.div>
@@ -347,11 +397,7 @@ export function AccountDetails() {
                                     <div key={address} className="flex items-center justify-between">
                                         <div>
                                             <div className="flex items-center gap-2">
-                                                <p className="font-medium">
-                                                    {address
-                                                        ? shortenAddress(address)
-                                                        : "No wallet linked"}
-                                                </p>
+
                                                 {address && (
                                                     <Copy
                                                         className="w-4 h-4 cursor-pointer text-gray-500 hover:text-gray-700"
@@ -384,6 +430,9 @@ export function AccountDetails() {
                                     </div>
                                 )) : (
                                     <div className="flex items-center justify-between">
+                                        <p className="font-medium">
+                                            No wallet linked
+                                        </p>
                                         <Button
                                             variant="ghost"
                                             className="text-blue-600"
@@ -395,27 +444,18 @@ export function AccountDetails() {
                                 )}
                             </div>
                         </div>
-                        {user?.wallet?.address && (
+
+                        {externalWalletAddresses.length > 0 && (
                             <div className="mt-4">
                                 <Button
                                     variant="outline"
-                                    className="w-full text-blue-600"
-                                    onClick={exportWallet}
+                                    className="text-blue-600 w-full"
+                                    onClick={linkWallet}
                                 >
-                                    Export Wallet
+                                    Link Additional Wallet
                                 </Button>
                             </div>
                         )}
-
-                        <div className="mt-4">
-                            <Button
-                                variant="outline"
-                                className="text-blue-600 w-full"
-                                onClick={linkWallet}
-                            >
-                                Link Additional Wallet
-                            </Button>
-                        </div>
                     </CardContent>
                 </Card>
             </motion.div>
