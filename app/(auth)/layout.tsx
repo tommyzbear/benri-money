@@ -40,7 +40,7 @@ export default async function HomeLayout({
     }
 
     return (
-        <div className="flex flex-col min-h-screen px-4 bg-background">
+        <div className="flex flex-col min-h-screen bg-background px-4 sm:px-0">
             <AnimatePresence initial={false} mode="popLayout">
                 <MobileHeader className="lg:hidden" />
                 <DesktopHeader className="hidden lg:block" />
