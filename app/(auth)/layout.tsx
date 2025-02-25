@@ -40,12 +40,14 @@ export default async function HomeLayout({
     }
 
     return (
-        <div className="flex flex-col min-h-screen bg-background px-4 sm:px-0">
+        <div className="flex flex-col bg-background px-4 sm:px-0 max-h-screen">
             <AnimatePresence initial={false} mode="popLayout">
-                <MobileHeader className="lg:hidden" />
                 <DesktopHeader className="hidden lg:block" />
-                <main className="py-6 w-full lg:pb-8 lg:p-8">{children}</main>
-                <MobileNav />
+                <div className="h-full overflow-hidden">
+                    <MobileHeader className="lg:hidden" />
+                    <main className="py-6 w-full lg:pb-8 lg:p-8">{children}</main>
+                    <MobileNav />
+                </div>
             </AnimatePresence>
         </div>
     );

@@ -44,7 +44,9 @@ export function MobileHeader({ className }: MobileHeaderProps) {
             fetchUser();
         }
         fetchPendingRequests();
-        fetchBalances(wallets.find((wallet) => wallet.walletClientType === "privy")?.address ?? wallets[0].address);
+        if (totalBalance === undefined) {
+            fetchBalances(wallets.find((wallet) => wallet.walletClientType === "privy")?.address ?? wallets[0].address);
+        }
     }, [ready, fetchPendingRequests, fetchUser, fetchBalances, wallets, walletsReady]);
 
     useEffect(() => {

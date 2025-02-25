@@ -29,18 +29,11 @@ export function Balance() {
     const [redirectUrl, setRedirectUrl] = useState<string | undefined>(undefined);
     const [privyWalletAddress, setPrivyWalletAddress] = useState<string | undefined>(undefined);
     const [selectedFriend, setSelectedFriend] = useState<Contact | null>(null);
-    const { user } = usePrivy();
     const { wallets, ready } = useWallets();
     const { fundWallet } = useFundWallet();
-    const { balances, isLoading, error, fetchBalances, totalBalance } = useWalletStore();
+    const { balances, isLoading, error, totalBalance } = useWalletStore();
     const { toast } = useToast();
     const { showBalances, toggleBalances } = useBalanceVisibilityStore();
-
-    useEffect(() => {
-        if (wallets.length > 0) {
-            fetchBalances(wallets.find((wallet) => wallet.walletClientType === "privy")?.address ?? wallets[0].address);
-        }
-    }, [wallets, fetchBalances, user]);
 
     useEffect(() => {
         const createOnrampSession = async () => {
