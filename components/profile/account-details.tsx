@@ -3,14 +3,13 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Mail, Phone, Wallet, Copy } from "lucide-react";
-import { ConnectedWallet, useMfaEnrollment, usePrivy, User, useSolanaWallets, useWallets } from "@privy-io/react-auth";
+import { ConnectedWallet, useMfaEnrollment, usePrivy, User, useWallets } from "@privy-io/react-auth";
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { NetworkIcon } from "@/components/network-icon";
-import { baseSepolia, sepolia } from "viem/chains";
 import {
     Select,
     SelectContent,
@@ -139,7 +138,6 @@ export function AccountDetails() {
     const handleSwitchNetwork = async (chainId: string) => {
         if (!walletsReady) return;
         try {
-            // await wallets[0].switchChain(chainId === "84532" ? Number(baseSepolia.id) : sepolia.id);
             await privyWallet?.switchChain(Number(chainId));
             toast({
                 description: "Network switched successfully",

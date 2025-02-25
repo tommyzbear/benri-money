@@ -9,6 +9,7 @@ import {
     baseSepolia,
     optimismSepolia,
     arbitrumSepolia,
+    polygon,
 } from "viem/chains";
 
 export function cn(...inputs: ClassValue[]) {
@@ -24,6 +25,8 @@ export function getNetworkByChainId(chainId: string) {
         switch (Number(caip2?.chainId)) {
             case base.id:
                 return "Base";
+            case polygon.id:
+                return "Polygon";
             case arbitrum.id:
                 return "Arbitrum One";
             case optimism.id:

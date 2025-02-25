@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { SendMoneyDialog } from "./dialogs/send-money-dialog";
 import { useFundWallet, usePrivy, useWallets } from "@privy-io/react-auth";
 import { SelectFriendDialog } from "./dialogs/select-friend-dialog";
-import { Contact } from "@/types/search";
+import { Contact } from "@/types/data";
 import { Skeleton } from "./ui/skeleton";
 import { useWalletStore } from "@/stores/use-wallet-store";
 import { motion, AnimatePresence } from "framer-motion";
@@ -28,7 +28,7 @@ export function Balance() {
 
     useEffect(() => {
         if (wallets.length > 0) {
-            fetchBalances(wallets.find((wallet) => wallet.address === user?.wallet?.address)?.address ?? wallets[0].address);
+            fetchBalances(wallets.find((wallet) => wallet.walletClientType === "privy")?.address ?? wallets[0].address);
         }
     }, [wallets, fetchBalances, user]);
 

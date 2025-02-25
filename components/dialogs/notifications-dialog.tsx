@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
 import { usePrivy } from "@privy-io/react-auth";
 import { useWallets } from "@privy-io/react-auth";
-import { baseSepolia, sepolia } from "@wagmi/core/chains";
+import { base, baseSepolia, mainnet, polygon, sepolia } from "@wagmi/core/chains";
 import { useState } from "react";
 import { usePaymentRequestsStore } from "@/stores/use-payment-requests-store";
 import { useTransactionsStore } from "@/stores/use-transactions-store";
@@ -53,10 +53,12 @@ export function NotificationsDialog({ open, onOpenChange, requests }: Notificati
         setIsLoading(true);
 
         try {
-            if (request.chain === "Base Sepolia") {
-                await wallet.switchChain(baseSepolia.id);
-            } else if (request.chain === "Sepolia") {
-                await wallet.switchChain(sepolia.id);
+            if (request.chain === "Base") {
+                await wallet.switchChain(base.id);
+            } else if (request.chain === "Polygon") {
+                await wallet.switchChain(polygon.id);
+            } else if (request.chain === "Ethereum") {
+                await wallet.switchChain(mainnet.id);
             } else {
                 toast({
                     variant: "destructive",

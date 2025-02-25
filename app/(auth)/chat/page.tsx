@@ -1,6 +1,5 @@
 "use client";
 
-import { useHeaderStore } from "@/stores/use-header-store";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
