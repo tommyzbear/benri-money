@@ -20,7 +20,6 @@ export function ChatMessages({ messages, contact, messagesEndRef }: ChatMessages
     };
 
     const renderMessage = (msg: ChatMessage) => {
-        console.log(msg);
         switch (msg.type) {
             case "payment":
                 return (

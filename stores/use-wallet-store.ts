@@ -34,11 +34,9 @@ export const useWalletStore = create<WalletState>((set) => ({
                 return acc;
             }, {});
 
-            console.log(balances);
             const totalBalance = Object.values(balances).reduce((acc, curr) => {
                 return acc + curr.reduce((acc, curr) => acc + Number(curr.value), 0);
             }, 0);
-            console.log(totalBalance);
 
             set({
                 balances,
