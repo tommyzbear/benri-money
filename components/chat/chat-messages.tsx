@@ -20,13 +20,31 @@ export function ChatMessages({ messages, contact, messagesEndRef }: ChatMessages
     };
 
     const renderMessage = (msg: ChatMessage) => {
+        console.log(msg);
         switch (msg.type) {
             case "payment":
+                return (
+                    <div className="bg-zinc-600 text-white p-6 rounded-4xl text-center">
+                        <h4 className="font-libre italic text-base">
+                            {msg.sender !== "user" ? `${contact.username} sent` : "you sent"}
+                        </h4>
+                        <div className="w-20 h-20 p-3 mx-auto">
+                            <Image
+                                src="/coin-rotate-temp.gif"
+                                alt="benri star"
+                                width={100}
+                                height={100}
+                                className="w-full h-full object-contain"
+                            />
+                        </div>
+                        <p className="font-libre text-xl">{formatValue(Number(msg.amount))}</p>
+                    </div>
+                );
             case "request":
                 return (
                     <div className="bg-zinc-600 text-white p-6 rounded-4xl text-center">
                         <h4 className="font-libre italic text-base">
-                            {msg.sender !== "user" ? `${contact.username} sent` : "you requested"}
+                            {msg.sender !== "user" ? `${contact.username} requested` : "you requested"}
                         </h4>
                         <div className="w-20 h-20 p-3 mx-auto">
                             <Image
