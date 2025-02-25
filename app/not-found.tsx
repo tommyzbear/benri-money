@@ -21,7 +21,7 @@ export default function NotFound() {
             <div className="text-center space-y-4">
                 <Image
                     src="https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExbTc3YzVmZGZybGZncW1nazI5djE0MnZ2MTB5YmU3Mm95bmxvb2RwZCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/ji6zzUZwNIuLS/giphy.gif"
-                    alt="Confused John Travolta"
+                    alt="This is awkward..."
                     width={300}
                     height={300}
                 />

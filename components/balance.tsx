@@ -14,15 +14,25 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { base } from "viem/chains";
 import { useBalanceVisibilityStore } from "@/stores/use-balance-visibility-store";
+import { formatValue } from "@/lib/utils";
+import { TokenData } from "@/app/services/alchemy";
+import { DepositDialog } from "./dialogs/deposit-dialog";
+
+const balancesSum = (balances: TokenData[]) => {
+    return balances.reduce((acc, balance) => acc + Number(balance.value), 0);
+}
 
 export function Balance() {
     const [sendDialogOpen, setSendDialogOpen] = useState(false);
     const [selectFriendDialogOpen, setSelectFriendDialogOpen] = useState(false);
+    const [depositDialogOpen, setDepositDialogOpen] = useState(false);
+    const [redirectUrl, setRedirectUrl] = useState<string | undefined>(undefined);
+    const [privyWalletAddress, setPrivyWalletAddress] = useState<string | undefined>(undefined);
     const [selectedFriend, setSelectedFriend] = useState<Contact | null>(null);
     const { user } = usePrivy();
     const { wallets, ready } = useWallets();
     const { fundWallet } = useFundWallet();
-    const { balances, isLoading, error, fetchBalances } = useWalletStore();
+    const { balances, isLoading, error, fetchBalances, totalBalance } = useWalletStore();
     const { toast } = useToast();
     const { showBalances, toggleBalances } = useBalanceVisibilityStore();
 
@@ -31,6 +41,34 @@ export function Balance() {
             fetchBalances(wallets.find((wallet) => wallet.walletClientType === "privy")?.address ?? wallets[0].address);
         }
     }, [wallets, fetchBalances, user]);
+
+    useEffect(() => {
+        const createOnrampSession = async () => {
+            const respqonse = await fetch("/api/stripe/onramp", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    transaction_details: {
+                        destination_currency: "usdc",
+                        destination_exchange_amount: "100",
+                        destination_network: "polygon",
+                        destination_wallet_address: privyWalletAddress,
+                    },
+                }),
+            });
+            const data = await respqonse.json();
+            setRedirectUrl(data.onrampSession.redirect_url);
+        };
+        createOnrampSession();
+    }, []);
+
+    useEffect(() => {
+        if (ready && wallets.length > 0) {
+            setPrivyWalletAddress(wallets.find((wallet) => wallet.walletClientType === "privy")?.address);
+        }
+    }, [ready, wallets]);
 
     useEffect(() => {
         if (error) {
@@ -69,17 +107,16 @@ export function Balance() {
                         animate={{ opacity: 1, y: 0 }}
                         className="flex items-start space-x-4 p-4 bg-gradient-to-br from-slate-50 to-white rounded-xl border border-slate-100"
                     >
-                        <div className="p-2 bg-blue-100 rounded-full">
-                            <Banknote className="h-6 w-6 text-blue-600" />
+                        <div className="p-2 bg-primary rounded-full">
+                            <Banknote className="h-6 w-6 text-primary-foreground" />
                         </div>
                         <div className="flex-1">
-                            <p className="text-sm text-muted-foreground mb-1">Bank Account</p>
+                            <p className="text-sm text-muted-foreground mb-1">Total Balance</p>
                             <p className="text-2xl font-bold">
-                                {showBalances ? "£1,234.56" : "••••••"}
+                                {showBalances ? formatValue(totalBalance?.toString() ?? "0") : "••••••"}
                             </p>
-                            <p className="text-sm text-muted-foreground">Available</p>
                         </div>
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={() => setDepositDialogOpen(true)}>
                             Top Up
                         </Button>
                     </motion.div>
@@ -94,41 +131,24 @@ export function Balance() {
                                 transition={{ delay: index * 0.1 }}
                                 className="flex items-start space-x-4 p-4 bg-gradient-to-br from-slate-50 to-white rounded-xl border border-slate-100"
                             >
-                                <div className="p-2 bg-purple-100 rounded-full">
-                                    <Wallet className="h-6 w-6 text-purple-600" />
+                                <div className="p-2 bg-primary rounded-full">
+                                    <Wallet className="h-6 w-6 text-primary-foreground" />
                                 </div>
                                 <div className="flex-1" key={chain}>
                                     <p className="text-sm text-muted-foreground mb-1">
                                         {chain} Wallet
                                     </p>
-                                    {balances.map((balance, index) => (
-                                        <p className="text-2xl font-bold" key={index}>
-                                            {showBalances
-                                                ? `${Number(balance.formatted).toFixed(4)} ${balance.symbol}`
-                                                : "••••••"
-                                            }
-                                        </p>
-                                    ))}
-                                    <p className="text-sm text-muted-foreground">Available</p>
+                                    <p className="text-2xl font-bold">
+                                        {showBalances ? formatValue(balancesSum(balances).toString() ?? "0") : "••••••"}
+                                    </p>
                                 </div>
-                                {chain === "Base" &&
-                                    <Button variant="outline" size="sm" onClick={() => fundWallet(user?.wallet?.address ?? "", {
-                                        chain: base,
-                                        asset: 'USDC',
-                                        card: {
-                                            preferredProvider: 'moonpay',
-                                        },
-                                    })}>
-                                        Top Up
-                                    </Button>
-                                }
                             </motion.div>
                         ))}
                     </AnimatePresence>
 
                     <Button
-                        className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 
-                                 hover:to-indigo-700 rounded-xl h-12 text-lg font-medium shadow-lg 
+                        className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/80 
+                                 hover:to-primary/60 rounded-xl h-12 text-lg font-medium shadow-lg 
                                  hover:shadow-xl transition-all duration-200"
                         onClick={() => setSelectFriendDialogOpen(true)}
                     >
@@ -147,6 +167,13 @@ export function Balance() {
                 open={sendDialogOpen}
                 onOpenChange={setSendDialogOpen}
                 selectedContact={selectedFriend}
+            />
+
+            <DepositDialog
+                open={depositDialogOpen}
+                onOpenChange={setDepositDialogOpen}
+                redirectUrl={redirectUrl}
+                fundWallet={() => fundWallet(privyWalletAddress ?? "")}
             />
         </Card>
     );
@@ -176,4 +203,4 @@ const BalanceSkeleton = () => {
             </CardContent>
         </Card>
     );
-} 
+}
