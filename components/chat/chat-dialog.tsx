@@ -1,6 +1,6 @@
 "use client";
 
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -38,7 +38,7 @@ export function ChatDialog({ open, onOpenChange, contact, user }: ChatDialogProp
 
     useEffect(() => {
         const fetchMessages = async () => {
-            if (!user?.id || !contact.wallet) return;
+            if (!user?.id || !contact.id) return;
 
             try {
                 const response = await fetch(`/api/contacts/chat?sender=${user.id}&receiver=${contact.id}`);
@@ -71,7 +71,7 @@ export function ChatDialog({ open, onOpenChange, contact, user }: ChatDialogProp
         };
 
         fetchMessages();
-    }, [user?.id, contact.wallet]);
+    }, [user?.id, contact.id, toast]);
 
     useEffect(() => {
         scrollToBottom();
@@ -80,12 +80,12 @@ export function ChatDialog({ open, onOpenChange, contact, user }: ChatDialogProp
     const handleSend = async () => {
         if (!inputValue.trim()) return;
 
-        const newMessage: Omit<Message, "id" | "sent_at"> = {
+        const newMessage: Omit<Message, "id" | "sent_at" | "transaction_id" | "payment_request_id"> = {
             content: inputValue.trim(),
             sender: user.id,
             receiver: contact.id,
             message_type: "message",
-            amount: 0,
+            amount: BigInt(0),
         };
         setInputValue("");
 
@@ -145,6 +145,7 @@ export function ChatDialog({ open, onOpenChange, contact, user }: ChatDialogProp
                         "!duration-300"
                     )}
                 >
+                    <DialogTitle className="hidden">{contact.username}</DialogTitle>
                     <div className="flex flex-col h-[calc(100vh-12.5rem)] mt-14 rounded-5xl rounded-tl-2xl bg-white overflow-hidden">
                         <header className="flex items-center justify-start bg-primary p-2 z-10 gap-3 h-18">
                             <Button
@@ -187,6 +188,7 @@ export function ChatDialog({ open, onOpenChange, contact, user }: ChatDialogProp
                             handleSend={handleSend}
                             handleKeyPress={handleKeyPress}
                             setRequestMoneyOpen={setRequestMoneyOpen}
+                            setSendMoneyOpen={setSendMoneyOpen}
                         />
                     </div>
                 </DialogContent>

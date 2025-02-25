@@ -141,6 +141,8 @@ export interface Message {
     sender: string;
     receiver: string;
     sent_at: Date;
-    amount: number;
+    amount: bigint;
+    transaction_id: number;
+    payment_request_id: number;
     message_type: "message" | "payment" | "request";
 }

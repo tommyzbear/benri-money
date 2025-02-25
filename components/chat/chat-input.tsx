@@ -8,6 +8,7 @@ interface ChatInputProps {
     handleSend: () => void;
     handleKeyPress: (e: React.KeyboardEvent) => void;
     setRequestMoneyOpen: (open: boolean) => void;
+    setSendMoneyOpen: (open: boolean) => void;
 }
 
 export function ChatInput({
@@ -16,6 +17,7 @@ export function ChatInput({
     handleSend,
     handleKeyPress,
     setRequestMoneyOpen,
+    setSendMoneyOpen,
 }: ChatInputProps) {
     return (
         <div className="fixed bottom-0 left-0 right-0 lg:hidden">
@@ -24,7 +26,7 @@ export function ChatInput({
                     <Button
                         variant="ghost"
                         className="flex-1 rounded-full px-5 py-1 font-serif bg-zinc-900 text-primary-foreground"
-                        onClick={() => setRequestMoneyOpen(true)}
+                        onClick={() => setSendMoneyOpen(true)}
                     >
                         <h3 className="w-full text-lg font-libre italic text-left">send</h3>
                     </Button>

@@ -156,8 +156,12 @@ CREATE TABLE messages (
     sent_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     amount NUMERIC(18, 2),
     message_type VARCHAR(20) NOT NULL,
+    transaction_id BIGINT,
+    payment_request_id BIGINT,
     FOREIGN KEY (sender) REFERENCES account(id),
-    FOREIGN KEY (receiver) REFERENCES account(id)
+    FOREIGN KEY (receiver) REFERENCES account(id),
+    FOREIGN KEY (transaction_id) REFERENCES transaction_history(id),
+    FOREIGN KEY (payment_request_id) REFERENCES payment_requests(id)
 );
 -- Create index on sender column
 CREATE INDEX idx_messages_sender ON messages(sender);
