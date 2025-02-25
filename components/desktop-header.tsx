@@ -54,7 +54,7 @@ export function DesktopHeader({ className }: DesktopHeaderProps) {
                             <Link href="/payments">Contacts</Link>
                         </Button>
                         <Button variant="ghost">
-                            <Link href="/crypto">Crypto</Link>
+                            <Link href="/defi">DeFi</Link>
                         </Button>
                         <Button variant="ghost">
                             <Link href="/profile">Profile</Link>

@@ -12,11 +12,11 @@ import { Skeleton } from "./ui/skeleton";
 import { useWalletStore } from "@/stores/use-wallet-store";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
-import { base } from "viem/chains";
 import { useBalanceVisibilityStore } from "@/stores/use-balance-visibility-store";
 import { formatValue } from "@/lib/utils";
 import { TokenData } from "@/app/services/alchemy";
 import { DepositDialog } from "./dialogs/deposit-dialog";
+import { NetworkIcon } from "./network-icon";
 
 const balancesSum = (balances: TokenData[]) => {
     return balances.reduce((acc, balance) => acc + Number(balance.value), 0);
@@ -105,7 +105,7 @@ export function Balance() {
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="flex items-start space-x-4 p-4 bg-gradient-to-br from-slate-50 to-white rounded-xl border border-slate-100"
+                        className="flex items-center justify-between space-x-4 p-4 bg-gradient-to-br from-slate-50 to-white rounded-xl border border-slate-100"
                     >
                         <div className="p-2 bg-primary rounded-full">
                             <Banknote className="h-6 w-6 text-primary-foreground" />
@@ -129,12 +129,13 @@ export function Balance() {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: index * 0.1 }}
-                                className="flex items-start space-x-4 p-4 bg-gradient-to-br from-slate-50 to-white rounded-xl border border-slate-100"
+                                className="flex items-center justify-between space-x-4 p-4 bg-gradient-to-br from-slate-50 to-white rounded-xl border border-slate-100"
                             >
-                                <div className="p-2 bg-primary rounded-full">
-                                    <Wallet className="h-6 w-6 text-primary-foreground" />
+                                <div className="flex items-center justify-center space-x-3">
+                                    <NetworkIcon chain={chain} className="w-10 h-10" />
                                 </div>
-                                <div className="flex-1" key={chain}>
+
+                                <div className="flex-1 flex flex-col justify-center" key={chain}>
                                     <p className="text-sm text-muted-foreground mb-1">
                                         {chain} Wallet
                                     </p>

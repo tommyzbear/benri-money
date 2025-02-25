@@ -48,7 +48,7 @@ export default function DepositPage() {
                 open={depositDialogOpen}
                 onOpenChange={setDepositDialogOpen}
                 redirectUrl={redirectUrl}
-                fundWallet={() => fundWallet(privyWalletAddress)}
+                fundWallet={() => fundWallet(privyWalletAddress ?? "")}
             />
 
             <div className="flex flex-1 lg:flex-row lg:mx-auto lg:max-w-7xl lg:pb-8">

@@ -9,6 +9,7 @@ interface NetworkIconProps {
 export function NetworkIcon({ chain, className }: NetworkIconProps) {
     let iconSrc = "/"
     let altText = "token"
+    console.log(chain)
     switch (chain) {
         case "Base":
             iconSrc = "/icons/base-logo.svg";
