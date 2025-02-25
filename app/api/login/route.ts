@@ -6,8 +6,6 @@ export async function POST(request: Request) {
     try {
         const user = (await request.json()) as User;
 
-        console.log(user);
-
         // Check if user exists
         const { data: existingUser, error: fetchError } = await supabase
             .from('account')

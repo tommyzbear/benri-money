@@ -38,7 +38,6 @@ export default function DepositPage() {
 
     useEffect(() => {
         if (ready && wallets.length > 0) {
-            console.log(wallets);
             setPrivyWalletAddress(wallets.find((wallet) => wallet.walletClientType === "privy")?.address);
         }
     }, [ready, wallets]);

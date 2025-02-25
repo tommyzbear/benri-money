@@ -15,9 +15,10 @@ import { RequestMoneyDialog } from "@/components/dialogs/request-money-dialog";
 import { useContactsStore } from "@/stores/use-contacts-store";
 import { ChatDialog } from "@/components/chat/chat-dialog";
 import { AddFriendDialog } from "@/components/dialogs/add-friend-dialog";
-
+import { usePrivy } from "@privy-io/react-auth";
 export function ContactList() {
     const { toast } = useToast();
+    const { user } = usePrivy();
     const [sendDialogOpen, setSendDialogOpen] = useState(false);
     const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
     const [requestDialogOpen, setRequestDialogOpen] = useState(false);
@@ -241,7 +242,7 @@ export function ContactList() {
             )}
 
             {selectedContact && (
-                <ChatDialog open={chatOpen} onOpenChange={setChatOpen} contact={selectedContact} />
+                <ChatDialog open={chatOpen} onOpenChange={setChatOpen} contact={selectedContact} user={user} />
             )}
 
             <SendMoneyDialog

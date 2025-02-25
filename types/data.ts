@@ -134,3 +134,13 @@ export interface SimplePaymentQrCode {
     token_name: string;
     chain: string;
 }
+
+export interface Message {
+    id: string;
+    content: string;
+    sender: string;
+    receiver: string;
+    sent_at: Date;
+    amount: number;
+    message_type: "message" | "payment" | "request";
+}
