@@ -146,3 +146,17 @@ export interface Message {
     payment_request_id: number;
     message_type: "message" | "payment" | "request";
 }
+
+export interface SupportedToken {
+    id: number;
+    chain_id: number;
+    address: string;
+    decimals: number;
+    name: string;
+    symbol: string;
+    logos_uri: string[];
+    type: string;
+    protocol_slug: string;
+    underlying_tokens: string[];
+    primary_address: string;
+}

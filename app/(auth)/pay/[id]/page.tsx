@@ -11,7 +11,7 @@ import { formatEther } from "viem";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { baseSepolia, sepolia } from "viem/chains";
+import { base, baseSepolia, mainnet, polygon, sepolia } from "viem/chains";
 import { useTransactionsStore } from "@/stores/use-transactions-store";
 import { usePaymentRequestsStore } from "@/stores/use-payment-requests-store";
 
@@ -73,10 +73,12 @@ export default function PaymentRequestPage() {
         setIsLoading(true);
 
         try {
-            if (request.chain === "Base Sepolia") {
-                await wallet.switchChain(baseSepolia.id);
-            } else if (request.chain === "Sepolia") {
-                await wallet.switchChain(sepolia.id);
+            if (request.chain === "Base") {
+                await wallet.switchChain(base.id);
+            } else if (request.chain === "Polygon") {
+                await wallet.switchChain(polygon.id);
+            } else if (request.chain === "Ethereum") {
+                await wallet.switchChain(mainnet.id);
             } else {
                 toast({
                     variant: "destructive",
