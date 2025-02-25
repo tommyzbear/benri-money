@@ -20,8 +20,8 @@ export default function ProfilePage() {
         fetchUser();
     }, [ready, fetchUser]);
 
-    return <div>
-        <div className="w-full h-full flex-row justify-start items-center relative pb-6 animate-fade-in hidden lg:flex">
+    return <div className="container mx-auto px-4 max-w-4xl">
+        <div className="h-full flex-row justify-start items-center relative pb-6 animate-fade-in hidden lg:flex">
             <div
                 className={cn(
                     "flex items-center gap-4 flex-1",

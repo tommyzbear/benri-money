@@ -163,540 +163,541 @@ export function AccountDetails() {
             variants={containerVariants}
             initial="hidden"
             animate="show"
-            className="space-y-6"
         >
             {/* Privy Wallet Section */}
-            <motion.div variants={cardVariants}>
-                <Card className="hover:shadow-md transition-shadow duration-200">
-                    <CardHeader className="flex flex-row items-center justify-between">
-                        <h2 className="text-xl font-semibold">Embedded Wallet</h2>
-                    </CardHeader>
-                    <CardContent>
-                        <motion.div
-                            className="flex items-start gap-4"
-                            whileHover={{ scale: 1.01 }}
-                            transition={{ type: "spring", stiffness: 300 }}
-                        >
-                            <Wallet className="w-5 h-5 mt-1 text-gray-500" />
-                            <div className="flex-1">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <p className="font-medium">
-                                            {privyWallet
-                                                ? shortenAddress(privyWallet.address)
-                                                : "No wallet linked"}
-                                        </p>
-                                        {privyWallet && (
-                                            <Copy
-                                                className="w-4 h-4 cursor-pointer text-gray-500 hover:text-gray-700"
-                                                onClick={() =>
-                                                    copyToClipboard(privyWallet.address)
-                                                }
-                                            />
-                                        )}
-                                    </div>
-                                    <Button
-                                        variant="ghost"
-                                        className="text-blue-600"
-                                        onClick={exportWallet}
-                                    >
-                                        Export Wallet
-                                    </Button>
-                                </div>
-                            </div>
-                        </motion.div>
-                    </CardContent>
-                </Card>
-            </motion.div>
-
-            {/* MFA Section */}
-            <motion.div variants={cardVariants}>
-                <Card className="hover:shadow-md transition-shadow duration-200">
-                    <CardHeader className="flex flex-row items-center justify-between">
-                        <h2 className="text-xl font-semibold">{user?.mfaMethods && user?.mfaMethods.length > 0 ? "(Enabled) Multi-Factor Authentication" : "Multi-Factor Authentication"}</h2>
-                    </CardHeader>
-                    <CardContent className="flex items-center justify-between">
-                        <div className="flex items-start gap-4">
-                            {user?.mfaMethods && user?.mfaMethods.length > 0 ? (
-                                user.mfaMethods.map((method) => (
-                                    <p className="font-medium" key={method}>
-                                        {method === "totp" ? "Authenticator App" : method.toUpperCase()}
-                                    </p>
-                                ))
-                            ) : (
-                                <p className="font-medium">
-                                    MFA is disabled
-                                </p>
-                            )}
-                        </div>
-                        {!user?.mfaMethods || user?.mfaMethods.length === 0 && (
-                            <Button
-                                variant="ghost"
-                                className="text-blue-600"
-                                onClick={showMfaEnrollmentModal}
+            <div className="space-y-6 overflow-y-auto max-h-[calc(100vh-200px)]">
+                <motion.div variants={cardVariants}>
+                    <Card className="hover:shadow-md transition-shadow duration-200">
+                        <CardHeader className="flex flex-row items-center justify-between">
+                            <h2 className="text-xl font-semibold">Embedded Wallet</h2>
+                        </CardHeader>
+                        <CardContent>
+                            <motion.div
+                                className="flex items-start gap-4"
+                                whileHover={{ scale: 1.01 }}
+                                transition={{ type: "spring", stiffness: 300 }}
                             >
-                                Enable MFA
-                            </Button>
-                        )}
-
-                        {user?.mfaMethods && user?.mfaMethods.length > 0 && (
-                            <Button
-                                variant="ghost"
-                                className="text-blue-600"
-                                onClick={showMfaEnrollmentModal}
-                            >
-                                Configure MFA
-                            </Button>
-                        )}
-                    </CardContent>
-                </Card>
-            </motion.div>
-
-            {/* Emails Section */}
-            <motion.div variants={cardVariants}>
-                <Card className="hover:shadow-md transition-shadow duration-200">
-                    <CardHeader className="flex flex-row items-center justify-between">
-                        <h2 className="text-xl font-semibold">Email</h2>
-                    </CardHeader>
-                    <CardContent>
-                        <motion.div
-                            className="flex items-start gap-4"
-                            whileHover={{ scale: 1.01 }}
-                            transition={{ type: "spring", stiffness: 300 }}
-                        >
-                            <Mail className="w-5 h-5 mt-1 text-gray-500" />
-                            <div className="flex-1">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <p className="font-medium">
-                                            {user?.email?.address ?? "No email linked"}
-                                        </p>
-                                        {user?.email?.address && (
-                                            <motion.div
-                                                whileHover={{ scale: 1.1 }}
-                                                whileTap={{ scale: 0.95 }}
-                                            >
+                                <Wallet className="w-5 h-5 mt-1 text-gray-500" />
+                                <div className="flex-1">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <p className="font-medium">
+                                                {privyWallet
+                                                    ? shortenAddress(privyWallet.address)
+                                                    : "No wallet linked"}
+                                            </p>
+                                            {privyWallet && (
                                                 <Copy
                                                     className="w-4 h-4 cursor-pointer text-gray-500 hover:text-gray-700"
                                                     onClick={() =>
-                                                        copyToClipboard(user?.email?.address || "")
+                                                        copyToClipboard(privyWallet.address)
                                                     }
                                                 />
-                                            </motion.div>
-                                        )}
+                                            )}
+                                        </div>
+                                        <Button
+                                            variant="ghost"
+                                            className="text-blue-600"
+                                            onClick={exportWallet}
+                                        >
+                                            Export Wallet
+                                        </Button>
                                     </div>
-                                    <motion.div
-                                        whileHover={{ scale: 1.05 }}
-                                        whileTap={{ scale: 0.95 }}
-                                    >
-                                        {user?.email ? (
-                                            <Button
-                                                variant="ghost"
-                                                className="text-blue-600"
-                                                onClick={() =>
-                                                    handleUnlink(
-                                                        "email",
-                                                        user?.email?.address || "",
-                                                        unlinkEmail
-                                                    )
-                                                }
-                                                disabled={!canRemoveAccount}
-                                            >
-                                                Unlink
-                                            </Button>
-                                        ) : (
-                                            <Button
-                                                variant="ghost"
-                                                className="text-blue-600"
-                                                onClick={linkEmail}
-                                            >
-                                                Link Email
-                                            </Button>
-                                        )}
-                                    </motion.div>
                                 </div>
-                            </div>
-                        </motion.div>
-                    </CardContent>
-                </Card>
-            </motion.div>
+                            </motion.div>
+                        </CardContent>
+                    </Card>
+                </motion.div>
 
-            {/* Phone Numbers Section */}
-            <motion.div variants={cardVariants}>
-                <Card className="hover:shadow-md transition-shadow duration-200">
-                    <CardHeader className="flex flex-row items-center justify-between">
-                        <h2 className="text-xl font-semibold">Phone number</h2>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="flex items-start gap-4">
-                            <Phone className="w-5 h-5 mt-1 text-gray-500" />
-                            <div className="flex-1">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <p className="font-medium">
-                                            {user?.phone?.number ?? "No phone number linked"}
+                {/* MFA Section */}
+                <motion.div variants={cardVariants}>
+                    <Card className="hover:shadow-md transition-shadow duration-200">
+                        <CardHeader className="flex flex-row items-center justify-between">
+                            <h2 className="text-xl font-semibold">{user?.mfaMethods && user?.mfaMethods.length > 0 ? "(Enabled) Multi-Factor Authentication" : "Multi-Factor Authentication"}</h2>
+                        </CardHeader>
+                        <CardContent className="flex items-center justify-between">
+                            <div className="flex items-start gap-4">
+                                {user?.mfaMethods && user?.mfaMethods.length > 0 ? (
+                                    user.mfaMethods.map((method) => (
+                                        <p className="font-medium" key={method}>
+                                            {method === "totp" ? "Authenticator App" : method.toUpperCase()}
                                         </p>
-                                        {user?.phone?.number && (
-                                            <Copy
-                                                className="w-4 h-4 cursor-pointer text-gray-500 hover:text-gray-700"
-                                                onClick={() =>
-                                                    copyToClipboard(user?.phone?.number || "")
-                                                }
-                                            />
-                                        )}
-                                    </div>
-                                    <motion.div
-                                        whileHover={{ scale: 1.05 }}
-                                        whileTap={{ scale: 0.95 }}
-                                    >
-                                        {user?.phone ? (
-                                            <Button
-                                                variant="ghost"
-                                                className="text-blue-600"
-                                                onClick={() =>
-                                                    handleUnlink(
-                                                        "phone",
-                                                        user?.phone?.number || "",
-                                                        unlinkPhone
-                                                    )
-                                                }
-                                                disabled={!canRemoveAccount}
-                                            >
-                                                Unlink
-                                            </Button>
-                                        ) : (
-                                            <Button
-                                                variant="ghost"
-                                                className="text-blue-600"
-                                                onClick={linkPhone}
-                                            >
-                                                Link Phone
-                                            </Button>
-                                        )}
-                                    </motion.div>
-                                </div>
+                                    ))
+                                ) : (
+                                    <p className="font-medium">
+                                        MFA is disabled
+                                    </p>
+                                )}
                             </div>
-                        </div>
-                    </CardContent>
-                </Card>
-            </motion.div>
+                            {!user?.mfaMethods || user?.mfaMethods.length === 0 && (
+                                <Button
+                                    variant="ghost"
+                                    className="text-blue-600"
+                                    onClick={showMfaEnrollmentModal}
+                                >
+                                    Enable MFA
+                                </Button>
+                            )}
 
-            {/* Wallet Section */}
-            <motion.div variants={cardVariants}>
-                <Card className="hover:shadow-md transition-shadow duration-200">
-                    <CardHeader className="flex flex-row items-center justify-between">
-                        <h2 className="text-xl font-semibold">External Wallets</h2>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="flex items-start gap-4">
-                            <Wallet className="w-5 h-5 mt-1 text-gray-500" />
-                            <div className="flex-1">
-                                {externalWalletAddresses.length > 0 ? externalWalletAddresses.map((address) => (
-                                    <div key={address} className="flex items-center justify-between">
-                                        <div>
-                                            <div className="flex items-center gap-2">
+                            {user?.mfaMethods && user?.mfaMethods.length > 0 && (
+                                <Button
+                                    variant="ghost"
+                                    className="text-blue-600"
+                                    onClick={showMfaEnrollmentModal}
+                                >
+                                    Configure MFA
+                                </Button>
+                            )}
+                        </CardContent>
+                    </Card>
+                </motion.div>
 
-                                                {address && (
+                {/* Emails Section */}
+                <motion.div variants={cardVariants}>
+                    <Card className="hover:shadow-md transition-shadow duration-200">
+                        <CardHeader className="flex flex-row items-center justify-between">
+                            <h2 className="text-xl font-semibold">Email</h2>
+                        </CardHeader>
+                        <CardContent>
+                            <motion.div
+                                className="flex items-start gap-4"
+                                whileHover={{ scale: 1.01 }}
+                                transition={{ type: "spring", stiffness: 300 }}
+                            >
+                                <Mail className="w-5 h-5 mt-1 text-gray-500" />
+                                <div className="flex-1">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <p className="font-medium">
+                                                {user?.email?.address ?? "No email linked"}
+                                            </p>
+                                            {user?.email?.address && (
+                                                <motion.div
+                                                    whileHover={{ scale: 1.1 }}
+                                                    whileTap={{ scale: 0.95 }}
+                                                >
                                                     <Copy
                                                         className="w-4 h-4 cursor-pointer text-gray-500 hover:text-gray-700"
                                                         onClick={() =>
-                                                            copyToClipboard(address)
+                                                            copyToClipboard(user?.email?.address || "")
                                                         }
                                                     />
-                                                )}
-                                            </div>
+                                                </motion.div>
+                                            )}
                                         </div>
                                         <motion.div
                                             whileHover={{ scale: 1.05 }}
                                             whileTap={{ scale: 0.95 }}
                                         >
-                                            <Button
-                                                variant="ghost"
-                                                className="text-blue-600"
-                                                onClick={() =>
-                                                    handleUnlink(
-                                                        "wallet",
-                                                        address,
-                                                        unlinkWallet
-                                                    )
-                                                }
-                                                disabled={!canRemoveAccount}
-                                            >
-                                                Unlink
-                                            </Button>
+                                            {user?.email ? (
+                                                <Button
+                                                    variant="ghost"
+                                                    className="text-blue-600"
+                                                    onClick={() =>
+                                                        handleUnlink(
+                                                            "email",
+                                                            user?.email?.address || "",
+                                                            unlinkEmail
+                                                        )
+                                                    }
+                                                    disabled={!canRemoveAccount}
+                                                >
+                                                    Unlink
+                                                </Button>
+                                            ) : (
+                                                <Button
+                                                    variant="ghost"
+                                                    className="text-blue-600"
+                                                    onClick={linkEmail}
+                                                >
+                                                    Link Email
+                                                </Button>
+                                            )}
                                         </motion.div>
                                     </div>
-                                )) : (
+                                </div>
+                            </motion.div>
+                        </CardContent>
+                    </Card>
+                </motion.div>
+
+                {/* Phone Numbers Section */}
+                <motion.div variants={cardVariants}>
+                    <Card className="hover:shadow-md transition-shadow duration-200">
+                        <CardHeader className="flex flex-row items-center justify-between">
+                            <h2 className="text-xl font-semibold">Phone number</h2>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="flex items-start gap-4">
+                                <Phone className="w-5 h-5 mt-1 text-gray-500" />
+                                <div className="flex-1">
                                     <div className="flex items-center justify-between">
-                                        <p className="font-medium">
-                                            No wallet linked
-                                        </p>
-                                        <Button
-                                            variant="ghost"
-                                            className="text-blue-600"
-                                            onClick={linkWallet}
-                                        >
-                                            Link Wallet
-                                        </Button>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-                        {externalWalletAddresses.length > 0 && (
-                            <div className="mt-4">
-                                <Button
-                                    variant="outline"
-                                    className="text-blue-600 w-full"
-                                    onClick={linkWallet}
-                                >
-                                    Link Additional Wallet
-                                </Button>
-                            </div>
-                        )}
-                    </CardContent>
-                </Card>
-            </motion.div>
-
-            {/* Discord Section */}
-            <motion.div variants={cardVariants}>
-                <Card className="hover:shadow-md transition-shadow duration-200">
-                    <CardHeader className="flex flex-row items-center justify-between">
-                        <h2 className="text-xl font-semibold">Discord</h2>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="flex items-start gap-4">
-                            <Image
-                                src={"/icons/discord.svg"}
-                                alt="Instagram"
-                                width={24}
-                                height={24}
-                                className="mt-1"
-                            />
-                            <div className="flex-1">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <p className="font-medium">
-                                            {user?.discord?.username ?? "No discord linked"}
-                                        </p>
-                                        {user?.discord?.username && (
-                                            <Copy
-                                                className="w-4 h-4 cursor-pointer text-gray-500 hover:text-gray-700"
-                                                onClick={() =>
-                                                    copyToClipboard(user?.discord?.username || "")
-                                                }
-                                            />
-                                        )}
-                                    </div>
-                                    <motion.div
-                                        whileHover={{ scale: 1.05 }}
-                                        whileTap={{ scale: 0.95 }}
-                                    >
-                                        {user?.discord ? (
-                                            <Button
-                                                variant="ghost"
-                                                className="text-blue-600"
-                                                onClick={() =>
-                                                    handleUnlink(
-                                                        "discord",
-                                                        user?.discord?.username || "",
-                                                        unlinkDiscord
-                                                    )
-                                                }
-                                                disabled={!canRemoveAccount}
-                                            >
-                                                Unlink
-                                            </Button>
-                                        ) : (
-                                            <Button
-                                                variant="ghost"
-                                                className="text-blue-600"
-                                                onClick={linkDiscord}
-                                            >
-                                                Link Discord
-                                            </Button>
-                                        )}
-                                    </motion.div>
-                                </div>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-            </motion.div>
-
-            {/* X Section */}
-            <motion.div variants={cardVariants}>
-                <Card className="hover:shadow-md transition-shadow duration-200">
-                    <CardHeader className="flex flex-row items-center justify-between">
-                        <h2 className="text-xl font-semibold">X</h2>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="flex items-start gap-4">
-                            <Image
-                                src={"/icons/x.svg"}
-                                alt="Instagram"
-                                width={24}
-                                height={24}
-                                className="mt-1"
-                            />
-                            <div className="flex-1">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <p className="font-medium">
-                                            {user?.twitter?.username ?? "No X linked"}
-                                        </p>
-                                        {user?.twitter?.username && (
-                                            <Copy
-                                                className="w-4 h-4 cursor-pointer text-gray-500 hover:text-gray-700"
-                                                onClick={() =>
-                                                    copyToClipboard(user?.twitter?.username || "")
-                                                }
-                                            />
-                                        )}
-                                    </div>
-                                    <motion.div
-                                        whileHover={{ scale: 1.05 }}
-                                        whileTap={{ scale: 0.95 }}
-                                    >
-                                        {user?.twitter ? (
-                                            <Button
-                                                variant="ghost"
-                                                className="text-blue-600"
-                                                onClick={() =>
-                                                    handleUnlink(
-                                                        "twitter",
-                                                        user?.twitter?.username || "",
-                                                        unlinkTwitter
-                                                    )
-                                                }
-                                                disabled={!canRemoveAccount}
-                                            >
-                                                Unlink
-                                            </Button>
-                                        ) : (
-                                            <Button
-                                                variant="ghost"
-                                                className="text-blue-600"
-                                                onClick={linkTwitter}
-                                            >
-                                                Link X
-                                            </Button>
-                                        )}
-                                    </motion.div>
-                                </div>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-            </motion.div>
-
-            {/* Google Section */}
-            <motion.div variants={cardVariants}>
-                <Card className="hover:shadow-md transition-shadow duration-200">
-                    <CardHeader className="flex flex-row items-center justify-between">
-                        <h2 className="text-xl font-semibold">Google</h2>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="flex items-start gap-4">
-                            <Image
-                                src={"/icons/google.svg"}
-                                alt="Instagram"
-                                width={24}
-                                height={24}
-                                className="mt-1"
-                            />
-                            <div className="flex-1">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <p className="font-medium">
-                                            {user?.google?.email ?? "No Google linked"}
-                                        </p>
-                                        {user?.google?.email && (
-                                            <Copy
-                                                className="w-4 h-4 cursor-pointer text-gray-500 hover:text-gray-700"
-                                                onClick={() =>
-                                                    copyToClipboard(user?.google?.email || "")
-                                                }
-                                            />
-                                        )}
-                                    </div>
-                                    <motion.div
-                                        whileHover={{ scale: 1.05 }}
-                                        whileTap={{ scale: 0.95 }}
-                                    >
-                                        {user?.google ? (
-                                            <Button
-                                                variant="ghost"
-                                                className="text-blue-600"
-                                                onClick={() =>
-                                                    handleUnlink(
-                                                        "google",
-                                                        user?.google?.email || "",
-                                                        unlinkGoogle
-                                                    )
-                                                }
-                                                disabled={!canRemoveAccount}
-                                            >
-                                                Unlink
-                                            </Button>
-                                        ) : (
-                                            <Button
-                                                variant="ghost"
-                                                className="text-blue-600"
-                                                onClick={linkGoogle}
-                                            >
-                                                Link Google
-                                            </Button>
-                                        )}
-                                    </motion.div>
-                                </div>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-            </motion.div>
-
-            {/* Network Section */}
-            <motion.div variants={cardVariants}>
-                <Card className="hover:shadow-md transition-shadow duration-200 mb-20">
-                    <CardHeader className="flex flex-row items-center justify-between">
-                        <h2 className="text-xl font-semibold">Networks</h2>
-                    </CardHeader>
-                    <CardContent>
-                        <Select
-                            value={getCurrentNetwork()}
-                            onValueChange={handleSwitchNetwork}
-                            disabled={!wallets[0]}
-                        >
-                            <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Select network">
-                                    <div className="flex items-center space-x-3">
-                                        <NetworkIcon
-                                            chain={getCurrentNetwork()}
-                                            className="w-6 h-6"
-                                        />
-                                        <div>
-                                            <p className="font-medium">{getCurrentNetwork()}</p>
+                                        <div className="flex items-center gap-2">
+                                            <p className="font-medium">
+                                                {user?.phone?.number ?? "No phone number linked"}
+                                            </p>
+                                            {user?.phone?.number && (
+                                                <Copy
+                                                    className="w-4 h-4 cursor-pointer text-gray-500 hover:text-gray-700"
+                                                    onClick={() =>
+                                                        copyToClipboard(user?.phone?.number || "")
+                                                    }
+                                                />
+                                            )}
                                         </div>
+                                        <motion.div
+                                            whileHover={{ scale: 1.05 }}
+                                            whileTap={{ scale: 0.95 }}
+                                        >
+                                            {user?.phone ? (
+                                                <Button
+                                                    variant="ghost"
+                                                    className="text-blue-600"
+                                                    onClick={() =>
+                                                        handleUnlink(
+                                                            "phone",
+                                                            user?.phone?.number || "",
+                                                            unlinkPhone
+                                                        )
+                                                    }
+                                                    disabled={!canRemoveAccount}
+                                                >
+                                                    Unlink
+                                                </Button>
+                                            ) : (
+                                                <Button
+                                                    variant="ghost"
+                                                    className="text-blue-600"
+                                                    onClick={linkPhone}
+                                                >
+                                                    Link Phone
+                                                </Button>
+                                            )}
+                                        </motion.div>
                                     </div>
-                                </SelectValue>
-                            </SelectTrigger>
-                            <SelectContent>
-                                {config.chains.map((chain) => (
-                                    <SelectItem key={chain.id} value={chain.id.toString()}>
-                                        <div className="flex items-center space-x-3">
-                                            <NetworkIcon chain={chain.name} className="w-6 h-6" />
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </motion.div>
+
+                {/* Wallet Section */}
+                <motion.div variants={cardVariants}>
+                    <Card className="hover:shadow-md transition-shadow duration-200">
+                        <CardHeader className="flex flex-row items-center justify-between">
+                            <h2 className="text-xl font-semibold">External Wallets</h2>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="flex items-start gap-4">
+                                <Wallet className="w-5 h-5 mt-1 text-gray-500" />
+                                <div className="flex-1">
+                                    {externalWalletAddresses.length > 0 ? externalWalletAddresses.map((address) => (
+                                        <div key={address} className="flex items-center justify-between">
                                             <div>
-                                                <p className="font-medium">{chain.name}</p>
+                                                <div className="flex items-center gap-2">
+
+                                                    {address && (
+                                                        <Copy
+                                                            className="w-4 h-4 cursor-pointer text-gray-500 hover:text-gray-700"
+                                                            onClick={() =>
+                                                                copyToClipboard(address)
+                                                            }
+                                                        />
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <motion.div
+                                                whileHover={{ scale: 1.05 }}
+                                                whileTap={{ scale: 0.95 }}
+                                            >
+                                                <Button
+                                                    variant="ghost"
+                                                    className="text-blue-600"
+                                                    onClick={() =>
+                                                        handleUnlink(
+                                                            "wallet",
+                                                            address,
+                                                            unlinkWallet
+                                                        )
+                                                    }
+                                                    disabled={!canRemoveAccount}
+                                                >
+                                                    Unlink
+                                                </Button>
+                                            </motion.div>
+                                        </div>
+                                    )) : (
+                                        <div className="flex items-center justify-between">
+                                            <p className="font-medium">
+                                                No wallet linked
+                                            </p>
+                                            <Button
+                                                variant="ghost"
+                                                className="text-blue-600"
+                                                onClick={linkWallet}
+                                            >
+                                                Link Wallet
+                                            </Button>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {externalWalletAddresses.length > 0 && (
+                                <div className="mt-4">
+                                    <Button
+                                        variant="outline"
+                                        className="text-blue-600 w-full"
+                                        onClick={linkWallet}
+                                    >
+                                        Link Additional Wallet
+                                    </Button>
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+                </motion.div>
+
+                {/* Discord Section */}
+                <motion.div variants={cardVariants}>
+                    <Card className="hover:shadow-md transition-shadow duration-200">
+                        <CardHeader className="flex flex-row items-center justify-between">
+                            <h2 className="text-xl font-semibold">Discord</h2>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="flex items-start gap-4">
+                                <Image
+                                    src={"/icons/discord.svg"}
+                                    alt="Instagram"
+                                    width={24}
+                                    height={24}
+                                    className="mt-1"
+                                />
+                                <div className="flex-1">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <p className="font-medium">
+                                                {user?.discord?.username ?? "No discord linked"}
+                                            </p>
+                                            {user?.discord?.username && (
+                                                <Copy
+                                                    className="w-4 h-4 cursor-pointer text-gray-500 hover:text-gray-700"
+                                                    onClick={() =>
+                                                        copyToClipboard(user?.discord?.username || "")
+                                                    }
+                                                />
+                                            )}
+                                        </div>
+                                        <motion.div
+                                            whileHover={{ scale: 1.05 }}
+                                            whileTap={{ scale: 0.95 }}
+                                        >
+                                            {user?.discord ? (
+                                                <Button
+                                                    variant="ghost"
+                                                    className="text-blue-600"
+                                                    onClick={() =>
+                                                        handleUnlink(
+                                                            "discord",
+                                                            user?.discord?.username || "",
+                                                            unlinkDiscord
+                                                        )
+                                                    }
+                                                    disabled={!canRemoveAccount}
+                                                >
+                                                    Unlink
+                                                </Button>
+                                            ) : (
+                                                <Button
+                                                    variant="ghost"
+                                                    className="text-blue-600"
+                                                    onClick={linkDiscord}
+                                                >
+                                                    Link Discord
+                                                </Button>
+                                            )}
+                                        </motion.div>
+                                    </div>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </motion.div>
+
+                {/* X Section */}
+                <motion.div variants={cardVariants}>
+                    <Card className="hover:shadow-md transition-shadow duration-200">
+                        <CardHeader className="flex flex-row items-center justify-between">
+                            <h2 className="text-xl font-semibold">X</h2>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="flex items-start gap-4">
+                                <Image
+                                    src={"/icons/x.svg"}
+                                    alt="Instagram"
+                                    width={24}
+                                    height={24}
+                                    className="mt-1"
+                                />
+                                <div className="flex-1">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <p className="font-medium">
+                                                {user?.twitter?.username ?? "No X linked"}
+                                            </p>
+                                            {user?.twitter?.username && (
+                                                <Copy
+                                                    className="w-4 h-4 cursor-pointer text-gray-500 hover:text-gray-700"
+                                                    onClick={() =>
+                                                        copyToClipboard(user?.twitter?.username || "")
+                                                    }
+                                                />
+                                            )}
+                                        </div>
+                                        <motion.div
+                                            whileHover={{ scale: 1.05 }}
+                                            whileTap={{ scale: 0.95 }}
+                                        >
+                                            {user?.twitter ? (
+                                                <Button
+                                                    variant="ghost"
+                                                    className="text-blue-600"
+                                                    onClick={() =>
+                                                        handleUnlink(
+                                                            "twitter",
+                                                            user?.twitter?.username || "",
+                                                            unlinkTwitter
+                                                        )
+                                                    }
+                                                    disabled={!canRemoveAccount}
+                                                >
+                                                    Unlink
+                                                </Button>
+                                            ) : (
+                                                <Button
+                                                    variant="ghost"
+                                                    className="text-blue-600"
+                                                    onClick={linkTwitter}
+                                                >
+                                                    Link X
+                                                </Button>
+                                            )}
+                                        </motion.div>
+                                    </div>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </motion.div>
+
+                {/* Google Section */}
+                <motion.div variants={cardVariants}>
+                    <Card className="hover:shadow-md transition-shadow duration-200">
+                        <CardHeader className="flex flex-row items-center justify-between">
+                            <h2 className="text-xl font-semibold">Google</h2>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="flex items-start gap-4">
+                                <Image
+                                    src={"/icons/google.svg"}
+                                    alt="Instagram"
+                                    width={24}
+                                    height={24}
+                                    className="mt-1"
+                                />
+                                <div className="flex-1">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <p className="font-medium">
+                                                {user?.google?.email ?? "No Google linked"}
+                                            </p>
+                                            {user?.google?.email && (
+                                                <Copy
+                                                    className="w-4 h-4 cursor-pointer text-gray-500 hover:text-gray-700"
+                                                    onClick={() =>
+                                                        copyToClipboard(user?.google?.email || "")
+                                                    }
+                                                />
+                                            )}
+                                        </div>
+                                        <motion.div
+                                            whileHover={{ scale: 1.05 }}
+                                            whileTap={{ scale: 0.95 }}
+                                        >
+                                            {user?.google ? (
+                                                <Button
+                                                    variant="ghost"
+                                                    className="text-blue-600"
+                                                    onClick={() =>
+                                                        handleUnlink(
+                                                            "google",
+                                                            user?.google?.email || "",
+                                                            unlinkGoogle
+                                                        )
+                                                    }
+                                                    disabled={!canRemoveAccount}
+                                                >
+                                                    Unlink
+                                                </Button>
+                                            ) : (
+                                                <Button
+                                                    variant="ghost"
+                                                    className="text-blue-600"
+                                                    onClick={linkGoogle}
+                                                >
+                                                    Link Google
+                                                </Button>
+                                            )}
+                                        </motion.div>
+                                    </div>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </motion.div>
+
+                {/* Network Section */}
+                <motion.div variants={cardVariants}>
+                    <Card className="hover:shadow-md transition-shadow duration-200 mb-60">
+                        <CardHeader className="flex flex-row items-center justify-between">
+                            <h2 className="text-xl font-semibold">Networks</h2>
+                        </CardHeader>
+                        <CardContent>
+                            <Select
+                                value={getCurrentNetwork()}
+                                onValueChange={handleSwitchNetwork}
+                                disabled={!wallets[0]}
+                            >
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="Select network">
+                                        <div className="flex items-center space-x-3">
+                                            <NetworkIcon
+                                                chain={getCurrentNetwork()}
+                                                className="w-6 h-6"
+                                            />
+                                            <div>
+                                                <p className="font-medium">{getCurrentNetwork()}</p>
                                             </div>
                                         </div>
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </CardContent>
-                </Card>
-            </motion.div>
+                                    </SelectValue>
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {config.chains.map((chain) => (
+                                        <SelectItem key={chain.id} value={chain.id.toString()}>
+                                            <div className="flex items-center space-x-3">
+                                                <NetworkIcon chain={chain.name} className="w-6 h-6" />
+                                                <div>
+                                                    <p className="font-medium">{chain.name}</p>
+                                                </div>
+                                            </div>
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </CardContent>
+                    </Card>
+                </motion.div>
+            </div>
         </motion.div>
     );
 }
