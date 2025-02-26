@@ -40,7 +40,22 @@ export function MobileHeader({ className }: MobileHeaderProps) {
         if (!ready) return;
         fetchUser();
         fetchPendingRequests();
-    }, [ready, fetchPendingRequests, fetchUser]);
+        if (totalBalance === undefined) {
+            fetchBalances(
+                wallets.find((wallet) => wallet.walletClientType === "privy")?.address ??
+                    wallets[0].address
+            );
+        }
+    }, [
+        ready,
+        fetchPendingRequests,
+        fetchUser,
+        fetchBalances,
+        wallets,
+        walletsReady,
+        userStore,
+        totalBalance,
+    ]);
 
     useEffect(() => {
         const channel = supabase
@@ -169,7 +184,7 @@ export function MobileHeader({ className }: MobileHeaderProps) {
                     className={cn(
                         "flex items-center gap-4 flex-1",
                         "bg-primary rounded-4xl",
-                        "p-5 pt-4 shadow-md h-full text-primary-foreground"
+                        "p-5 pt-4 shadow-primary h-full"
                     )}
                 >
                     {headerCardContent()}
@@ -177,7 +192,10 @@ export function MobileHeader({ className }: MobileHeaderProps) {
 
                 <div className="flex flex-col gap-2 w-14 h-full p-0">
                     <Button
-                        className="p-4 flex justify-center items-center h-14 w-full rounded-3xl shadow-lg bg-primary hover:bg-zinc-200/20 relative"
+                        className={cn(
+                            "p-4 flex justify-center items-center h-14 w-full rounded-3xl",
+                            "shadow-secondary bg-primary hover:bg-zinc-200/20 relative"
+                        )}
                         onClick={() => setNotificationsDialogOpen(true)}
                     >
                         <Mail className="h-[100%] w-[100%] text-primary-foreground" />
@@ -187,7 +205,8 @@ export function MobileHeader({ className }: MobileHeaderProps) {
                     </Button>
                     <Button
                         className={cn(
-                            "px-4 flex-1 w-full rounded-4xl bg-primary hover:bg-zinc-200/20 transition-all duration-300 overflow-hidden",
+                            "px-4 flex-1 w-full rounded-4xl bg-primary hover:bg-zinc-200/20",
+                            " transition-all duration-300 overflow-hidden shadow-primary",
                             type === "balance-sm"
                                 ? "h-0 py-0 pointer-events-none"
                                 : "h-full py-4 pointer-events-auto"

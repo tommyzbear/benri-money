@@ -26,7 +26,7 @@ export function MobileNav() {
     ];
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 lg:hidden">
+        <div className="absolute bottom-0 left-0 right-0 lg:hidden">
             <div className="w-auto h-20 mx-4 mb-[21px] rounded-full bg-primary flex px-3 z-20">
                 <div className="flex w-full justify-start items-center gap-2.5 ">
                     {actions.map((action, index) => (
