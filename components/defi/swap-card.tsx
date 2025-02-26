@@ -20,9 +20,10 @@ import { ethers } from "ethers";
 interface SwapCardProps {
     wallet?: ConnectedWallet;
     chains: Array<Chain>;
+    onTransactionSuccess?: () => void;
 }
 
-export function SwapCard({ wallet, chains }: SwapCardProps) {
+export function SwapCard({ wallet, chains, onTransactionSuccess }: SwapCardProps) {
     const [fromToken, setFromToken] = useState<TokenData | null>(null);
     const [toToken, setToToken] = useState<TokenData | null>(null);
     const [amount, setAmount] = useState("");
@@ -209,6 +210,10 @@ export function SwapCard({ wallet, chains }: SwapCardProps) {
             title: "Swap Successful",
             description: `${result?.transactionHash}`,
         });
+
+        if (onTransactionSuccess) {
+            setTimeout(onTransactionSuccess, 2000);
+        }
     }
 
     return (
