@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { ConnectedWallet, usePrivy, useWallets } from "@privy-io/react-auth";
 import { config } from "@/lib/wallet/config";
 import { SwapCard } from "@/components/defi/swap-card";
@@ -16,12 +16,25 @@ import {
 } from "@/components/ui/accordion";
 import { formatValue } from "@/lib/utils";
 import { NetworkIcon } from "@/components/network-icon";
+import { TokenDeposits } from "@/components/defi/token-deposits";
 
 export default function DeFiPage() {
     const { ready } = usePrivy();
     const { wallets } = useWallets();
     const { fetchBalances, balances, totalBalance } = useWalletStore();
     const [activeWallet, setActiveWallet] = useState<ConnectedWallet | undefined>();
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+    // Function to refresh data (balances and deposits)
+    const refreshData = useCallback(() => {
+        // Increment refresh trigger to force effects to run
+        setRefreshTrigger(prev => prev + 1);
+        
+        // Refresh wallet balances
+        if (activeWallet?.address) {
+            fetchBalances(activeWallet.address);
+        }
+    }, [activeWallet, fetchBalances]);
 
     useEffect(() => {
         if (!ready || !wallets.length) return;
@@ -92,13 +105,30 @@ export default function DeFiPage() {
                 </TabsList>
 
                 <TabsContent value="swap">
-                    <SwapCard wallet={activeWallet} chains={config.chains} />
+                    <SwapCard 
+                        wallet={activeWallet} 
+                        chains={config.chains} 
+                        onTransactionSuccess={refreshData}
+                    />
                 </TabsContent>
 
                 <TabsContent value="stake">
-                    <StakingCard wallet={activeWallet} chains={config.chains} />
+                    <StakingCard 
+                        wallet={activeWallet} 
+                        chains={config.chains} 
+                        onTransactionSuccess={refreshData}
+                    />
                 </TabsContent>
             </Tabs>
+            
+            <div className="mt-8">
+                <TokenDeposits 
+                    wallet={activeWallet} 
+                    chains={config.chains} 
+                    refreshTrigger={refreshTrigger}
+                    onTransactionSuccess={refreshData}
+                />
+            </div>
         </div>
     );
 } 
