@@ -26,7 +26,7 @@ export const useTransactionsStore = create<TransactionsState>()(
                     const { data } = await response.json();
                     set({
                         transactions: data,
-                        isLoading: false
+                        isLoading: false,
                     });
                 } catch (error) {
                     set({
@@ -67,8 +67,6 @@ export const useTransactionsStore = create<TransactionsState>()(
             storage: createJSONStorage(() => localStorage),
             partialize: (state: TransactionsState) => ({
                 transactions: state.transactions,
-                isLoading: state.isLoading,
-                error: state.error,
             }),
         }
     )
