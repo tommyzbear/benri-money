@@ -18,18 +18,14 @@ export function NetworkIcon({ chain, className }: NetworkIconProps) {
             iconSrc = "/icons/ethereum-eth-logo.svg";
             altText = "Ethereum";
             break;
-        case "Arbitrum One":
-            iconSrc = "/icons/arbitrum-arb-logo.svg";
-            altText = "Arbitrum One";
+        case "Polygon":
+            iconSrc = "/icons/polygon-matic-logo.svg";
+            altText = "Polygon";
             break;
-        case "OP Mainnet":
-            iconSrc = "/icons/optimism-ethereum-op-logo.svg";
-            altText = "OP Mainnet";
-            break;
-        case "Solana":
-            iconSrc = "/icons/solana-sol-logo.svg";
-            altText = "Solana";
-            break;
+        // case "Solana":
+        //     iconSrc = "/icons/solana-sol-logo.svg";
+        //     altText = "Solana";
+        //     break;
     }
 
     return (

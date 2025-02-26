@@ -46,7 +46,17 @@ export async function POST(request: Request) {
             .select()
             .single();
 
-        if (error) {
+        const { error: messageError } = await supabase
+            .from("messages")
+            .insert({
+                sender: claims.userId,
+                receiver: body.payee,
+                amount: body.amount,
+                message_type: "request",
+                payment_request_id: data.id,
+            });
+
+        if (error || messageError) {
             console.error('Error creating request:', error);
             return NextResponse.json(
                 { error: 'Failed to create request' },

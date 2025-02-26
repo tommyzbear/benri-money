@@ -1,6 +1,5 @@
 "use client";
 
-import { useHeaderStore } from "@/stores/use-header-store";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
@@ -8,66 +7,11 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { motion, usePresence, AnimatePresence } from "framer-motion";
 import { ChevronLeft } from "lucide-react";
-
-interface Message {
-    id: string;
-    content: string;
-    sender: string;
-    timestamp: Date;
-    amount?: string;
-    type: "text" | "payment" | "request";
-}
+import { Message } from "@/types/data";
 
 export default function ChatPage({ params }: { params: { id: string } }) {
     const router = useRouter();
-    const { setHeaderType } = useHeaderStore();
-    const [message, setMessage] = useState("");
-    const [messages, setMessages] = useState<Message[]>([
-        {
-            id: "1",
-            content: "",
-            sender: "other",
-            timestamp: new Date("2024-01-21T12:36:00"),
-            amount: "4,200.69",
-            type: "payment",
-        },
-        {
-            id: "2",
-            content: "",
-            sender: "user",
-            timestamp: new Date("2024-01-21T12:36:00"),
-            amount: "420,000,000.69",
-            type: "request",
-        },
-        {
-            id: "3",
-            content: "bro where the fuq are you",
-            sender: "user",
-            timestamp: new Date("2024-01-21T14:36:00"),
-            type: "text",
-        },
-        {
-            id: "4",
-            content: "ayoooo0000oo",
-            sender: "user",
-            timestamp: new Date("2024-01-21T14:36:00"),
-            type: "text",
-        },
-        {
-            id: "5",
-            content: "send me sum fucking money now u bitch",
-            sender: "user",
-            timestamp: new Date("2024-01-21T14:36:00"),
-            type: "text",
-        },
-        {
-            id: "6",
-            content: "hey wtf bro",
-            sender: "user",
-            timestamp: new Date("2024-01-21T14:36:00"),
-            type: "text",
-        },
-    ]);
+    const [messages, setMessages] = useState<Message[]>([]);
 
     const [isPresent, safeToRemove] = usePresence();
     const [isExiting, setIsExiting] = useState(false);
@@ -123,13 +67,13 @@ export default function ChatPage({ params }: { params: { id: string } }) {
                             const showTime =
                                 !prevMsg ||
                                 new Date(prevMsg.timestamp).setSeconds(0) !==
-                                    new Date(msg.timestamp).setSeconds(0) ||
+                                new Date(msg.timestamp).setSeconds(0) ||
                                 prevMsg.sender !== msg.sender;
                             const isStacked = !showTime && prevMsg?.sender === msg.sender;
                             const isLastInStack =
                                 !nextMsg ||
                                 new Date(nextMsg.timestamp).setSeconds(0) !==
-                                    new Date(msg.timestamp).setSeconds(0) ||
+                                new Date(msg.timestamp).setSeconds(0) ||
                                 nextMsg.sender !== msg.sender;
 
                             return (

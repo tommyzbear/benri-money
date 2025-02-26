@@ -1,60 +1,66 @@
 import { create } from "zustand";
-import { getBalance, GetBalanceReturnType } from "@wagmi/core";
+import { persist, createJSONStorage } from "zustand/middleware";
 import { config } from "@/lib/wallet/config";
-import { approvedTokens } from "@/lib/wallet/coinlist";
+import { TokenData } from "@/app/services/alchemy";
 
 interface WalletState {
-    totalBalance: number;
-    balances: Record<string, GetBalanceReturnType[]>;
+    totalBalance: number | undefined;
+    balances: Record<string, TokenData[]>;
     isLoading: boolean;
     error: string | null;
     fetchBalances: (address: string) => Promise<void>;
 }
 
-export const useWalletStore = create<WalletState>((set) => ({
-    totalBalance: 12345.67,
-    balances: {},
-    isLoading: false,
-    error: null,
-    fetchBalances: async (address: string) => {
-        set({ isLoading: true, error: null });
-        try {
-            const balancesByChain = await Promise.all(
-                config.chains.map(async (chain) => {
-                    const balance = await getBalance(config, {
-                        address: address as `0x${string}`,
-                        chainId: chain.id,
+export const useWalletStore = create<WalletState>()(
+    persist(
+        (set) => ({
+            totalBalance: undefined,
+            balances: {},
+            isLoading: false,
+            error: null,
+            fetchBalances: async (address: string) => {
+                set({ isLoading: true, error: null });
+                try {
+                    const balancesByChain = await Promise.all(config.chains.map(async (chain) => {
+                        const response = await fetch(`/api/balance?address=${address}&chain=${chain.name}`);
+                        if (!response.ok) {
+                            throw new Error('Failed to fetch balance');
+                        }
+                        const data = await response.json();
+                        return { [chain.name]: data.tokens };
+                    }));
+
+                    const balances = balancesByChain.reduce((acc, curr) => {
+                        Object.keys(curr).forEach((key) => {
+                            acc[key] = curr[key];
+                        });
+                        return acc;
+                    }, {});
+
+                    const totalBalance = Object.values(balances).reduce((acc, curr) => {
+                        return acc + curr.reduce((acc, curr) => acc + Number(curr.value), 0);
+                    }, 0);
+
+                    set({
+                        balances,
+                        totalBalance,
+                        isLoading: false,
                     });
-
-                    const altCoinBalances = await Promise.all(
-                        approvedTokens[chain.name].map(
-                            async (token) =>
-                                await getBalance(config, {
-                                    address: address as `0x${string}`,
-                                    chainId: chain.id,
-                                    token: token.address as `0x${string}`,
-                                })
-                        )
-                    );
-
-                    return { [chain.name]: [balance, ...altCoinBalances] };
-                })
-            );
-
-            set({
-                balances: balancesByChain.reduce((acc, curr) => {
-                    Object.keys(curr).forEach((key) => {
-                        acc[key] = curr[key];
+                } catch (error) {
+                    set({
+                        error: error instanceof Error ? error.message : "Failed to fetch balances",
+                        isLoading: false,
                     });
-                    return acc;
-                }, {}),
-                isLoading: false,
-            });
-        } catch (error) {
-            set({
-                error: error instanceof Error ? error.message : "Failed to fetch balances",
-                isLoading: false,
-            });
+                }
+            },
+        }),
+        {
+            name: 'wallet-storage',
+            storage: createJSONStorage(() => localStorage),
+            partialize: (state: WalletState) => ({
+                totalBalance: state.totalBalance,
+                balances: state.balances,
+            }),
         }
-    },
-}));
+    )
+);

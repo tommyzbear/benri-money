@@ -1,149 +1,121 @@
 "use client";
 
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { Message } from "@/types/chat";
-import { Contact } from "@/types/data";
+import { Contact, Message } from "@/types/data";
 import Image from "next/image";
 import { blo } from "blo";
 import { SendMoneyDialog } from "@/components/dialogs/send-money-dialog";
 import { RequestMoneyDialog } from "@/components/dialogs/request-money-dialog";
 import { ChatInput } from "@/components/chat/chat-input";
 import { ChatMessages } from "@/components/chat/chat-messages";
+import { User } from "@privy-io/server-auth";
+import { useToast } from "@/hooks/use-toast";
+import { ChatMessage } from "@/types/chat";
 
 interface ChatDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     contact: Contact;
+    user: User;
 }
 
-export function ChatDialog({ open, onOpenChange, contact }: ChatDialogProps) {
-    const [messages, setMessages] = useState<Message[]>([]);
+export function ChatDialog({ open, onOpenChange, contact, user }: ChatDialogProps) {
+    const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [inputValue, setInputValue] = useState("");
     const [sendMoneyOpen, setSendMoneyOpen] = useState(false);
     const [requestMoneyOpen, setRequestMoneyOpen] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const { toast } = useToast();
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
 
     useEffect(() => {
-        if (open) {
-            setMessages([
-                // Example messages for testing
-                {
-                    id: "1",
-                    content: "",
-                    sender: "other",
-                    timestamp: new Date("2024-01-01T12:36:00"),
-                    amount: 4200.69,
-                    type: "payment",
-                },
-                {
-                    id: "2",
-                    content: "",
-                    sender: "user",
-                    timestamp: new Date("2024-01-01T12:36:00"),
-                    amount: 420000000.69,
-                    type: "request",
-                },
-                {
-                    id: "3",
-                    content: "bro where the fuq are you",
-                    sender: "user",
-                    timestamp: new Date("2024-01-01T14:36:00"),
-                    type: "message",
-                },
-                {
-                    id: "4",
-                    content: "ayoooo0000oo",
-                    sender: "user",
-                    timestamp: new Date("2024-01-21T14:36:00"),
-                    type: "message",
-                },
-                {
-                    id: "5",
-                    content: "send me sum fucking money now u bitch",
-                    sender: "user",
-                    timestamp: new Date("2024-01-21T14:38:00"),
-                    type: "message",
-                },
-                {
-                    id: "6",
-                    content: "hey wtf bro",
-                    sender: "user",
-                    timestamp: new Date("2024-02-21T14:36:00"),
-                    type: "message",
-                },
-                {
-                    id: "7",
-                    content: "chill out man, I was in a meeting",
-                    sender: "other",
-                    timestamp: new Date("2024-02-21T15:00:00"),
-                    type: "message",
-                },
-                {
-                    id: "8",
-                    content: "here's some cash to calm you down",
-                    sender: "other",
-                    timestamp: new Date("2024-02-21T15:00:30"),
-                    type: "message",
-                },
-                {
-                    id: "9",
-                    content: "",
-                    sender: "other",
-                    timestamp: new Date("2024-02-21T15:01:00"),
-                    amount: 1000,
-                    type: "payment",
-                },
-                {
-                    id: "10",
-                    content: "thanks g",
-                    sender: "user",
-                    timestamp: new Date("2024-02-23T15:02:00"),
-                    type: "message",
-                },
-                {
-                    id: "11",
-                    content: "but I need more tho",
-                    sender: "user",
-                    timestamp: new Date("2024-02-23T15:02:10"),
-                    type: "message",
-                },
-                {
-                    id: "12",
-                    content: "for reasons...",
-                    sender: "user",
-                    timestamp: new Date("2024-02-23T15:02:15"),
-                    type: "message",
-                },
-            ]);
-        }
-    }, [open]);
+        const fetchMessages = async () => {
+            if (!user?.id || !contact.id) return;
+
+            try {
+                const response = await fetch(`/api/contacts/chat?sender=${user.id}&receiver=${contact.id}`);
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch messages');
+                }
+
+                const data = await response.json();
+
+                // Transform the messages to match the expected format
+                const formattedMessages: ChatMessage[] = data.messages.map((msg: Message) => ({
+                    id: msg.id.toString(),
+                    content: msg.content || "",
+                    sender: msg.sender === user.id ? "user" : "other",
+                    timestamp: msg.sent_at,
+                    amount: msg.amount ? Number(msg.amount) : undefined,
+                    type: msg.message_type
+                }));
+
+                setMessages(formattedMessages);
+            } catch (error) {
+                console.error('Error fetching messages:', error);
+                toast({
+                    title: "Error fetching messages",
+                    description: "Please try again later",
+                    variant: "destructive",
+                });
+            }
+        };
+
+        fetchMessages();
+    }, [user?.id, contact.id, toast]);
 
     useEffect(() => {
         scrollToBottom();
     }, [messages]);
 
-    const handleSend = () => {
+    const handleSend = async () => {
         if (!inputValue.trim()) return;
 
-        const newMessage: Message = {
-            id: Date.now().toString(),
+        const newMessage: Omit<Message, "id" | "sent_at" | "transaction_id" | "payment_request_id"> = {
             content: inputValue.trim(),
-            sender: "user",
-            timestamp: new Date(),
-            type: "message",
+            sender: user.id,
+            receiver: contact.id,
+            message_type: "message",
+            amount: BigInt(0),
         };
-
-        setMessages((prev) => [...prev, newMessage]);
         setInputValue("");
+
+        try {
+            const response = await fetch("/api/contacts/chat", {
+                method: "POST",
+                body: JSON.stringify(newMessage),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                const convertedMessage = {
+                    id: data.message.id.toString(),
+                    content: data.message.content || "",
+                    sender: data.message.sender === user.id ? "user" : "other",
+                    timestamp: data.message.sent_at,
+                    amount: data.message.amount ? Number(data.message.amount) : undefined,
+                    type: data.message.message_type
+                } as ChatMessage;
+
+                setMessages((prev) => [...prev, convertedMessage]);
+            }
+        } catch (error) {
+            console.error("Error sending message:", error);
+            toast({
+                title: "Error sending message",
+                description: "Please try again later",
+                variant: "destructive",
+            });
+        }
     };
 
     const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -173,6 +145,7 @@ export function ChatDialog({ open, onOpenChange, contact }: ChatDialogProps) {
                         "!duration-300"
                     )}
                 >
+                    <DialogTitle className="hidden">{contact.username}</DialogTitle>
                     <div className="flex flex-col h-[calc(100vh-12.5rem)] mt-14 rounded-5xl rounded-tl-2xl bg-white overflow-hidden">
                         <header className="flex items-center justify-start bg-primary p-2 z-10 gap-3 h-18">
                             <Button
@@ -215,6 +188,7 @@ export function ChatDialog({ open, onOpenChange, contact }: ChatDialogProps) {
                             handleSend={handleSend}
                             handleKeyPress={handleKeyPress}
                             setRequestMoneyOpen={setRequestMoneyOpen}
+                            setSendMoneyOpen={setSendMoneyOpen}
                         />
                     </div>
                 </DialogContent>

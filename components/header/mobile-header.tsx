@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Mail, Settings } from "lucide-react";
 import { Button } from "../ui/button";
-import { usePrivy } from "@privy-io/react-auth";
+import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { supabase } from "@/lib/supabase";
 import { toast } from "@/hooks/use-toast";
 import { Textfit } from "react-textfit";
@@ -30,15 +30,19 @@ export function MobileHeader({ className }: MobileHeaderProps) {
     const [uploadProfileImageDialogOpen, setUploadProfileImageDialogOpen] = useState(false);
     const [usernameDialogOpen, setUsernameDialogOpen] = useState(false);
     const { user, ready } = usePrivy();
+    const { wallets, ready: walletsReady } = useWallets();
     const { pendingRequests, fetchPendingRequests } = usePaymentRequestsStore();
     const { type } = useHeaderStore();
-    const { totalBalance } = useWalletStore();
+    const { totalBalance, fetchBalances } = useWalletStore();
     const { user: userStore, fetchUser } = useUserStore();
     const [isTextScaled, setIsTextScaled] = useState(false);
 
     useEffect(() => {
-        if (!ready) return;
-        fetchUser();
+        if (!ready || !walletsReady) return;
+
+        if (userStore === null) {
+            fetchUser();
+        }
         fetchPendingRequests();
         if (totalBalance === undefined) {
             fetchBalances(
@@ -128,7 +132,7 @@ export function MobileHeader({ className }: MobileHeaderProps) {
                                         !isTextScaled ? "opacity-0" : "animate-fade-in"
                                     )}
                                 >
-                                    {formatValue(totalBalance.toString())}
+                                    {formatValue(totalBalance?.toString() ?? "0")}
                                 </Textfit>
                             </div>
                         </div>

@@ -6,11 +6,11 @@ import { CreditCard, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Stepper, Step, StepLabel, Box } from "@mui/material";
 import Image from "next/image";
-import { Contact } from "@/types/search";
+import { Contact } from "@/types/data";
 import { parseEther } from 'viem';
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { useToast } from "@/hooks/use-toast";
-import { baseSepolia, sepolia } from "viem/chains";
+import { base, mainnet, polygon } from "viem/chains";
 import { dialogSlideUp, fadeIn, stepVariants } from "@/lib/animations";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTransactionsStore } from "@/stores/use-transactions-store";
@@ -18,7 +18,7 @@ import { useTransactionsStore } from "@/stores/use-transactions-store";
 const steps = ['Select Type', 'Select Network', 'Enter Amount', 'Confirm'];
 
 type SendOption = "crypto" | "cash" | null;
-type Chain = "Base Sepolia" | "Arbitrum Sepolia" | "Arbitrum Goerli" | "Sepolia" | "Optimism Sepolia" | null;
+type Chain = "Base" | "Polygon" | "Ethereum" | null;
 
 const StepperIcon = ({ active, completed, icon }: { active: boolean; completed: boolean; icon: React.ReactNode }) => {
     return (
@@ -108,15 +108,17 @@ export function SendMoneyDialog({
         }
 
         const wallet = wallets[0];
-        const chainId = selectedChain === "Base Sepolia" ? baseSepolia.id : sepolia.id;
-        const chain = selectedChain === "Base Sepolia" ? "Base Sepolia" : "Sepolia";
-        const token = selectedChain === "Base Sepolia" ? baseSepolia.nativeCurrency : sepolia.nativeCurrency;
+        const chainId = selectedChain === "Base" ? base.id : selectedChain === "Polygon" ? polygon.id : mainnet.id;
+        const chain = selectedChain === "Base" ? "Base" : selectedChain === "Polygon" ? "Polygon" : "Ethereum";
+        const token = selectedChain === "Base" ? base.nativeCurrency : selectedChain === "Polygon" ? polygon.nativeCurrency : mainnet.nativeCurrency;
 
         try {
-            if (selectedChain === "Base Sepolia") {
-                await wallet.switchChain(baseSepolia.id);
-            } else if (selectedChain === "Sepolia") {
-                await wallet.switchChain(sepolia.id);
+            if (selectedChain === "Base") {
+                await wallet.switchChain(base.id);
+            } else if (selectedChain === "Polygon") {
+                await wallet.switchChain(polygon.id);
+            } else if (selectedChain === "Ethereum") {
+                await wallet.switchChain(mainnet.id);
             } else {
                 toast({
                     variant: "destructive",
@@ -292,12 +294,10 @@ export function SendMoneyDialog({
                                     className="text-4xl w-full bg-transparent border-none focus:outline-none text-center"
                                 />
                                 <p className="text-center text-sm text-muted-foreground">
-                                    {selectedChain === "Base Sepolia" ? "ETH" :
-                                        selectedChain === "Arbitrum Sepolia" ? "ETH" :
-                                            selectedChain === "Arbitrum Goerli" ? "ETH" :
-                                                selectedChain === "Sepolia" ? "ETH" :
-                                                    selectedChain === "Optimism Sepolia" ? "ETH" :
-                                                        "ETH"}
+                                    {selectedChain === "Base" ? "ETH" :
+                                        selectedChain === "Polygon" ? "ETH" :
+                                            selectedChain === "Ethereum" ? "ETH" :
+                                                "ETH"}
                                 </p>
                             </div>
                             <Button

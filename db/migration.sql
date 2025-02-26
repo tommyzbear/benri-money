@@ -148,3 +148,40 @@ CREATE TABLE discord (
     -- First verification timestamp
     latest_verified_at TIMESTAMP -- Latest verification timestamp
 );
+CREATE TABLE messages (
+    id BIGSERIAL PRIMARY KEY,
+    content TEXT,
+    sender VARCHAR(255) NOT NULL,
+    receiver VARCHAR(255) NOT NULL,
+    sent_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    amount NUMERIC(18, 2),
+    message_type VARCHAR(20) NOT NULL,
+    transaction_id BIGINT,
+    payment_request_id BIGINT,
+    FOREIGN KEY (sender) REFERENCES account(id),
+    FOREIGN KEY (receiver) REFERENCES account(id),
+    FOREIGN KEY (transaction_id) REFERENCES transaction_history(id),
+    FOREIGN KEY (payment_request_id) REFERENCES payment_requests(id)
+);
+-- Create index on sender column
+CREATE INDEX idx_messages_sender ON messages(sender);
+-- Create index on receiver column
+CREATE INDEX idx_messages_receiver ON messages(receiver);
+-- Create index on sent_at column
+CREATE INDEX idx_messages_sent_at ON messages(sent_at);
+-- Create composite index on sender and receiver columns
+CREATE INDEX idx_messages_sender_receiver ON messages(sender, receiver);
+CREATE TABLE supported_tokens (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    chain_id INTEGER NOT NULL,
+    address TEXT NOT NULL,
+    decimals INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    symbol TEXT NOT NULL,
+    logos_uri TEXT [] NOT NULL,
+    type TEXT NOT NULL,
+    protocol_slug TEXT,
+    underlying_tokens JSONB [] NOT NULL,
+    primary_address TEXT NOT NULL,
+    CONSTRAINT unique_supported_tokens_chain_address UNIQUE (chain_id, address)
+);

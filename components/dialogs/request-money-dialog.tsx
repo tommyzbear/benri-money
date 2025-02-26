@@ -212,7 +212,7 @@ export function RequestMoneyDialog({
                 return (
                     <div className="space-y-4 py-4">
                         <div className="grid grid-cols-1 gap-3">
-                            {["Base Sepolia", "Sepolia"].map((chain) => (
+                            {["Base", "Polygon", "Ethereum"].map((chain) => (
                                 <Button
                                     key={chain}
                                     variant={selectedChain === chain ? "secondary" : "outline"}
@@ -223,7 +223,7 @@ export function RequestMoneyDialog({
                                     }}
                                 >
                                     <div className="flex items-center space-x-3">
-                                        {chain === "Base Sepolia" && (
+                                        {chain === "Base" && (
                                             <Image
                                                 src="/icons/base-logo.svg"
                                                 alt="Base Network Logo"
@@ -232,7 +232,16 @@ export function RequestMoneyDialog({
                                                 className="rounded-full"
                                             />
                                         )}
-                                        {chain === "Sepolia" && (
+                                        {chain === "Polygon" && (
+                                            <Image
+                                                src="/icons/polygon-matic-logo.svg"
+                                                alt="Polygon Network Logo"
+                                                width={24}
+                                                height={24}
+                                                className="rounded-full"
+                                            />
+                                        )}
+                                        {chain === "Ethereum" && (
                                             <Image
                                                 src="/icons/ethereum-eth-logo.svg"
                                                 alt="Ethereum Network Logo"
@@ -244,7 +253,7 @@ export function RequestMoneyDialog({
                                         <div className="text-left">
                                             <p className="font-medium">{chain}</p>
                                             <p className="text-sm text-muted-foreground">
-                                                {chain === "Base Sepolia" ? "Base Testnet" : "Ethereum Testnet"}
+                                                {chain === "Base" ? "Base Mainnet" : chain === "Polygon" ? "Polygon Mainnet" : "Ethereum Mainnet"}
                                             </p>
                                         </div>
                                     </div>

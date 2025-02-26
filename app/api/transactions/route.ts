@@ -41,7 +41,17 @@ export async function POST(request: Request) {
             .select()
             .single();
 
-        if (error) {
+        const { error: messageError } = await supabase
+            .from("messages")
+            .insert({
+                sender: transaction.from_account_id,
+                receiver: transaction.to_account_id,
+                transaction_id: data.id,
+                amount: transaction.amount,
+                message_type: "payment",
+            });
+
+        if (error || messageError) {
             console.error("Error inserting transaction:", error);
             return NextResponse.json({ error: "Failed to save transaction" }, { status: 500 });
         }

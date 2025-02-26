@@ -42,11 +42,6 @@ export function RecentActivity() {
     );
 
     useEffect(() => {
-        if (!ready) return;
-        fetchTransactions();
-    }, [ready, fetchTransactions]);
-
-    useEffect(() => {
         const channel = supabase
             .channel("transaction_history")
             .on(
@@ -82,11 +77,11 @@ export function RecentActivity() {
     }, [error, toast]);
 
     return (
-        <div className="flex flex-col gap-0 bg-background rounded-3xl p-0 overflow-hidden min-h-[calc(100vh-25rem)] mb-24 bg-white">
+        <div className="flex flex-col gap-0 bg-background rounded-3xl p-0 overflow-hidden min-h-[calc(100vh-40rem)] bg-white">
             <div className="pl-5 pt-2 pb-1 m-0 bg-primary">
                 <h3 className="header-text text-primary-foreground">recently</h3>
             </div>
-            <CardContent className="p-0 m-0 !border-0">
+            <CardContent className="p-0 m-0 !border-0 overflow-y-auto max-h-[calc(100vh-10rem)] pb-60">
                 {!ready || isLoading ? (
                     <RecentActivitySkeleton />
                 ) : (
@@ -102,8 +97,8 @@ export function RecentActivity() {
                                     const previousDate =
                                         index > 0
                                             ? new Date(
-                                                  transactions[index - 1].created_at
-                                              ).toDateString()
+                                                transactions[index - 1].created_at
+                                            ).toDateString()
                                             : null;
 
                                     const showDivider = currentDate !== previousDate;
@@ -115,13 +110,13 @@ export function RecentActivity() {
                                                     <h4 className="text-base font-libre italic">
                                                         {currentDate === new Date().toDateString()
                                                             ? `today, ${format(
-                                                                  new Date(currentDate),
-                                                                  "MMM d"
-                                                              ).toLowerCase()}`
+                                                                new Date(currentDate),
+                                                                "MMM d"
+                                                            ).toLowerCase()}`
                                                             : format(
-                                                                  new Date(currentDate),
-                                                                  "EEE, MMM d"
-                                                              ).toLowerCase()}
+                                                                new Date(currentDate),
+                                                                "EEE, MMM d"
+                                                            ).toLowerCase()}
                                                     </h4>
                                                 </div>
                                             )}
