@@ -1,5 +1,7 @@
 import { supabase } from "@/lib/supabase";
 import { formatEther } from "viem";
+import { ethers } from 'ethers'
+
 const ALCHEMY_API_KEY = process.env.NEXT_PUBLIC_ALCHEMY_API_KEY
 
 interface TokenBalance {
@@ -33,6 +35,7 @@ export interface TokenData {
     contractAddress: string
     logo: string,
     type?: string
+    decimals: number
 }
 
 export interface Transfer {
@@ -52,6 +55,7 @@ export async function getWalletTokens(address: string, chain: string): Promise<{
     divisor: number
     balance: string
     type: string
+    decimals: number
     logo: string
 }[]> {
     try {
@@ -76,30 +80,32 @@ export async function getWalletTokens(address: string, chain: string): Promise<{
             (token: TokenBalance) => token.tokenBalance !== '0x0000000000000000000000000000000000000000000000000000000000000000'
         )
 
-        const supportedTokensOnly = nonZeroBalances.filter(async (token: TokenBalance) => {
+        const supportedTokensOnly = await Promise.all(nonZeroBalances.map(async (token: TokenBalance) => {
             const { data, error } = await supabase
                 .from("supported_tokens")
                 .select("*")
-                .eq("address", token.contractAddress)
+                .eq("address", ethers.utils.getAddress(token.contractAddress))
                 .eq("chain_id", alchemyChainToChainId[chain]);
-
-            return !error && data && data.length > 0;
-        })
+            return !error && data && data.length > 0 ? token : null;
+        }))
 
         // Get token metadata for non-zero balances
         const tokens = await Promise.all(
-            supportedTokensOnly.map(async (token: TokenBalance) => {
-                const metadata = await getTokenMetadata(token.contractAddress, chain);
-                return {
-                    contractAddress: token.contractAddress,
-                    tokenName: metadata.name,
-                    symbol: metadata.symbol,
-                    divisor: Math.pow(10, metadata.decimals),
-                    balance: token.tokenBalance,
-                    logo: metadata.logo,
-                    type: 'ERC20'
-                }
-            })
+            supportedTokensOnly
+                .filter(token => token !== null)
+                .map(async (token: TokenBalance) => {
+                    const metadata = await getTokenMetadata(token.contractAddress, chain);
+                    return {
+                        contractAddress: token.contractAddress,
+                        tokenName: metadata.name,
+                        symbol: metadata.symbol,
+                        divisor: Math.pow(10, metadata.decimals),
+                        balance: token.tokenBalance,
+                        logo: metadata.logo || "",
+                        decimals: metadata.decimals,
+                        type: 'ERC20'
+                    }
+                })
         )
 
         return tokens.filter((token) => token !== null)
@@ -168,7 +174,8 @@ export async function getEthBalanceTokenData(address: string, chain: string): Pr
         price: price.toString(),
         value: (price * Number(balance)).toString(),
         contractAddress: "",
-        logo: isPolygon ? "/icons/polygon-matic-logo.svg" : "/icons/ethereum-eth-logo.svg"
+        logo: isPolygon ? "/icons/polygon-matic-logo.svg" : "/icons/ethereum-eth-logo.svg",
+        decimals: 18
     } as TokenData;
 }
 

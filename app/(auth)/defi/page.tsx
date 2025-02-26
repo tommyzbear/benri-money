@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { usePrivy, useWallets } from "@privy-io/react-auth";
+import { ConnectedWallet, usePrivy, useWallets } from "@privy-io/react-auth";
 import { config } from "@/lib/wallet/config";
 import { SwapCard } from "@/components/defi/swap-card";
 import { StakingCard } from "@/components/defi/staking-card";
@@ -21,13 +21,13 @@ export default function DeFiPage() {
     const { ready } = usePrivy();
     const { wallets } = useWallets();
     const { fetchBalances, balances, totalBalance } = useWalletStore();
-    const [activeWallet, setActiveWallet] = useState<string | undefined>();
+    const [activeWallet, setActiveWallet] = useState<ConnectedWallet | undefined>();
 
     useEffect(() => {
         if (!ready || !wallets.length) return;
 
         const privyWallet = wallets.find(w => w.walletClientType === "privy");
-        setActiveWallet(privyWallet?.address || wallets[0].address);
+        setActiveWallet(privyWallet);
 
         if (privyWallet?.address) {
             fetchBalances(privyWallet.address);
