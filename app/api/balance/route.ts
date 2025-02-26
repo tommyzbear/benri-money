@@ -55,6 +55,7 @@ export async function GET(request: Request) {
                     price: price.toString(),
                     value: value.toString(),
                     logo: token.logo,
+                    decimals: token.decimals,
                 } as TokenData;
             })
             .filter((t) => t !== null);
