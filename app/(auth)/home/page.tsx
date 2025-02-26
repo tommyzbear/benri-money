@@ -10,14 +10,13 @@ export default function HomePage() {
     const { ready } = usePrivy();
     const { wallets, ready: walletsReady } = useWallets();
     const { totalBalance, fetchBalances } = useWalletStore();
-    const { transactions, fetchTransactions } = useTransactionsStore();
+    const { fetchTransactions } = useTransactionsStore();
 
     useEffect(() => {
         if (!ready) return;
-        if (!transactions.length) {
-            fetchTransactions();
-        }
-    }, [ready, fetchTransactions, transactions]);
+
+        fetchTransactions();
+    }, [ready, fetchTransactions]);
 
     useEffect(() => {
         if (!walletsReady) return;
