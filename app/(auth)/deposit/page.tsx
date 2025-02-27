@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { DepositDialog } from "@/components/dialogs/deposit-dialog";
 import { useState } from "react";
 import { useFundWallet, useWallets } from "@privy-io/react-auth";
+import { cn } from "@/lib/utils";
 
 export default function DepositPage() {
     const [depositDialogOpen, setDepositDialogOpen] = useState(false);
@@ -34,16 +35,18 @@ export default function DepositPage() {
             setRedirectUrl(data.onrampSession.redirect_url);
         };
         createOnrampSession();
-    }, []);
+    }, [privyWalletAddress]);
 
     useEffect(() => {
         if (ready && wallets.length > 0) {
-            setPrivyWalletAddress(wallets.find((wallet) => wallet.walletClientType === "privy")?.address);
+            setPrivyWalletAddress(
+                wallets.find((wallet) => wallet.walletClientType === "privy")?.address
+            );
         }
     }, [ready, wallets]);
 
     return (
-        <div className="flex flex-col">
+        <div className="flex flex-col w-full">
             <DepositDialog
                 open={depositDialogOpen}
                 onOpenChange={setDepositDialogOpen}
@@ -51,41 +54,58 @@ export default function DepositPage() {
                 fundWallet={() => fundWallet(privyWalletAddress ?? "")}
             />
 
-            <div className="flex flex-1 lg:flex-row lg:mx-auto lg:max-w-7xl lg:pb-8">
-                <div className="flex flex-col flex-1 lg:max-w-3xl gap-2">
+            <div className="flex flex-1 max-w-full lg:flex-row lg:mx-auto lg:max-w-7xl lg:pb-8">
+                <div className="flex flex-col flex-1 max-w-full lg:max-w-3xl gap-4">
                     <div className="flex gap-2 h-56">
                         <Button
                             onClick={() => setDepositDialogOpen(true)}
-                            className="flex flex-1 h-full border flex-col justify-center items-start text-left bg-primary rounded-4xl p-5 text-primary-foreground"
+                            className={cn(
+                                "flex flex-1 h-full bg-chart-2 flex-col",
+                                "justify-center items-start text-left",
+                                "rounded-4xl p-5 text-primary",
+                                "shadow-primary max-w-full text-chart-2-foreground"
+                            )}
                         >
-                            <h2 className="mt-[35%] text-2xl font-libre italic mb-2">deposit</h2>
-                            <p className="text-muted-foreground text-roboto text-sm">
+                            <h2 className="mt-[35%] text-2xl font-libre italic mb-2l">deposit</h2>
+                            <p className="text-muted-foreground text-roboto text-sm text-wrap">
                                 cash or cryptocurrencies
                             </p>
                         </Button>
 
-                        <Link
-                            href="/withdraw"
-                            className="flex flex-1 h-full border flex-col justify-center items-start text-left bg-primary rounded-4xl p-5 text-primary-foreground"
+                        <Button
+                            className={cn(
+                                "flex flex-1 h-full bg-chart-1 flex-col",
+                                "justify-center items-start text-left",
+                                "rounded-4xl p-5 text-chart-1-foreground",
+                                "shadow-primary max-w-full"
+                            )}
                         >
                             <h2 className="mt-[35%] text-2xl font-libre italic mb-2">withdraw</h2>
-                            <p className="text-muted-foreground text-roboto text-sm">
+                            <p className="text-muted-foreground text-roboto text-sm text-wrap">
                                 to your bank or crypto wallet
                             </p>
-                        </Link>
+                        </Button>
                     </div>
                     <div className="flex gap-2 h-36">
                         <Link
                             href="/convert"
-                            className="flex w-32 h-full border flex-col justify-center items-start text-left bg-secondary rounded-7xl p-5 text-secondary-foreground"
+                            className={cn(
+                                "shadow-primary flex w-32 h-full",
+                                " flex-col justify-center items-start text-left",
+                                " bg-white rounded-7xl p-7 text-secondary-foreground"
+                            )}
                         ></Link>
                         <Link
                             href="/convert"
-                            className="flex flex-1 h-full border flex-col justify-center items-start text-left bg-secondary rounded-4xl p-5 text-secondary-foreground"
+                            className={cn(
+                                "flex flex-1 h-full flex-col justify-center",
+                                "items-start text-left bg-secondary rounded-4xl",
+                                "p-5 text-secondary-foreground shadow-primary"
+                            )}
                         >
                             <h2 className="mt-[20%] text-2xl font-libre italic mb-2">convert</h2>
-                            <p className="text-muted-foreground text-roboto text-sm">
-                                between cash or cryptocurrencies
+                            <p className="text-muted-foreground text-roboto text-sm font-semibold">
+                                cash or cryptocurrencies
                             </p>
                         </Link>
                     </div>

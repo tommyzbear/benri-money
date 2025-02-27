@@ -37,12 +37,7 @@ export function DesktopHeader({ className }: DesktopHeaderProps) {
     };
 
     return (
-        <header
-            className={cn(
-                "flex justify-between px-6 py-3 bg-primary text-white",
-                className
-            )}
-        >
+        <header className={cn("flex justify-between px-6 py-3 bg-primary text-white", className)}>
             <div className="w-full flex justify-between items-center">
                 <div className="flex flex-1 items-center space-x-8">
                     <Image src="/logo.png" alt="Logo" width={32} height={32} />

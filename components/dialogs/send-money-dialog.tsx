@@ -7,37 +7,43 @@ import { Button } from "@/components/ui/button";
 import { Stepper, Step, StepLabel, Box } from "@mui/material";
 import Image from "next/image";
 import { Contact } from "@/types/data";
-import { parseEther } from 'viem';
+import { parseEther } from "viem";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { useToast } from "@/hooks/use-toast";
 import { base, mainnet, polygon } from "viem/chains";
 import { dialogSlideUp, fadeIn, stepVariants } from "@/lib/animations";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTransactionsStore } from "@/stores/use-transactions-store";
+import { cn } from "@/lib/utils";
 
-const steps = ['Select Type', 'Select Network', 'Enter Amount', 'Confirm'];
+const steps = ["Select Type", "Select Network", "Enter Amount", "Confirm"];
 
 type SendOption = "crypto" | "cash" | null;
 type Chain = "Base" | "Polygon" | "Ethereum" | null;
 
-const StepperIcon = ({ active, completed, icon }: { active: boolean; completed: boolean; icon: React.ReactNode }) => {
+const StepperIcon = ({
+    active,
+    completed,
+    icon,
+}: {
+    active: boolean;
+    completed: boolean;
+    icon: React.ReactNode;
+}) => {
     return (
-        <motion.div
-            className="relative"
-            initial={false}
-        >
+        <motion.div className="relative" initial={false}>
             <motion.div
                 className="absolute inset-0 rounded-full bg-blue-400/80 blur-md"
                 initial={false}
                 animate={{
                     scale: active ? 1.8 : 0,
-                    opacity: active ? 1 : 0
+                    opacity: active ? 1 : 0,
                 }}
                 transition={{
                     type: "spring",
                     stiffness: 300,
                     damping: 20,
-                    opacity: { duration: 0.2 }
+                    opacity: { duration: 0.2 },
                 }}
             />
 
@@ -46,12 +52,16 @@ const StepperIcon = ({ active, completed, icon }: { active: boolean; completed: 
                 initial={false}
                 animate={{
                     scale: active ? 1.2 : 1,
-                    color: active ? "rgb(59, 130, 246)" : completed ? "rgb(34, 197, 94)" : "rgb(156, 163, 175)"
+                    color: active
+                        ? "rgb(59, 130, 246)"
+                        : completed
+                        ? "rgb(34, 197, 94)"
+                        : "rgb(156, 163, 175)",
                 }}
                 transition={{
                     type: "spring",
                     stiffness: 500,
-                    damping: 30
+                    damping: 30,
                 }}
             >
                 {icon}
@@ -108,9 +118,24 @@ export function SendMoneyDialog({
         }
 
         const wallet = wallets[0];
-        const chainId = selectedChain === "Base" ? base.id : selectedChain === "Polygon" ? polygon.id : mainnet.id;
-        const chain = selectedChain === "Base" ? "Base" : selectedChain === "Polygon" ? "Polygon" : "Ethereum";
-        const token = selectedChain === "Base" ? base.nativeCurrency : selectedChain === "Polygon" ? polygon.nativeCurrency : mainnet.nativeCurrency;
+        const chainId =
+            selectedChain === "Base"
+                ? base.id
+                : selectedChain === "Polygon"
+                ? polygon.id
+                : mainnet.id;
+        const chain =
+            selectedChain === "Base"
+                ? "Base"
+                : selectedChain === "Polygon"
+                ? "Polygon"
+                : "Ethereum";
+        const token =
+            selectedChain === "Base"
+                ? base.nativeCurrency
+                : selectedChain === "Polygon"
+                ? polygon.nativeCurrency
+                : mainnet.nativeCurrency;
 
         try {
             if (selectedChain === "Base") {
@@ -136,7 +161,7 @@ export function SendMoneyDialog({
             };
 
             const result = await provider.request({
-                method: 'eth_sendTransaction',
+                method: "eth_sendTransaction",
                 params: [transactionRequest],
             });
 
@@ -151,7 +176,7 @@ export function SendMoneyDialog({
                 tx: result,
                 transaction_type: "wallet",
                 chain_id: chainId,
-                chain: chain
+                chain: chain,
             });
 
             toast({
@@ -164,9 +189,10 @@ export function SendMoneyDialog({
             toast({
                 variant: "destructive",
                 title: "Transaction Failed",
-                description: typeof error === 'object' && error !== null && 'message' in error
-                    ? String(error.message)
-                    : "Failed to send transaction. Please try again.",
+                description:
+                    typeof error === "object" && error !== null && "message" in error
+                        ? String(error.message)
+                        : "Failed to send transaction. Please try again.",
             });
         } finally {
             setIsLoading(false);
@@ -238,7 +264,8 @@ export function SendMoneyDialog({
                                                 className="rounded-full"
                                             />
                                         )}
-                                        {(chain === "Arbitrum Sepolia" || chain === "Arbitrum Goerli") && (
+                                        {(chain === "Arbitrum Sepolia" ||
+                                            chain === "Arbitrum Goerli") && (
                                             <Image
                                                 src="/icons/arbitrum-arb-logo.svg"
                                                 alt="Arbitrum Network Logo"
@@ -268,11 +295,15 @@ export function SendMoneyDialog({
                                         <div className="text-left">
                                             <div className="font-medium">{chain}</div>
                                             <div className="text-sm text-muted-foreground">
-                                                {chain === "Ethereum" ? "~3 minutes" :
-                                                    chain === "Base" ? "~17 sec" :
-                                                        chain === "Solana" ? "~36 sec" :
-                                                            chain === "Algorand" ? "~19 sec" :
-                                                                "~4 minutes"}
+                                                {chain === "Ethereum"
+                                                    ? "~3 minutes"
+                                                    : chain === "Base"
+                                                    ? "~17 sec"
+                                                    : chain === "Solana"
+                                                    ? "~36 sec"
+                                                    : chain === "Algorand"
+                                                    ? "~19 sec"
+                                                    : "~4 minutes"}
                                             </div>
                                         </div>
                                     </div>
@@ -294,17 +325,16 @@ export function SendMoneyDialog({
                                     className="text-4xl w-full bg-transparent border-none focus:outline-none text-center"
                                 />
                                 <p className="text-center text-sm text-muted-foreground">
-                                    {selectedChain === "Base" ? "ETH" :
-                                        selectedChain === "Polygon" ? "ETH" :
-                                            selectedChain === "Ethereum" ? "ETH" :
-                                                "ETH"}
+                                    {selectedChain === "Base"
+                                        ? "ETH"
+                                        : selectedChain === "Polygon"
+                                        ? "ETH"
+                                        : selectedChain === "Ethereum"
+                                        ? "ETH"
+                                        : "ETH"}
                                 </p>
                             </div>
-                            <Button
-                                className="w-full"
-                                onClick={handleSubmit}
-                                disabled={!amount}
-                            >
+                            <Button className="w-full" onClick={handleSubmit} disabled={!amount}>
                                 Preview
                             </Button>
                         </div>
@@ -335,19 +365,18 @@ export function SendMoneyDialog({
                                 <div className="flex justify-between">
                                     <span className="text-muted-foreground">Wallet:</span>
                                     <span className="font-medium truncate ml-4">
-                                        {selectedContact?.wallet ?
-                                            `${selectedContact.wallet.slice(0, 6)}...${selectedContact.wallet.slice(-4)}` :
-                                            ''}
+                                        {selectedContact?.wallet
+                                            ? `${selectedContact.wallet.slice(
+                                                  0,
+                                                  6
+                                              )}...${selectedContact.wallet.slice(-4)}`
+                                            : ""}
                                     </span>
                                 </div>
                             </div>
                         </div>
-                        <Button
-                            className="w-full"
-                            onClick={handleConfirm}
-                            disabled={isLoading}
-                        >
-                            {isLoading ? 'Confirming...' : 'Confirm Transaction'}
+                        <Button className="w-full" onClick={handleConfirm} disabled={isLoading}>
+                            {isLoading ? "Confirming..." : "Confirm Transaction"}
                         </Button>
                     </div>
                 );
@@ -382,7 +411,13 @@ export function SendMoneyDialog({
                         exit="exit"
                         variants={fadeIn}
                     />
-                    <DialogContent className="sm:max-w-md rounded-3xl border-none bg-gradient-to-b from-white to-slate-50/95 backdrop-blur-sm">
+                    <DialogContent
+                        className={cn(
+                            "max-w-[calc(100vw-2rem)] sm:max-w-md rounded-3xl",
+                            "border-none bg-gradient-to-b from-white",
+                            "to-slate-50/95 backdrop-blur-sm"
+                        )}
+                    >
                         <motion.div
                             initial="initial"
                             animate="animate"
@@ -393,23 +428,23 @@ export function SendMoneyDialog({
                                 <DialogTitle>Send Money</DialogTitle>
                             </DialogHeader>
 
-                            <Box sx={{ width: '100%', mb: 4, mt: 4 }}>
+                            <Box sx={{ width: "100%", mb: 4, mt: 4 }}>
                                 <Stepper
                                     activeStep={step}
                                     alternativeLabel
                                     sx={{
-                                        '& .MuiStepConnector-line': {
-                                            transition: 'border-color 0.3s ease'
-                                        }
+                                        "& .MuiStepConnector-line": {
+                                            transition: "border-color 0.3s ease",
+                                        },
                                     }}
                                 >
                                     {steps.map((label, index) => (
                                         <Step
                                             key={label}
                                             sx={{
-                                                '& .MuiStepLabel-root': {
-                                                    transition: 'all 0.3s ease'
-                                                }
+                                                "& .MuiStepLabel-root": {
+                                                    transition: "all 0.3s ease",
+                                                },
                                             }}
                                         >
                                             <StepLabel
@@ -424,8 +459,11 @@ export function SendMoneyDialog({
                                                 <motion.span
                                                     initial={false}
                                                     animate={{
-                                                        color: step === index ? "rgb(59, 130, 246)" : "rgb(107, 114, 128)",
-                                                        fontWeight: step === index ? 600 : 400
+                                                        color:
+                                                            step === index
+                                                                ? "rgb(59, 130, 246)"
+                                                                : "rgb(107, 114, 128)",
+                                                        fontWeight: step === index ? 600 : 400,
                                                     }}
                                                 >
                                                     {label}
@@ -447,7 +485,7 @@ export function SendMoneyDialog({
                                     transition={{
                                         type: "spring",
                                         stiffness: 300,
-                                        damping: 30
+                                        damping: 30,
                                     }}
                                 >
                                     {renderStepContent()}
@@ -475,4 +513,4 @@ export function SendMoneyDialog({
             )}
         </AnimatePresence>
     );
-} 
+}

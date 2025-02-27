@@ -141,7 +141,7 @@ export function NotificationsDialog({ open, onOpenChange, requests }: Notificati
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[400px] rounded-3xl flex flex-col max-h-[80vh] p-0">
+            <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md rounded-3xl flex flex-col max-h-[80vh] p-0">
                 <div className="px-6 py-4 border-b">
                     <DialogHeader>
                         <DialogTitle>Pending Payment Requests</DialogTitle>

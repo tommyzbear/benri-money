@@ -21,16 +21,19 @@ export default function HomePage() {
     useEffect(() => {
         if (!walletsReady) return;
         if (totalBalance === undefined) {
-            fetchBalances(wallets.find((wallet) => wallet.walletClientType === "privy")?.address ?? wallets[0].address);
+            fetchBalances(
+                wallets.find((wallet) => wallet.walletClientType === "privy")?.address ??
+                    wallets[0].address
+            );
         }
     }, [fetchBalances, wallets, walletsReady, totalBalance]);
 
     return (
-        <div className="flex flex-row lg:mx-auto lg:max-w-7xl">
-            <div className="flex-1 lg:max-w-xl mx-auto hidden lg:block">
+        <div className="flex flex-row lg:mx-auto lg:max-w-full gap-5">
+            <div className="flex-1 lg:max-w-full lg:h-full mx-auto hidden lg:block">
                 <Balance />
             </div>
-            <div className="flex-1 lg:max-w-xl mx-auto">
+            <div className="flex-1 lg:max-w-full mx-auto h-full">
                 <RecentActivity />
             </div>
         </div>

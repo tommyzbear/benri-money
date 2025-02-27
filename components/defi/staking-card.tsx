@@ -4,13 +4,20 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import { useWalletStore } from "@/stores/use-wallet-store";
 import { useToast } from "@/hooks/use-toast";
+import { ConnectedWallet } from "@privy-io/react-auth";
 
 interface StakingCardProps {
-    wallet?: string;
-    chains: Array<{ name: string; id: number }>;
+    wallet?: ConnectedWallet;
+    chains: ReadonlyArray<{ readonly name: string; readonly id: number }>;
 }
 
 export function StakingCard({ wallet, chains }: StakingCardProps) {
@@ -70,7 +77,14 @@ export function StakingCard({ wallet, chains }: StakingCardProps) {
                         </SelectTrigger>
                         <SelectContent>
                             {balances[selectedChain]?.map((token) => (
-                                <SelectItem key={token.contractAddress} value={token.contractAddress === "" ? "0x0000000000000000000000000000000000000000" : token.contractAddress}>
+                                <SelectItem
+                                    key={token.contractAddress}
+                                    value={
+                                        token.contractAddress === ""
+                                            ? "0x0000000000000000000000000000000000000000"
+                                            : token.contractAddress
+                                    }
+                                >
                                     {token.symbol}
                                 </SelectItem>
                             ))}
@@ -99,4 +113,4 @@ export function StakingCard({ wallet, chains }: StakingCardProps) {
             </CardContent>
         </Card>
     );
-} 
+}

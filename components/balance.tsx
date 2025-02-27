@@ -20,7 +20,7 @@ import { NetworkIcon } from "./network-icon";
 
 const balancesSum = (balances: TokenData[]) => {
     return balances.reduce((acc, balance) => acc + Number(balance.value), 0);
-}
+};
 
 export function Balance() {
     const [sendDialogOpen, setSendDialogOpen] = useState(false);
@@ -59,7 +59,9 @@ export function Balance() {
 
     useEffect(() => {
         if (ready && wallets.length > 0) {
-            setPrivyWalletAddress(wallets.find((wallet) => wallet.walletClientType === "privy")?.address);
+            setPrivyWalletAddress(
+                wallets.find((wallet) => wallet.walletClientType === "privy")?.address
+            );
         }
     }, [ready, wallets]);
 
@@ -83,7 +85,7 @@ export function Balance() {
     }
 
     return (
-        <Card className="mb-6">
+        <Card className="mb-6 rounded-3xl">
             <CardHeader className="flex flex-row items-center justify-between">
                 <h2 className="text-xl font-semibold">Balances</h2>
                 {!showBalances ? (
@@ -106,10 +108,16 @@ export function Balance() {
                         <div className="flex-1">
                             <p className="text-sm text-muted-foreground mb-1">Total Balance</p>
                             <p className="text-2xl font-bold">
-                                {showBalances ? formatValue(totalBalance?.toString() ?? "0") : "••••••"}
+                                {showBalances
+                                    ? formatValue(totalBalance?.toString() ?? "0")
+                                    : "••••••"}
                             </p>
                         </div>
-                        <Button variant="outline" size="sm" onClick={() => setDepositDialogOpen(true)}>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setDepositDialogOpen(true)}
+                        >
                             Top Up
                         </Button>
                     </motion.div>
@@ -133,7 +141,9 @@ export function Balance() {
                                         {chain} Wallet
                                     </p>
                                     <p className="text-2xl font-bold">
-                                        {showBalances ? formatValue(balancesSum(balances).toString() ?? "0") : "••••••"}
+                                        {showBalances
+                                            ? formatValue(balancesSum(balances).toString() ?? "0")
+                                            : "••••••"}
                                     </p>
                                 </div>
                             </motion.div>
@@ -182,7 +192,10 @@ const BalanceSkeleton = () => {
             <CardContent>
                 <div className="space-y-6">
                     {[1, 2, 3].map((i) => (
-                        <div key={i} className="flex items-start space-x-4 p-4 bg-slate-50 rounded-xl">
+                        <div
+                            key={i}
+                            className="flex items-start space-x-4 p-4 bg-slate-50 rounded-xl"
+                        >
                             <Skeleton className="h-10 w-10 rounded-full" />
                             <div className="flex-1">
                                 <Skeleton className="h-4 w-24 mb-2" />
@@ -197,4 +210,4 @@ const BalanceSkeleton = () => {
             </CardContent>
         </Card>
     );
-}
+};

@@ -3,7 +3,6 @@
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 import { useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Contact, Message } from "@/types/data";
@@ -13,7 +12,7 @@ import { SendMoneyDialog } from "@/components/dialogs/send-money-dialog";
 import { RequestMoneyDialog } from "@/components/dialogs/request-money-dialog";
 import { ChatInput } from "@/components/chat/chat-input";
 import { ChatMessages } from "@/components/chat/chat-messages";
-import { User } from "@privy-io/server-auth";
+import { User } from "@privy-io/react-auth";
 import { useToast } from "@/hooks/use-toast";
 import { ChatMessage } from "@/types/chat";
 
@@ -41,10 +40,12 @@ export function ChatDialog({ open, onOpenChange, contact, user }: ChatDialogProp
             if (!user?.id || !contact.id) return;
 
             try {
-                const response = await fetch(`/api/contacts/chat?sender=${user.id}&receiver=${contact.id}`);
+                const response = await fetch(
+                    `/api/contacts/chat?sender=${user.id}&receiver=${contact.id}`
+                );
 
                 if (!response.ok) {
-                    throw new Error('Failed to fetch messages');
+                    throw new Error("Failed to fetch messages");
                 }
 
                 const data = await response.json();
@@ -56,12 +57,12 @@ export function ChatDialog({ open, onOpenChange, contact, user }: ChatDialogProp
                     sender: msg.sender === user.id ? "user" : "other",
                     timestamp: msg.sent_at,
                     amount: msg.amount ? Number(msg.amount) : undefined,
-                    type: msg.message_type
+                    type: msg.message_type,
                 }));
 
                 setMessages(formattedMessages);
             } catch (error) {
-                console.error('Error fetching messages:', error);
+                console.error("Error fetching messages:", error);
                 toast({
                     title: "Error fetching messages",
                     description: "Please try again later",
@@ -80,7 +81,10 @@ export function ChatDialog({ open, onOpenChange, contact, user }: ChatDialogProp
     const handleSend = async () => {
         if (!inputValue.trim()) return;
 
-        const newMessage: Omit<Message, "id" | "sent_at" | "transaction_id" | "payment_request_id"> = {
+        const newMessage: Omit<
+            Message,
+            "id" | "sent_at" | "transaction_id" | "payment_request_id"
+        > = {
             content: inputValue.trim(),
             sender: user.id,
             receiver: contact.id,
@@ -103,7 +107,7 @@ export function ChatDialog({ open, onOpenChange, contact, user }: ChatDialogProp
                     sender: data.message.sender === user.id ? "user" : "other",
                     timestamp: data.message.sent_at,
                     amount: data.message.amount ? Number(data.message.amount) : undefined,
-                    type: data.message.message_type
+                    type: data.message.message_type,
                 } as ChatMessage;
 
                 setMessages((prev) => [...prev, convertedMessage]);
@@ -130,12 +134,11 @@ export function ChatDialog({ open, onOpenChange, contact, user }: ChatDialogProp
             <Dialog open={open} onOpenChange={onOpenChange}>
                 <DialogContent
                     className={cn(
-                        "sm:max-w-[425px]",
+                        "sm:max-w-[425px] [&>button]:hidden",
                         "h-[100dvh]",
-                        "p-0",
+                        "p-0 px-4",
                         "gap-0",
                         "border-0",
-                        "px-4",
                         "bg-background",
                         "transition-all",
                         "data-[state=open]:animate-in",
@@ -146,25 +149,30 @@ export function ChatDialog({ open, onOpenChange, contact, user }: ChatDialogProp
                     )}
                 >
                     <DialogTitle className="hidden">{contact.username}</DialogTitle>
-                    <div className="flex flex-col h-[calc(100vh-12.5rem)] mt-14 rounded-5xl rounded-tl-2xl bg-white overflow-hidden">
-                        <header className="flex items-center justify-start bg-primary p-2 z-10 gap-3 h-18">
+                    <div
+                        className={cn(
+                            "flex flex-col h-[calc(100vh-12.5rem)]",
+                            "mt-14 rounded-4xl rounded-tl-2xl bg-white overflow-hidden"
+                        )}
+                    >
+                        <header className="flex items-center justify-start bg-primary p-2 z-10 gap-3 h-16">
                             <Button
                                 size="icon"
-                                className="rounded-xl bg-primary-foreground w-5 h-full"
+                                className="rounded-xl bg-secondary w-5 h-full"
                                 onClick={() => onOpenChange(false)}
                             >
                                 <ChevronLeft className="h-5 w-5" stroke="black" />
                             </Button>
-                            <div className="flex items-center ml-4 h-full gap-3">
+                            <div className="flex items-center ml-3 h-full gap-3">
                                 <Image
                                     src={contact.profileImg || blo(contact.wallet as `0x${string}`)}
-                                    width={40}
-                                    height={40}
+                                    width={35}
+                                    height={35}
                                     alt={contact.username || "Contact profile"}
                                     className="h-full w-auto antialiased rounded-full"
                                 />
                                 <div className="">
-                                    <h2 className="font-libre font-semibold italic text-primary-foreground text-lg pl-1">
+                                    <h2 className="font-libre font-semibold italic text-white text-lg pl-1">
                                         {contact.username}
                                     </h2>
                                     <p className="text-xs text-secondary">

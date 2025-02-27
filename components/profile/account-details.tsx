@@ -3,7 +3,13 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Mail, Phone, Wallet, Copy } from "lucide-react";
-import { ConnectedWallet, useMfaEnrollment, usePrivy, User, useWallets } from "@privy-io/react-auth";
+import {
+    ConnectedWallet,
+    useMfaEnrollment,
+    usePrivy,
+    User,
+    useWallets,
+} from "@privy-io/react-auth";
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -90,7 +96,11 @@ export function AccountDetails() {
     useEffect(() => {
         if (ready && wallets.length > 0) {
             setPrivyWallet(wallets.find((wallet) => wallet.walletClientType === "privy"));
-            setExternalWalletAddresses(wallets.filter((wallet) => wallet.walletClientType !== "privy").map((wallet) => wallet.address));
+            setExternalWalletAddresses(
+                wallets
+                    .filter((wallet) => wallet.walletClientType !== "privy")
+                    .map((wallet) => wallet.address)
+            );
         }
     }, [ready, wallets]);
 
@@ -159,15 +169,11 @@ export function AccountDetails() {
     };
 
     return (
-        <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="show"
-        >
+        <motion.div variants={containerVariants} initial="hidden" animate="show">
             {/* Privy Wallet Section */}
-            <div className="space-y-6 overflow-y-auto max-h-[calc(100vh-200px)]">
+            <div className="space-y-4 overflow-y-auto max-h-[calc(100vh-200px)]">
                 <motion.div variants={cardVariants}>
-                    <Card className="hover:shadow-md transition-shadow duration-200">
+                    <Card className="hover:shadow-md transition-shadow duration-200 rounded-3xl">
                         <CardHeader className="flex flex-row items-center justify-between">
                             <h2 className="text-xl font-semibold">Embedded Wallet</h2>
                         </CardHeader>
@@ -211,33 +217,38 @@ export function AccountDetails() {
 
                 {/* MFA Section */}
                 <motion.div variants={cardVariants}>
-                    <Card className="hover:shadow-md transition-shadow duration-200">
+                    <Card className="hover:shadow-md transition-shadow duration-200 rounded-3xl">
                         <CardHeader className="flex flex-row items-center justify-between">
-                            <h2 className="text-xl font-semibold">{user?.mfaMethods && user?.mfaMethods.length > 0 ? "(Enabled) Multi-Factor Authentication" : "Multi-Factor Authentication"}</h2>
+                            <h2 className="text-xl font-semibold">
+                                {user?.mfaMethods && user?.mfaMethods.length > 0
+                                    ? "(Enabled) Multi-Factor Authentication"
+                                    : "Multi-Factor Authentication"}
+                            </h2>
                         </CardHeader>
                         <CardContent className="flex items-center justify-between">
                             <div className="flex items-start gap-4">
                                 {user?.mfaMethods && user?.mfaMethods.length > 0 ? (
                                     user.mfaMethods.map((method) => (
                                         <p className="font-medium" key={method}>
-                                            {method === "totp" ? "Authenticator App" : method.toUpperCase()}
+                                            {method === "totp"
+                                                ? "Authenticator App"
+                                                : method.toUpperCase()}
                                         </p>
                                     ))
                                 ) : (
-                                    <p className="font-medium">
-                                        MFA is disabled
-                                    </p>
+                                    <p className="font-medium">MFA is disabled</p>
                                 )}
                             </div>
-                            {!user?.mfaMethods || user?.mfaMethods.length === 0 && (
-                                <Button
-                                    variant="ghost"
-                                    className="text-blue-600"
-                                    onClick={showMfaEnrollmentModal}
-                                >
-                                    Enable MFA
-                                </Button>
-                            )}
+                            {!user?.mfaMethods ||
+                                (user?.mfaMethods.length === 0 && (
+                                    <Button
+                                        variant="ghost"
+                                        className="text-blue-600"
+                                        onClick={showMfaEnrollmentModal}
+                                    >
+                                        Enable MFA
+                                    </Button>
+                                ))}
 
                             {user?.mfaMethods && user?.mfaMethods.length > 0 && (
                                 <Button
@@ -254,7 +265,7 @@ export function AccountDetails() {
 
                 {/* Emails Section */}
                 <motion.div variants={cardVariants}>
-                    <Card className="hover:shadow-md transition-shadow duration-200">
+                    <Card className="hover:shadow-md transition-shadow duration-200 rounded-3xl">
                         <CardHeader className="flex flex-row items-center justify-between">
                             <h2 className="text-xl font-semibold">Email</h2>
                         </CardHeader>
@@ -279,7 +290,9 @@ export function AccountDetails() {
                                                     <Copy
                                                         className="w-4 h-4 cursor-pointer text-gray-500 hover:text-gray-700"
                                                         onClick={() =>
-                                                            copyToClipboard(user?.email?.address || "")
+                                                            copyToClipboard(
+                                                                user?.email?.address || ""
+                                                            )
                                                         }
                                                     />
                                                 </motion.div>
@@ -323,7 +336,7 @@ export function AccountDetails() {
 
                 {/* Phone Numbers Section */}
                 <motion.div variants={cardVariants}>
-                    <Card className="hover:shadow-md transition-shadow duration-200">
+                    <Card className="hover:shadow-md transition-shadow duration-200 rounded-3xl">
                         <CardHeader className="flex flex-row items-center justify-between">
                             <h2 className="text-xl font-semibold">Phone number</h2>
                         </CardHeader>
@@ -383,7 +396,7 @@ export function AccountDetails() {
 
                 {/* Wallet Section */}
                 <motion.div variants={cardVariants}>
-                    <Card className="hover:shadow-md transition-shadow duration-200">
+                    <Card className="hover:shadow-md transition-shadow duration-200 rounded-3xl">
                         <CardHeader className="flex flex-row items-center justify-between">
                             <h2 className="text-xl font-semibold">External Wallets</h2>
                         </CardHeader>
@@ -391,46 +404,48 @@ export function AccountDetails() {
                             <div className="flex items-start gap-4">
                                 <Wallet className="w-5 h-5 mt-1 text-gray-500" />
                                 <div className="flex-1">
-                                    {externalWalletAddresses.length > 0 ? externalWalletAddresses.map((address) => (
-                                        <div key={address} className="flex items-center justify-between">
-                                            <div>
-                                                <div className="flex items-center gap-2">
-
-                                                    {address && (
-                                                        <Copy
-                                                            className="w-4 h-4 cursor-pointer text-gray-500 hover:text-gray-700"
-                                                            onClick={() =>
-                                                                copyToClipboard(address)
-                                                            }
-                                                        />
-                                                    )}
-                                                </div>
-                                            </div>
-                                            <motion.div
-                                                whileHover={{ scale: 1.05 }}
-                                                whileTap={{ scale: 0.95 }}
+                                    {externalWalletAddresses.length > 0 ? (
+                                        externalWalletAddresses.map((address) => (
+                                            <div
+                                                key={address}
+                                                className="flex items-center justify-between"
                                             >
-                                                <Button
-                                                    variant="ghost"
-                                                    className="text-blue-600"
-                                                    onClick={() =>
-                                                        handleUnlink(
-                                                            "wallet",
-                                                            address,
-                                                            unlinkWallet
-                                                        )
-                                                    }
-                                                    disabled={!canRemoveAccount}
+                                                <div>
+                                                    <div className="flex items-center gap-2">
+                                                        {address && (
+                                                            <Copy
+                                                                className="w-4 h-4 cursor-pointer text-gray-500 hover:text-gray-700"
+                                                                onClick={() =>
+                                                                    copyToClipboard(address)
+                                                                }
+                                                            />
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <motion.div
+                                                    whileHover={{ scale: 1.05 }}
+                                                    whileTap={{ scale: 0.95 }}
                                                 >
-                                                    Unlink
-                                                </Button>
-                                            </motion.div>
-                                        </div>
-                                    )) : (
+                                                    <Button
+                                                        variant="ghost"
+                                                        className="text-blue-600"
+                                                        onClick={() =>
+                                                            handleUnlink(
+                                                                "wallet",
+                                                                address,
+                                                                unlinkWallet
+                                                            )
+                                                        }
+                                                        disabled={!canRemoveAccount}
+                                                    >
+                                                        Unlink
+                                                    </Button>
+                                                </motion.div>
+                                            </div>
+                                        ))
+                                    ) : (
                                         <div className="flex items-center justify-between">
-                                            <p className="font-medium">
-                                                No wallet linked
-                                            </p>
+                                            <p className="font-medium">No wallet linked</p>
                                             <Button
                                                 variant="ghost"
                                                 className="text-blue-600"
@@ -460,7 +475,7 @@ export function AccountDetails() {
 
                 {/* Discord Section */}
                 <motion.div variants={cardVariants}>
-                    <Card className="hover:shadow-md transition-shadow duration-200">
+                    <Card className="hover:shadow-md transition-shadow duration-200 rounded-3xl">
                         <CardHeader className="flex flex-row items-center justify-between">
                             <h2 className="text-xl font-semibold">Discord</h2>
                         </CardHeader>
@@ -483,7 +498,9 @@ export function AccountDetails() {
                                                 <Copy
                                                     className="w-4 h-4 cursor-pointer text-gray-500 hover:text-gray-700"
                                                     onClick={() =>
-                                                        copyToClipboard(user?.discord?.username || "")
+                                                        copyToClipboard(
+                                                            user?.discord?.username || ""
+                                                        )
                                                     }
                                                 />
                                             )}
@@ -526,7 +543,7 @@ export function AccountDetails() {
 
                 {/* X Section */}
                 <motion.div variants={cardVariants}>
-                    <Card className="hover:shadow-md transition-shadow duration-200">
+                    <Card className="hover:shadow-md transition-shadow duration-200 rounded-3xl">
                         <CardHeader className="flex flex-row items-center justify-between">
                             <h2 className="text-xl font-semibold">X</h2>
                         </CardHeader>
@@ -549,7 +566,9 @@ export function AccountDetails() {
                                                 <Copy
                                                     className="w-4 h-4 cursor-pointer text-gray-500 hover:text-gray-700"
                                                     onClick={() =>
-                                                        copyToClipboard(user?.twitter?.username || "")
+                                                        copyToClipboard(
+                                                            user?.twitter?.username || ""
+                                                        )
                                                     }
                                                 />
                                             )}
@@ -592,7 +611,7 @@ export function AccountDetails() {
 
                 {/* Google Section */}
                 <motion.div variants={cardVariants}>
-                    <Card className="hover:shadow-md transition-shadow duration-200">
+                    <Card className="hover:shadow-md transition-shadow duration-200 rounded-3xl">
                         <CardHeader className="flex flex-row items-center justify-between">
                             <h2 className="text-xl font-semibold">Google</h2>
                         </CardHeader>
@@ -658,7 +677,7 @@ export function AccountDetails() {
 
                 {/* Network Section */}
                 <motion.div variants={cardVariants}>
-                    <Card className="hover:shadow-md transition-shadow duration-200 mb-60">
+                    <Card className="hover:shadow-md transition-shadow duration-200 rounded-3xl mb-60">
                         <CardHeader className="flex flex-row items-center justify-between">
                             <h2 className="text-xl font-semibold">Networks</h2>
                         </CardHeader>
@@ -685,7 +704,10 @@ export function AccountDetails() {
                                     {config.chains.map((chain) => (
                                         <SelectItem key={chain.id} value={chain.id.toString()}>
                                             <div className="flex items-center space-x-3">
-                                                <NetworkIcon chain={chain.name} className="w-6 h-6" />
+                                                <NetworkIcon
+                                                    chain={chain.name}
+                                                    className="w-6 h-6"
+                                                />
                                                 <div>
                                                     <p className="font-medium">{chain.name}</p>
                                                 </div>
