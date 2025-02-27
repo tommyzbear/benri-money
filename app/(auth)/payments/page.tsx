@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { ContactSearchBar } from "@/components/contacts/contact-search-bar";
 import { ContactList } from "@/components/contacts/contact-list";
 import { cn } from "@/lib/utils";

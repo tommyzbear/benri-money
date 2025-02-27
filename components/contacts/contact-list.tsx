@@ -33,11 +33,11 @@ export function ContactList({ friendSearchQuery }: ContactListProps) {
 
     const filteredFriends = friendSearchQuery
         ? friends.filter(
-              (friend) =>
-                  friend.username?.toLowerCase().includes(friendSearchQuery.toLowerCase()) ||
-                  friend.email?.toLowerCase().includes(friendSearchQuery.toLowerCase()) ||
-                  friend.wallet?.toLowerCase().includes(friendSearchQuery.toLowerCase())
-          )
+            (friend) =>
+                friend.username?.toLowerCase().includes(friendSearchQuery.toLowerCase()) ||
+                friend.email?.toLowerCase().includes(friendSearchQuery.toLowerCase()) ||
+                friend.wallet?.toLowerCase().includes(friendSearchQuery.toLowerCase())
+        )
         : friends;
 
     useEffect(() => {
