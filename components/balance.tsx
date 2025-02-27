@@ -14,7 +14,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { useBalanceVisibilityStore } from "@/stores/use-balance-visibility-store";
 import { formatValue } from "@/lib/utils";
-import { TokenData } from "@/app/services/alchemy";
+import { TokenData } from "@/services/alchemy";
 import { DepositDialog } from "./dialogs/deposit-dialog";
 import { NetworkIcon } from "./network-icon";
 

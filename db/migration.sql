@@ -70,6 +70,7 @@ CREATE TABLE transaction_history (
     -- Chain ID
     chain VARCHAR(50) NOT NULL,
     token_name VARCHAR(255) NOT NULL,
+    decimals INT4 NOT NULL DEFAULT 18,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE TABLE payment_requests (

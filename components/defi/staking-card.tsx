@@ -16,7 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ConnectedWallet } from "@privy-io/react-auth";
 
 import { Chain, createPublicClient, encodeFunctionData, http } from "viem";
-import { StakeKitClient, YieldOpportunity } from "@/app/services/stakekit";
+import { StakeKitClient, YieldOpportunity } from "@/services/stakekit";
 import { Loader2, CheckCircle2, XCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import React from "react";

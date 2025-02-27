@@ -4,21 +4,13 @@ import {
     getEthBalanceTokenData,
     TokenData,
     literalChainToAlchemyChain,
-} from "@/app/services/alchemy";
-import { privyClient } from "@/lib/privy";
-import { cookies } from "next/headers";
+} from "@/services/alchemy";
+import { privy } from "@/lib/privy";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
     try {
-        const cookieStore = cookies();
-        const cookieAuthToken = cookieStore.get("privy-token");
-
-        if (!cookieAuthToken) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-        const claims = await privyClient.verifyAuthToken(cookieAuthToken.value);
-
-        if (!claims) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        await privy.getClaims();
 
         const { searchParams } = new URL(request.url);
         const address = searchParams.get("address");

@@ -2,7 +2,7 @@
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useEffect } from "react";
-import { Contact } from "@/types/search";
+import { Contact } from "@/types/data";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
 import { blo } from "blo";
@@ -140,7 +140,7 @@ export function SelectFriendDialog({ open, onOpenChange, onFriendSelect }: Selec
                                                             <div className="flex items-center w-full">
                                                                 <div className="flex items-center space-x-3 flex-1">
                                                                     <Image
-                                                                        src={blo(friend.wallet as `0x${string}`)}
+                                                                        src={friend.profileImg ? friend.profileImg : blo(friend.wallet as `0x${string}`)}
                                                                         alt={friend.wallet}
                                                                         width={40}
                                                                         height={40}

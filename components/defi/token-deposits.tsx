@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ConnectedWallet } from "@privy-io/react-auth";
 import { Chain } from "viem";
-import { StakeKitClient, BalanceResponse } from "@/app/services/stakekit";
+import { StakeKitClient, BalanceResponse } from "@/services/stakekit";
 import { Loader2, ArrowUpRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
@@ -41,13 +41,13 @@ export function TokenDeposits({ wallet, smartWalletClient, chains, refreshTrigge
         console.log("Fetching yield balances for address:", smartWalletClient.account.address);
         const balances = await stakeKitClient.getYieldBalance(smartWalletClient.account.address);
         console.log("Received yield balances:", balances);
-        
+
         // Filter out deposits with zero or negative value
         const nonZeroBalances = balances.filter(deposit => {
           const amount = parseFloat(deposit.amount);
           return amount > 0.0001;
         });
-        
+
         // Fetch APY for each deposit
         const balancesWithApy = await Promise.all(
           nonZeroBalances.map(async (deposit) => {
@@ -60,7 +60,7 @@ export function TokenDeposits({ wallet, smartWalletClient, chains, refreshTrigge
             }
           })
         );
-        
+
         setDeposits(balancesWithApy);
       } catch (error) {
         console.error("Error fetching yield balances:", error);
@@ -208,14 +208,14 @@ export function TokenDeposits({ wallet, smartWalletClient, chains, refreshTrigge
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">Your Staked Assets</h3>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {deposits.map((deposit) => {
           // Calculate the USD value if possible
-          const usdValue = deposit.pricePerShare 
-            ? parseFloat(deposit.amount) * parseFloat(deposit.pricePerShare) 
+          const usdValue = deposit.pricePerShare
+            ? parseFloat(deposit.amount) * parseFloat(deposit.pricePerShare)
             : 0;
-            
+
           return (
             <Card key={deposit.integrationId} className="overflow-hidden">
               <CardContent className="p-0">
@@ -223,9 +223,9 @@ export function TokenDeposits({ wallet, smartWalletClient, chains, refreshTrigge
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-2">
                       {deposit.token.logoURI && (
-                        <img 
-                          src={deposit.token.logoURI} 
-                          alt={deposit.token.symbol} 
+                        <img
+                          src={deposit.token.logoURI}
+                          alt={deposit.token.symbol}
                           className="w-8 h-8 rounded-full"
                         />
                       )}
@@ -239,7 +239,7 @@ export function TokenDeposits({ wallet, smartWalletClient, chains, refreshTrigge
                     </Badge>
                   </div>
                 </div>
-                
+
                 <div className="p-4 space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
@@ -255,7 +255,7 @@ export function TokenDeposits({ wallet, smartWalletClient, chains, refreshTrigge
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <p className="text-sm text-muted-foreground">Network</p>
@@ -268,7 +268,7 @@ export function TokenDeposits({ wallet, smartWalletClient, chains, refreshTrigge
                       </p>
                     </div>
                   </div>
-                  
+
                   {deposit.pendingActions && deposit.pendingActions.length > 0 && (
                     <div>
                       <p className="text-sm text-muted-foreground">Pending</p>
@@ -277,11 +277,11 @@ export function TokenDeposits({ wallet, smartWalletClient, chains, refreshTrigge
                       </p>
                     </div>
                   )}
-                  
+
                   <div className="flex gap-2 mt-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
+                    <Button
+                      variant="outline"
+                      size="sm"
                       className="flex-1"
                       onClick={() => handleUnstake(deposit.integrationId, deposit.amount)}
                     >

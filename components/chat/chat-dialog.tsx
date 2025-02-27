@@ -89,7 +89,7 @@ export function ChatDialog({ open, onOpenChange, contact, user }: ChatDialogProp
             sender: user.id,
             receiver: contact.id,
             message_type: "message",
-            amount: BigInt(0),
+            amount: 0n.toString(10), // JSON can't serialize bigint
         };
         setInputValue("");
 
@@ -134,12 +134,12 @@ export function ChatDialog({ open, onOpenChange, contact, user }: ChatDialogProp
             <Dialog open={open} onOpenChange={onOpenChange}>
                 <DialogContent
                     className={cn(
-                        "sm:max-w-[425px] [&>button]:hidden",
+                        "sm:max-w-[1024px] [&>button]:hidden",
                         "h-[100dvh]",
                         "p-0 px-4",
                         "gap-0",
                         "border-0",
-                        "bg-background",
+                        "sm:bg-transparent bg-background",
                         "transition-all",
                         "data-[state=open]:animate-in",
                         "data-[state=closed]:animate-out",

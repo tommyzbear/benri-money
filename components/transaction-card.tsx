@@ -1,4 +1,4 @@
-import { formatEther } from "viem";
+import { formatUnits } from "viem";
 import { motion } from "framer-motion";
 import { ProfileImgMask } from "@/components/profile/profile-img-mask";
 import { TransactionHistory } from "@/types/data";
@@ -6,6 +6,7 @@ import { CheckCheck } from "lucide-react";
 import { PaperPlaneTilt } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { blo } from "blo";
+import { config } from "@/lib/wallet/config";
 interface TransactionCardProps {
     tx: TransactionHistory;
     userId?: string;
@@ -20,9 +21,7 @@ export function TransactionCard({ tx, userId, index }: TransactionCardProps) {
             transition={{ delay: index * 0.1 }}
             onClick={() => {
                 window.open(
-                    tx.chain === "Base Sepolia"
-                        ? `https://sepolia.basescan.org/tx/${tx.tx}`
-                        : `https://sepolia.etherscan.io/tx/${tx.tx}`,
+                    config.chains.find((chain) => chain.id === tx.chain_id)?.blockExplorers.default?.url + "/tx/" + tx.tx,
                     "_blank"
                 );
             }}
@@ -60,7 +59,7 @@ export function TransactionCard({ tx, userId, index }: TransactionCardProps) {
                     </p>
                     <p className="text-muted-foreground font-bold tracking-tight">
                         {tx.from_account_id === userId ? "-" : "+"}
-                        {formatEther(BigInt(tx.amount))} {tx.token_name}
+                        {formatUnits(BigInt(tx.amount), tx.decimals)} {tx.token_name}
                     </p>
                 </div>
             </div>

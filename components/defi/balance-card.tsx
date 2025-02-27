@@ -10,7 +10,7 @@ import {
 import { NetworkIcon } from "@/components/network-icon";
 import { formatValue } from "@/lib/utils";
 import { Chain } from "@wagmi/core/chains";
-import { TokenData } from "@/app/services/alchemy";
+import { TokenData } from "@/services/alchemy";
 import { cn } from "@/lib/utils";
 
 interface BalanceCardProps {
