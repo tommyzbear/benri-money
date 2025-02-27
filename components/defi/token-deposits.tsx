@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ConnectedWallet } from "@privy-io/react-auth";
 import { Chain } from "viem";
-import { StakeKitClient, BalanceResponse } from "@/app/services/stakekit";
+import { StakeKitClient, BalanceResponse } from "@/services/stakekit";
 import { Loader2, ArrowUpRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
@@ -34,19 +34,19 @@ export function TokenDeposits({ wallet, chains, refreshTrigger = 0, onTransactio
   useEffect(() => {
     const fetchDeposits = async () => {
       if (!wallet?.address) return;
-      
+
       setIsLoading(true);
       try {
         console.log("Fetching yield balances for address:", wallet.address);
         const balances = await stakeKitClient.getYieldBalance(wallet.address);
         console.log("Received yield balances:", balances);
-        
+
         // Filter out deposits with zero or negative value
         const nonZeroBalances = balances.filter(deposit => {
           const amount = parseFloat(deposit.amount);
           return amount > 0.0001;
         });
-        
+
         // Fetch APY for each deposit
         const balancesWithApy = await Promise.all(
           nonZeroBalances.map(async (deposit) => {
@@ -59,7 +59,7 @@ export function TokenDeposits({ wallet, chains, refreshTrigger = 0, onTransactio
             }
           })
         );
-        
+
         setDeposits(balancesWithApy);
       } catch (error) {
         console.error("Error fetching yield balances:", error);
@@ -78,13 +78,13 @@ export function TokenDeposits({ wallet, chains, refreshTrigger = 0, onTransactio
 
   const handleUnstake = async (integrationId: string, amount: string) => {
     if (!wallet?.address) return;
-    
+
     try {
       toast({
         title: "Unstaking",
         description: "Preparing unstaking transaction...",
       });
-      
+
       const session = await stakeKitClient.createExitRequest(integrationId, wallet.address, amount);
       console.log("Session:", session);
       const provider = await wallet?.getEthereumProvider();
@@ -93,22 +93,22 @@ export function TokenDeposits({ wallet, chains, refreshTrigger = 0, onTransactio
         console.log("Tx:", tx);
         let unsignedTx;
         for (let i = 0; i < 3; i++) {
-            try {
-                unsignedTx = await stakeKitClient.request('PATCH', `/v1/transactions/${tx.id}`, {});
-                break;
-            } catch (err) {
-                console.log(`Attempt ${i + 1} => retrying...`);
-                await new Promise(r => setTimeout(r, 500));
-            }
+          try {
+            unsignedTx = await stakeKitClient.request('PATCH', `/v1/transactions/${tx.id}`, {});
+            break;
+          } catch (err) {
+            console.log(`Attempt ${i + 1} => retrying...`);
+            await new Promise(r => setTimeout(r, 500));
+          }
         }
         if (unsignedTx) {
-            unsignedTxs.push({
-                ...tx,
-                unsignedTransaction: unsignedTx.unsignedTransaction
-            });
+          unsignedTxs.push({
+            ...tx,
+            unsignedTransaction: unsignedTx.unsignedTransaction
+          });
         }
       }
-      
+
       const txHashes = [];
       for (const tx of unsignedTxs) {
         try {
@@ -119,12 +119,12 @@ export function TokenDeposits({ wallet, chains, refreshTrigger = 0, onTransactio
           } catch (nonceError) {
             console.warn("Error updating nonce, continuing with original:", nonceError);
           }
-          
+
           const txHash = await provider?.request({
             method: 'eth_sendTransaction',
             params: [jsonTx]
           });
-          
+
           if (txHash) {
             txHashes.push(txHash);
             try {
@@ -143,12 +143,12 @@ export function TokenDeposits({ wallet, chains, refreshTrigger = 0, onTransactio
           return;
         }
       }
-      
+
       toast({
         title: "Unstaking successful",
         description: `Your assets have been unstaked. Transaction${txHashes.length > 1 ? 's' : ''}: ${txHashes.join(', ')}`,
       });
-      
+
       if (onTransactionSuccess) {
         setTimeout(onTransactionSuccess, 2000);
       }
@@ -194,14 +194,14 @@ export function TokenDeposits({ wallet, chains, refreshTrigger = 0, onTransactio
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">Your Staked Assets</h3>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {deposits.map((deposit) => {
           // Calculate the USD value if possible
-          const usdValue = deposit.pricePerShare 
-            ? parseFloat(deposit.amount) * parseFloat(deposit.pricePerShare) 
+          const usdValue = deposit.pricePerShare
+            ? parseFloat(deposit.amount) * parseFloat(deposit.pricePerShare)
             : 0;
-            
+
           return (
             <Card key={deposit.integrationId} className="overflow-hidden">
               <CardContent className="p-0">
@@ -209,9 +209,9 @@ export function TokenDeposits({ wallet, chains, refreshTrigger = 0, onTransactio
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-2">
                       {deposit.token.logoURI && (
-                        <img 
-                          src={deposit.token.logoURI} 
-                          alt={deposit.token.symbol} 
+                        <img
+                          src={deposit.token.logoURI}
+                          alt={deposit.token.symbol}
                           className="w-8 h-8 rounded-full"
                         />
                       )}
@@ -225,7 +225,7 @@ export function TokenDeposits({ wallet, chains, refreshTrigger = 0, onTransactio
                     </Badge>
                   </div>
                 </div>
-                
+
                 <div className="p-4 space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
@@ -241,7 +241,7 @@ export function TokenDeposits({ wallet, chains, refreshTrigger = 0, onTransactio
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <p className="text-sm text-muted-foreground">Network</p>
@@ -254,7 +254,7 @@ export function TokenDeposits({ wallet, chains, refreshTrigger = 0, onTransactio
                       </p>
                     </div>
                   </div>
-                  
+
                   {deposit.pendingActions && deposit.pendingActions.length > 0 && (
                     <div>
                       <p className="text-sm text-muted-foreground">Pending</p>
@@ -263,11 +263,11 @@ export function TokenDeposits({ wallet, chains, refreshTrigger = 0, onTransactio
                       </p>
                     </div>
                   )}
-                  
+
                   <div className="flex gap-2 mt-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
+                    <Button
+                      variant="outline"
+                      size="sm"
                       className="flex-1"
                       onClick={() => handleUnstake(deposit.integrationId, deposit.amount)}
                     >

@@ -1,23 +1,11 @@
-import { privyClient } from "@/lib/privy";
-import { cookies } from "next/headers";
+import { privy } from "@/lib/privy";
 import { NextResponse } from "next/server";
-import { OnrampSessionResource, stripe } from "@/app/services/stripe";
+import { OnrampSessionResource, stripe } from "@/services/stripe";
 
 export async function POST(request: Request) {
     const forwarded = request.headers.get('x-forwarded-for');
     try {
-        const cookieStore = cookies();
-        const cookieAuthToken = cookieStore.get("privy-token");
-
-        if (!cookieAuthToken) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-
-        const claims = await privyClient.verifyAuthToken(cookieAuthToken.value);
-        if (!claims) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-
+        await privy.getClaims();
         const req = await request.json();
         const { transaction_details } = req;
 

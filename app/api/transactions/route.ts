@@ -1,23 +1,11 @@
-import { privyClient } from "@/lib/privy";
+import { privy } from "@/lib/privy";
 import { supabase } from "@/lib/supabase";
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { TransactionHistory } from "@/types/data";
 
 export async function POST(request: Request) {
     try {
-        const cookieStore = cookies();
-        const cookieAuthToken = cookieStore.get("privy-token");
-
-        if (!cookieAuthToken) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
-
-        const claims = await privyClient.verifyAuthToken(cookieAuthToken.value);
-
-        if (!claims) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
+        await privy.getClaims();
 
         const transaction: Omit<TransactionHistory, "id" | "amount" | "created_at"> & {
             amount: string;
@@ -65,18 +53,7 @@ export async function POST(request: Request) {
 
 export async function GET(request: Request) {
     try {
-        const cookieStore = cookies();
-        const cookieAuthToken = cookieStore.get("privy-token");
-
-        if (!cookieAuthToken) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
-
-        const claims = await privyClient.verifyAuthToken(cookieAuthToken.value);
-
-        if (!claims) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
+        const claims = await privy.getClaims();
 
         const { data, error } = await supabase
             .from("transaction_history")

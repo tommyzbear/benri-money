@@ -2,7 +2,7 @@
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useEffect } from "react";
-import { Contact } from "@/types/search";
+import { Contact } from "@/types/data";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
 import { blo } from "blo";

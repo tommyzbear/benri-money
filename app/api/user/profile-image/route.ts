@@ -1,23 +1,10 @@
-import { privyClient } from '@/lib/privy';
+import { privy } from '@/lib/privy';
 import { supabase } from '@/lib/supabase';
-import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
     try {
-
-        const cookieStore = cookies();
-        const cookieAuthToken = cookieStore.get("privy-token");
-
-        if (!cookieAuthToken) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-
-        const claims = await privyClient.verifyAuthToken(cookieAuthToken.value);
-
-        if (!claims) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
+        const claims = await privy.getClaims();
 
         // Get the file from form data
         const formData = await request.formData();
