@@ -2,6 +2,8 @@
 
 import { PrivyProvider } from "@privy-io/react-auth";
 import { mainnet, base, polygon } from "viem/chains";
+import {SmartWalletsProvider} from '@privy-io/react-auth/smart-wallets';
+
 export default function Providers({ children }: { children: React.ReactNode }) {
     return (
         <PrivyProvider
@@ -17,7 +19,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
                 },
                 // Create embedded wallets for users who don't have a wallet
                 embeddedWallets: {
-                    createOnLogin: "users-without-wallets", // defaults to 'off'
+                    createOnLogin: "all-users", // defaults to 'off'
                 },
                 // externalWallets: {
                 //     solana: {
@@ -35,7 +37,10 @@ export default function Providers({ children }: { children: React.ReactNode }) {
                 },
             }}
         >
-            {children}
+            <SmartWalletsProvider
+            >
+                {children}
+            </SmartWalletsProvider>
         </PrivyProvider>
     );
 }

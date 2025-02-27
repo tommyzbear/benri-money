@@ -13,12 +13,13 @@ import { formatValue } from "@/lib/utils";
 
 interface TokenDepositsProps {
   wallet?: ConnectedWallet;
+  smartWalletClient?: any; // Using any for now, but you can define a proper type
   chains: Array<Chain>;
   refreshTrigger?: number;
   onTransactionSuccess?: () => void;
 }
 
-export function TokenDeposits({ wallet, chains, refreshTrigger = 0, onTransactionSuccess }: TokenDepositsProps) {
+export function TokenDeposits({ wallet, smartWalletClient, chains, refreshTrigger = 0, onTransactionSuccess }: TokenDepositsProps) {
   const [deposits, setDeposits] = useState<BalanceResponse[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -33,12 +34,12 @@ export function TokenDeposits({ wallet, chains, refreshTrigger = 0, onTransactio
   // Fetch user's yield balances
   useEffect(() => {
     const fetchDeposits = async () => {
-      if (!wallet?.address) return;
+      if (!smartWalletClient) return;
       
       setIsLoading(true);
       try {
-        console.log("Fetching yield balances for address:", wallet.address);
-        const balances = await stakeKitClient.getYieldBalance(wallet.address);
+        console.log("Fetching yield balances for address:", smartWalletClient.account.address);
+        const balances = await stakeKitClient.getYieldBalance(smartWalletClient.account.address);
         console.log("Received yield balances:", balances);
         
         // Filter out deposits with zero or negative value
@@ -77,7 +78,10 @@ export function TokenDeposits({ wallet, chains, refreshTrigger = 0, onTransactio
   }, [wallet?.address, stakeKitClient, toast, refreshTrigger]);
 
   const handleUnstake = async (integrationId: string, amount: string) => {
-    if (!wallet?.address) return;
+    const useSmartWallet = !!smartWalletClient;
+    const walletAddress = useSmartWallet ? smartWalletClient.account.address : wallet?.address;
+    
+    if (!walletAddress) return;
     
     try {
       toast({
@@ -85,73 +89,83 @@ export function TokenDeposits({ wallet, chains, refreshTrigger = 0, onTransactio
         description: "Preparing unstaking transaction...",
       });
       
-      const session = await stakeKitClient.createExitRequest(integrationId, wallet.address, amount);
+      const session = await stakeKitClient.createExitRequest(integrationId, walletAddress, amount);
       console.log("Session:", session);
-      const provider = await wallet?.getEthereumProvider();
-      const unsignedTxs = [];
-      for (const tx of session.transactions) {
-        console.log("Tx:", tx);
-        let unsignedTx;
-        for (let i = 0; i < 3; i++) {
-            try {
-                unsignedTx = await stakeKitClient.request('PATCH', `/v1/transactions/${tx.id}`, {});
-                break;
-            } catch (err) {
-                console.log(`Attempt ${i + 1} => retrying...`);
-                await new Promise(r => setTimeout(r, 500));
-            }
-        }
-        if (unsignedTx) {
-            unsignedTxs.push({
-                ...tx,
-                unsignedTransaction: unsignedTx.unsignedTransaction
-            });
-        }
+      
+      // Filter out skipped transactions
+      const activeTransactions = session.transactions.filter((tx) => tx.status !== "SKIPPED");
+      
+      if (activeTransactions.length === 0) {
+        throw new Error("No valid transactions to process");
       }
       
-      const txHashes = [];
-      for (const tx of unsignedTxs) {
-        try {
-          const jsonTx = JSON.parse(tx.unsignedTransaction);
-          try {
-            delete jsonTx.nonce;
-            console.log("Sending unstaking transaction with wallet-determined nonce");
-          } catch (nonceError) {
-            console.warn("Error updating nonce, continuing with original:", nonceError);
+      if (useSmartWallet) {
+        // SMART WALLET BATCH TRANSACTION APPROACH
+        const transactionCalls = [];
+        
+        // Prepare all transactions for batch processing
+        for (const tx of activeTransactions) {
+          let unsignedTx;
+          for (let i = 0; i < 3; i++) {
+            try {
+              unsignedTx = await stakeKitClient.request('PATCH', `/v1/transactions/${tx.id}`, {});
+              break;
+            } catch (err) {
+              console.log(`Attempt ${i + 1} => retrying...`);
+              await new Promise(r => setTimeout(r, 500));
+              if (i === 2) throw err; // Throw on last retry
+            }
           }
           
-          const txHash = await provider?.request({
-            method: 'eth_sendTransaction',
-            params: [jsonTx]
+          if (!unsignedTx || !unsignedTx.unsignedTransaction) {
+            console.error("Failed to get unsigned transaction data", tx);
+            throw new Error(`Failed to prepare transaction`);
+          }
+          
+          // Parse JSON transaction
+          const jsonTx = JSON.parse(unsignedTx.unsignedTransaction);
+          
+          // Add to batch calls
+          transactionCalls.push({
+            to: jsonTx.to,
+            data: jsonTx.data,
+            value: jsonTx.value || "0x0"
+          });
+        }
+        
+        // Send batch transaction
+        try {
+          const result = await smartWalletClient.sendTransaction({
+            account: smartWalletClient.account,
+            calls: transactionCalls
           });
           
-          if (txHash) {
-            txHashes.push(txHash);
+          const txHash = result.hash;
+          console.log("Batch transaction sent:", txHash);
+          
+          // Submit transaction hash to StakeKit for all transactions
+          for (const tx of activeTransactions) {
             try {
               await stakeKitClient.submitTransactionHash(tx.id, txHash);
             } catch (submitError) {
               console.warn("Error submitting transaction hash:", submitError);
+              // Continue anyway - the transaction is on-chain regardless
             }
           }
-        } catch (error) {
-          console.error("Error sending transaction:", error);
+          
           toast({
-            title: "Error",
-            description: `Failed to send transaction: ${error instanceof Error ? error.message : "Unknown error"}`,
-            variant: "destructive",
+            title: "Unstaking successful",
+            description: `Your assets have been unstaked. Transaction: ${txHash}`,
           });
-          return;
+          
+        } catch (txError) {
+          console.error("Smart wallet batch transaction error:", txError);
+          throw new Error(
+            `Batch transaction failed: ${txError.message || "Unknown error"}`
+          );
         }
-      }
+      } 
       
-      toast({
-        title: "Unstaking successful",
-        description: `Your assets have been unstaked. Transaction${txHashes.length > 1 ? 's' : ''}: ${txHashes.join(', ')}`,
-      });
-      
-      if (onTransactionSuccess) {
-        setTimeout(onTransactionSuccess, 2000);
-      }
 
     } catch (error) {
       console.error("Error unstaking:", error);

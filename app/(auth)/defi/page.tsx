@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { ConnectedWallet, usePrivy, useWallets } from "@privy-io/react-auth";
+import { useSmartWallets } from "@privy-io/react-auth/smart-wallets";
 import { config } from "@/lib/wallet/config";
 import { SwapCard } from "@/components/defi/swap-card";
 import { StakingCard } from "@/components/defi/staking-card";
@@ -12,33 +13,48 @@ import { cn } from "@/lib/utils";
 import { TokenDeposits } from "@/components/defi/token-deposits";
 
 export default function DeFiPage() {
-    const { ready } = usePrivy();
+    const { ready, user } = usePrivy();
     const { wallets } = useWallets();
+    const { client: smartWalletClient } = useSmartWallets();
     const { fetchBalances, balances, totalBalance } = useWalletStore();
     const [activeWallet, setActiveWallet] = useState<ConnectedWallet | undefined>();
     const [refreshTrigger, setRefreshTrigger] = useState(0);
-
+    
+    const smartWallet = user?.linkedAccounts.find((account) => account.type === 'smart_wallet');
+    
     // Function to refresh data (balances and deposits)
     const refreshData = useCallback(() => {
         // Increment refresh trigger to force effects to run
         setRefreshTrigger((prev) => prev + 1);
 
         // Refresh wallet balances
-        if (activeWallet?.address) {
-            fetchBalances(activeWallet.address);
+        // if (activeWallet?.address) {
+        //     fetchBalances(activeWallet.address);
+        // }
+        
+        // If we have a smart wallet, also fetch its balances
+        if (smartWalletClient?.account.address) {
+            fetchBalances(smartWalletClient.account.address);
         }
-    }, [activeWallet, fetchBalances]);
+    }, [fetchBalances, smartWalletClient]);
 
     useEffect(() => {
         if (!ready || !wallets.length) return;
 
+        //log wallets object
+        console.log(`wallets: ${JSON.stringify(wallets)}`);
         const privyWallet = wallets.find((w) => w.walletClientType === "privy");
         setActiveWallet(privyWallet);
 
-        if (privyWallet?.address) {
-            fetchBalances(privyWallet.address);
+        // if (privyWallet?.address) {
+        //     fetchBalances(privyWallet.address);
+        // }
+        
+        // Also fetch smart wallet balances if available
+        if (smartWalletClient?.account.address) {
+            fetchBalances(smartWalletClient.account.address);
         }
-    }, [ready, wallets, fetchBalances]);
+    }, [ready, wallets, fetchBalances, smartWalletClient]);
 
     return (
         <div
@@ -65,6 +81,7 @@ export default function DeFiPage() {
                     <TabsContent value="swap">
                         <SwapCard
                             wallet={activeWallet}
+                            smartWalletClient={smartWalletClient}
                             chains={config.chains}
                             onTransactionSuccess={refreshData}
                         />
@@ -73,6 +90,7 @@ export default function DeFiPage() {
                     <TabsContent value="stake">
                         <StakingCard
                             wallet={activeWallet}
+                            smartWalletClient={smartWalletClient}
                             chains={config.chains}
                             onTransactionSuccess={refreshData}
                         />
@@ -83,6 +101,7 @@ export default function DeFiPage() {
             <div className="mt-8">
                 <TokenDeposits
                     wallet={activeWallet}
+                    smartWalletClient={smartWalletClient}
                     chains={config.chains}
                     refreshTrigger={refreshTrigger}
                     onTransactionSuccess={refreshData}
