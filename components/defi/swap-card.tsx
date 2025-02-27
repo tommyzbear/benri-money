@@ -4,7 +4,13 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import { ArrowDownIcon } from "lucide-react";
 import { useWalletStore } from "@/stores/use-wallet-store";
 import { useToast } from "@/hooks/use-toast";
@@ -47,8 +53,20 @@ export function SwapCard({ wallet, chains, onTransactionSuccess }: SwapCardProps
             method: "POST",
             body: JSON.stringify({
                 chainId: selectedChain.id,
-                inputToken: { tokenAddress: fromToken.contractAddress === "" ? "0x0000000000000000000000000000000000000000" : fromToken.contractAddress, amount: ethers.utils.parseUnits(amount, fromToken.decimals).toString() },
-                outputToken: { tokenAddress: toToken.contractAddress === "" ? "0x0000000000000000000000000000000000000000" : toToken.contractAddress, proportion: 1 },
+                inputToken: {
+                    tokenAddress:
+                        fromToken.contractAddress === ""
+                            ? "0x0000000000000000000000000000000000000000"
+                            : fromToken.contractAddress,
+                    amount: ethers.utils.parseUnits(amount, fromToken.decimals).toString(),
+                },
+                outputToken: {
+                    tokenAddress:
+                        toToken.contractAddress === ""
+                            ? "0x0000000000000000000000000000000000000000"
+                            : toToken.contractAddress,
+                    proportion: 1,
+                },
                 userAddr: wallet.address,
             }),
         });
@@ -82,11 +100,14 @@ export function SwapCard({ wallet, chains, onTransactionSuccess }: SwapCardProps
             }
 
             const provider = await wallet.getEthereumProvider();
-            const spenderAddress = selectedChain.id === 1
-                ? odosClient.routerAddressByChain["eip155:1"] :
-                selectedChain.id === 137 ? odosClient.routerAddressByChain["eip155:137"] :
-                    selectedChain.id === 8453 ? odosClient.routerAddressByChain["eip155:8453"] :
-                        "";
+            const spenderAddress =
+                selectedChain.id === 1
+                    ? odosClient.routerAddressByChain["eip155:1"]
+                    : selectedChain.id === 137
+                    ? odosClient.routerAddressByChain["eip155:137"]
+                    : selectedChain.id === 8453
+                    ? odosClient.routerAddressByChain["eip155:8453"]
+                    : "";
 
             if (!spenderAddress) {
                 toast({
@@ -99,30 +120,33 @@ export function SwapCard({ wallet, chains, onTransactionSuccess }: SwapCardProps
 
             const data = encodeFunctionData({
                 abi: erc20Abi,
-                functionName: 'allowance',
-                args: [wallet?.address as `0x${string}`, spenderAddress]
+                functionName: "allowance",
+                args: [wallet?.address as `0x${string}`, spenderAddress],
             });
 
             const result = await provider?.request({
-                method: 'eth_call',
-                params: [{
-                    to: fromToken?.contractAddress,
-                    data: data,
-                    value: "0x0"
-                }]
+                method: "eth_call",
+                params: [
+                    {
+                        to: fromToken?.contractAddress,
+                        data: data,
+                        value: "0x0",
+                    },
+                ],
             });
 
             if (amount) {
                 console.log("result", result);
-                const allowance = ethers.utils.parseUnits(amount, fromToken?.decimals || 18).toBigInt();
+                const allowance = ethers.utils
+                    .parseUnits(amount, fromToken?.decimals || 18)
+                    .toBigInt();
                 if (BigInt(result) < allowance) {
                     setApproved(false);
-                }
-                else {
+                } else {
                     setApproved(true);
                 }
             }
-        }
+        };
 
         checkApproved();
     }, [approved, wallet, fromToken, selectedChain, amount]);
@@ -130,11 +154,14 @@ export function SwapCard({ wallet, chains, onTransactionSuccess }: SwapCardProps
     const handleApprove = async () => {
         const provider = await wallet?.getEthereumProvider();
 
-        const spenderAddress = selectedChain.id === 1
-            ? odosClient.routerAddressByChain["eip155:1"] :
-            selectedChain.id === 137 ? odosClient.routerAddressByChain["eip155:137"] :
-                selectedChain.id === 8453 ? odosClient.routerAddressByChain["eip155:8453"] :
-                    "";
+        const spenderAddress =
+            selectedChain.id === 1
+                ? odosClient.routerAddressByChain["eip155:1"]
+                : selectedChain.id === 137
+                ? odosClient.routerAddressByChain["eip155:137"]
+                : selectedChain.id === 8453
+                ? odosClient.routerAddressByChain["eip155:8453"]
+                : "";
 
         if (!spenderAddress) {
             toast({
@@ -147,17 +174,22 @@ export function SwapCard({ wallet, chains, onTransactionSuccess }: SwapCardProps
 
         const data = encodeFunctionData({
             abi: erc20Abi,
-            functionName: 'approve',
-            args: [spenderAddress, ethers.utils.parseUnits(amount, fromToken?.decimals || 18).toBigInt()]
+            functionName: "approve",
+            args: [
+                spenderAddress,
+                ethers.utils.parseUnits(amount, fromToken?.decimals || 18).toBigInt(),
+            ],
         });
 
         const result = await provider?.request({
-            method: 'eth_sendTransaction',
-            params: [{
-                to: fromToken?.contractAddress,
-                data: data,
-                value: "0x0"
-            }],
+            method: "eth_sendTransaction",
+            params: [
+                {
+                    to: fromToken?.contractAddress,
+                    data: data,
+                    value: "0x0",
+                },
+            ],
         });
 
         console.log("Approved tx", result);
@@ -167,7 +199,7 @@ export function SwapCard({ wallet, chains, onTransactionSuccess }: SwapCardProps
             title: "Approved",
             description: "Approved token spending in your wallet",
         });
-    }
+    };
 
     const handleSwap = async () => {
         if (!wallet || !amount || !fromToken || !toToken) {
@@ -198,10 +230,12 @@ export function SwapCard({ wallet, chains, onTransactionSuccess }: SwapCardProps
         const provider = await wallet?.getEthereumProvider();
 
         const result = await provider?.request({
-            method: 'eth_sendTransaction',
-            params: [{
-                ...data.transaction
-            }],
+            method: "eth_sendTransaction",
+            params: [
+                {
+                    ...data.transaction,
+                },
+            ],
         });
 
         console.log("Swap tx", result);
@@ -214,7 +248,7 @@ export function SwapCard({ wallet, chains, onTransactionSuccess }: SwapCardProps
         if (onTransactionSuccess) {
             setTimeout(onTransactionSuccess, 2000);
         }
-    }
+    };
 
     return (
         <Card>
@@ -222,7 +256,12 @@ export function SwapCard({ wallet, chains, onTransactionSuccess }: SwapCardProps
                 <CardTitle>Swap Tokens</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-                <Select value={selectedChain.name} onValueChange={(value) => setSelectedChain(chains.find((chain) => chain.name === value) || chains[0])}>
+                <Select
+                    value={selectedChain.name}
+                    onValueChange={(value) =>
+                        setSelectedChain(chains.find((chain) => chain.name === value) || chains[0])
+                    }
+                >
                     <SelectTrigger>
                         <SelectValue placeholder="Select Chain" />
                     </SelectTrigger>
@@ -242,7 +281,16 @@ export function SwapCard({ wallet, chains, onTransactionSuccess }: SwapCardProps
                         onChange={(e) => setAmount(e.target.value)}
                         type="number"
                     />
-                    <Select value={fromToken?.symbol} onValueChange={(value) => setFromToken(balances[selectedChain.name]?.find((token) => token.symbol === value) || null)}>
+                    <Select
+                        value={fromToken?.symbol}
+                        onValueChange={(value) =>
+                            setFromToken(
+                                balances[selectedChain.name]?.find(
+                                    (token) => token.symbol === value
+                                ) || null
+                            )
+                        }
+                    >
                         <SelectTrigger>
                             <SelectValue placeholder="From Token" />
                         </SelectTrigger>
@@ -257,29 +305,46 @@ export function SwapCard({ wallet, chains, onTransactionSuccess }: SwapCardProps
                 </div>
 
                 <div className="flex justify-center">
-                    <Button variant="ghost" size="icon" onClick={() => {
-                        const temp = fromToken;
-                        setFromToken(toToken);
-                        setToToken(temp);
-                    }}>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                            const temp = fromToken;
+                            setFromToken(toToken);
+                            setToToken(temp);
+                        }}
+                    >
                         <ArrowDownIcon className="h-6 w-6" />
                     </Button>
                 </div>
 
                 <div className="space-y-2">
                     <Input placeholder="0.0" disabled value="" />
-                    <Select value={toToken?.symbol} onValueChange={(value) => setToToken(balances[selectedChain.name]?.find((token) => token.symbol === value) || null)}>
+                    <Select
+                        value={toToken?.symbol}
+                        onValueChange={(value) =>
+                            setToToken(
+                                balances[selectedChain.name]?.find(
+                                    (token) => token.symbol === value
+                                ) || null
+                            )
+                        }
+                    >
                         <SelectTrigger>
                             <SelectValue placeholder="To Token" />
                         </SelectTrigger>
                         <SelectContent>
-                            {balances[selectedChain.name]?.map((token) => (
-                                token.symbol !== fromToken?.symbol && (
-                                    <SelectItem key={token.contractAddress} value={token.symbol}>
-                                        {token.symbol}
-                                    </SelectItem>
-                                )
-                            ))}
+                            {balances[selectedChain.name]?.map(
+                                (token) =>
+                                    token.symbol !== fromToken?.symbol && (
+                                        <SelectItem
+                                            key={token.contractAddress}
+                                            value={token.symbol}
+                                        >
+                                            {token.symbol}
+                                        </SelectItem>
+                                    )
+                            )}
                         </SelectContent>
                     </Select>
                 </div>
@@ -303,14 +368,11 @@ export function SwapCard({ wallet, chains, onTransactionSuccess }: SwapCardProps
                         </Button>
                     )
                 ) : (
-                    <Button
-                        className="w-full"
-                        onClick={handleApprove}
-                    >
+                    <Button className="w-full" onClick={handleApprove}>
                         Approve
                     </Button>
                 )}
             </CardContent>
         </Card>
     );
-} 
+}

@@ -2,7 +2,10 @@ import { formatEther } from "viem";
 import { motion } from "framer-motion";
 import { ProfileImgMask } from "@/components/profile/profile-img-mask";
 import { TransactionHistory } from "@/types/data";
-
+import { CheckCheck } from "lucide-react";
+import { PaperPlaneTilt } from "@phosphor-icons/react";
+import { cn } from "@/lib/utils";
+import { blo } from "blo";
 interface TransactionCardProps {
     tx: TransactionHistory;
     userId?: string;
@@ -23,12 +26,29 @@ export function TransactionCard({ tx, userId, index }: TransactionCardProps) {
                     "_blank"
                 );
             }}
-            className="h-28 p-5 flex items-center justify-start bg-white  border-0 cursor-pointer
+            className="h-24 p-5 flex items-center justify-start bg-white  border-0 cursor-pointer
                      hover:bg-slate-50 transition-colors duration-200 shadow-none"
         >
-            <div className="w-auto h-full py-1">
-                <ProfileImgMask fill="black" className="antialiased" />
-                {/* <ProfileImgMask imageUrl={tx.from_profile_img} fill="black" /> */}
+            <div className="w-auto h-full py-1 relative">
+                <ProfileImgMask
+                    imageUrl={blo(tx.from_account_id as `0x${string}`)}
+                    fill="hsl(var(--primary-foreground))"
+                    className="antialiased opacity-85"
+                />
+                <div
+                    className={cn(
+                        "absolute top-1/2 -translate-y-1/2 h-5 w-5",
+                        "-left-2 rounded-full p-1 shadow-sm border",
+                        "flex items-center justify-center",
+                        tx.from_account_id === userId ? "bg-chart-3" : "bg-green-200"
+                    )}
+                >
+                    {tx.from_account_id === userId ? (
+                        <PaperPlaneTilt size={20} weight="fill" className="text-red-500" />
+                    ) : (
+                        <CheckCheck className="w-4 h-4 text-green-500" />
+                    )}
+                </div>
             </div>
             <div className="ml-5 flex-1 min-w-0 space-y-1 font-roboto">
                 <h3 className="text-xl font-bold break-all line-clamp-2">

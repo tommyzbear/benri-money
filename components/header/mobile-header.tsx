@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Mail, Settings } from "lucide-react";
+import { Mailbox, Wrench } from "@phosphor-icons/react";
 import { Button } from "../ui/button";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { supabase } from "@/lib/supabase";
@@ -45,9 +45,21 @@ export function MobileHeader({ className }: MobileHeaderProps) {
         }
         fetchPendingRequests();
         if (totalBalance === undefined) {
-            fetchBalances(wallets.find((wallet) => wallet.walletClientType === "privy")?.address ?? wallets[0].address);
+            fetchBalances(
+                wallets.find((wallet) => wallet.walletClientType === "privy")?.address ??
+                    wallets[0].address
+            );
         }
-    }, [ready, fetchPendingRequests, fetchUser, fetchBalances, wallets, walletsReady]);
+    }, [
+        ready,
+        fetchPendingRequests,
+        fetchUser,
+        fetchBalances,
+        wallets,
+        walletsReady,
+        userStore,
+        totalBalance,
+    ]);
 
     useEffect(() => {
         const channel = supabase
@@ -88,7 +100,7 @@ export function MobileHeader({ className }: MobileHeaderProps) {
                                     type === "balance-sm" ? "left-0 top-0" : "left-0 top-0"
                                 )}
                             >
-                                <h3 className="header-text">balance</h3>
+                                <h3 className="header-text text-primary-foreground">balance</h3>
                             </div>
                             <div
                                 className={cn(
@@ -101,11 +113,11 @@ export function MobileHeader({ className }: MobileHeaderProps) {
                                 {!isTextScaled &&
                                     (type === "balance-sm" ? (
                                         <div className="absolute inset-0 flex items-center justify-end top-2">
-                                            <Skeleton className="h-8 w-4/5 bg-muted" />
+                                            <Skeleton className="h-8 w-4/5 bg-accent" />
                                         </div>
                                     ) : (
                                         <div className="absolute inset-0 flex items-center">
-                                            <Skeleton className="h-12 w-4/5 bg-muted" />
+                                            <Skeleton className="h-12 w-4/5 bg-accent" />
                                         </div>
                                     ))}
                                 <Textfit
@@ -115,7 +127,7 @@ export function MobileHeader({ className }: MobileHeaderProps) {
                                     max={type === "balance-sm" ? 24 : 40}
                                     onReady={() => setIsTextScaled(true)}
                                     className={cn(
-                                        "font-libre font-bold not-italic text-white h-full w-full transition-all duration-300",
+                                        "font-libre font-bold not-italic h-full w-full transition-all duration-300",
                                         type === "balance-sm" ? "text-right" : "text-left",
                                         !isTextScaled ? "opacity-0" : "animate-fade-in"
                                     )}
@@ -132,10 +144,10 @@ export function MobileHeader({ className }: MobileHeaderProps) {
                     <div className="w-full h-full flex flex-row justify-start items-center relative gap-6 animate-fade-in">
                         <div className="relative w-fit h-full mb-auto">
                             <Button
-                                className="w-20 h-20 bg-neutral-600 rounded-lg p-2"
+                                className="w-20 h-20 bg-secondary-foreground rounded-lg p-2"
                                 onClick={() => setUploadProfileImageDialogOpen(true)}
                             >
-                                <ProfileImgMask />
+                                <ProfileImgMask fill="hsl(var(--primary-foreground))" />
                             </Button>
                             {/* <Pencil className="w-4 h-4" /> */}
                         </div>
@@ -175,32 +187,36 @@ export function MobileHeader({ className }: MobileHeaderProps) {
                 <div
                     className={cn(
                         "flex items-center gap-4 flex-1",
-                        "bg-primary rounded-4xl",
-                        "p-5 pt-4 shadow-md h-full"
+                        "bg-primary rounded-4xl text-primary-foreground",
+                        "p-5 pt-4 shadow-primary h-full"
                     )}
                 >
                     {headerCardContent()}
                 </div>
 
-                <div className="flex flex-col gap-2 w-14 h-full p-0">
+                <div className="flex flex-col gap-3 w-14 h-full p-0">
                     <Button
-                        className="p-4 flex justify-center items-center h-14 w-full rounded-3xl shadow-lg bg-primary hover:bg-zinc-200/20 relative"
+                        className={cn(
+                            "p-3 flex justify-center items-center h-14 w-full rounded-3xl",
+                            "bg-chart-5 shadow-primary hover:bg-zinc-200/20 relative"
+                        )}
                         onClick={() => setNotificationsDialogOpen(true)}
                     >
-                        <Mail className="h-[100%] w-[100%] text-primary-foreground" />
+                        <Mailbox size={32} weight="fill" className="text-primary" />
                         {pendingRequests.length > 0 && (
-                            <div className="absolute top-[25%] right-[25%] h-2 w-2 bg-red-500 rounded-full z-10" />
+                            <div className="absolute top-0 right-0 h-3 w-3 bg-chart-1-foreground rounded-full z-10" />
                         )}
                     </Button>
                     <Button
                         className={cn(
-                            "px-4 flex-1 w-full rounded-4xl bg-primary hover:bg-zinc-200/20 transition-all duration-300 overflow-hidden",
+                            "px-3 flex-1 w-full rounded-4xl bg-chart-4/70 hover:bg-zinc-200/20",
+                            "transition-all duration-300 overflow-hidden shadow-primary text-chart-4-foreground",
                             type === "balance-sm"
                                 ? "h-0 py-0 pointer-events-none"
                                 : "h-full py-4 pointer-events-auto"
                         )}
                     >
-                        <Settings className="h-[100%] w-[100%] text-primary-foreground" />
+                        <Wrench size={32} weight="fill" className="" />
                     </Button>
                 </div>
             </header>

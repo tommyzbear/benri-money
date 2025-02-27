@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Stepper, Step, StepLabel, Box } from "@mui/material";
-import { Contact } from "@/types/search";
+import { Contact } from "@/types/data";
 import { usePrivy } from "@privy-io/react-auth";
 import { useToast } from "@/hooks/use-toast";
 import { dialogSlideUp, fadeIn, stepVariants } from "@/lib/animations";
@@ -21,28 +21,33 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { PaymentRequest, SimplePaymentQrCode } from "@/types/data";
-const steps = ['Select Chain', 'Enter Amount', 'Confirm'];
+const steps = ["Select Chain", "Enter Amount", "Confirm"];
 
 type Chain = "Base Sepolia" | "Sepolia" | null;
 
-const StepperIcon = ({ active, completed, icon }: { active: boolean; completed: boolean; icon: React.ReactNode }) => {
+const StepperIcon = ({
+    active,
+    completed,
+    icon,
+}: {
+    active: boolean;
+    completed: boolean;
+    icon: React.ReactNode;
+}) => {
     return (
-        <motion.div
-            className="relative"
-            initial={false}
-        >
+        <motion.div className="relative" initial={false}>
             <motion.div
                 className="absolute inset-0 rounded-full bg-blue-400/80 blur-md"
                 initial={false}
                 animate={{
                     scale: active ? 1.8 : 0,
-                    opacity: active ? 1 : 0
+                    opacity: active ? 1 : 0,
                 }}
                 transition={{
                     type: "spring",
                     stiffness: 300,
                     damping: 20,
-                    opacity: { duration: 0.2 }
+                    opacity: { duration: 0.2 },
                 }}
             />
 
@@ -51,12 +56,16 @@ const StepperIcon = ({ active, completed, icon }: { active: boolean; completed: 
                 initial={false}
                 animate={{
                     scale: active ? 1.2 : 1,
-                    color: active ? "rgb(59, 130, 246)" : completed ? "rgb(34, 197, 94)" : "rgb(156, 163, 175)"
+                    color: active
+                        ? "rgb(59, 130, 246)"
+                        : completed
+                        ? "rgb(34, 197, 94)"
+                        : "rgb(156, 163, 175)",
                 }}
                 transition={{
                     type: "spring",
                     stiffness: 500,
-                    damping: 30
+                    damping: 30,
                 }}
             >
                 {icon}
@@ -120,10 +129,10 @@ export function RequestMoneyDialog({
 
         setIsLoading(true);
         try {
-            const response = await fetch('/api/payment-requests', {
-                method: 'POST',
+            const response = await fetch("/api/payment-requests", {
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/json',
+                    "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
                     amount: parseEther(amount).toString(),
@@ -133,12 +142,12 @@ export function RequestMoneyDialog({
                     chain: selectedChain,
                     token_name: "ETH",
                     token_address: "0x0000000000000000000000000000000000000000",
-                    transaction_type: "wallet"
+                    transaction_type: "wallet",
                 }),
             });
 
             if (!response.ok) {
-                throw new Error('Failed to create payment request');
+                throw new Error("Failed to create payment request");
             }
 
             const { data } = await response.json();
@@ -187,8 +196,10 @@ export function RequestMoneyDialog({
         try {
             if (navigator.share) {
                 await navigator.share({
-                    title: 'Payment Request',
-                    text: `Payment request for ${formatEther(createdRequest.amount)} ${createdRequest.token_name} on ${createdRequest.chain}`,
+                    title: "Payment Request",
+                    text: `Payment request for ${formatEther(createdRequest.amount)} ${
+                        createdRequest.token_name
+                    } on ${createdRequest.chain}`,
                     url: window.location.origin + `/pay/${createdRequest.id}`,
                 });
             } else {
@@ -202,7 +213,7 @@ export function RequestMoneyDialog({
                 });
             }
         } catch (error) {
-            console.error('Error sharing:', error);
+            console.error("Error sharing:", error);
         }
     };
 
@@ -253,7 +264,11 @@ export function RequestMoneyDialog({
                                         <div className="text-left">
                                             <p className="font-medium">{chain}</p>
                                             <p className="text-sm text-muted-foreground">
-                                                {chain === "Base" ? "Base Mainnet" : chain === "Polygon" ? "Polygon Mainnet" : "Ethereum Mainnet"}
+                                                {chain === "Base"
+                                                    ? "Base Mainnet"
+                                                    : chain === "Polygon"
+                                                    ? "Polygon Mainnet"
+                                                    : "Ethereum Mainnet"}
                                             </p>
                                         </div>
                                     </div>
@@ -277,10 +292,7 @@ export function RequestMoneyDialog({
                                 <p className="text-center text-sm text-muted-foreground">ETH</p>
                             </div>
                         </div>
-                        <Button
-                            className="w-full"
-                            onClick={handleSubmit}
-                        >
+                        <Button className="w-full" onClick={handleSubmit}>
                             Continue
                         </Button>
                     </div>
@@ -305,12 +317,8 @@ export function RequestMoneyDialog({
                                 </div>
                             </div>
                         </div>
-                        <Button
-                            className="w-full"
-                            onClick={handleConfirm}
-                            disabled={isLoading}
-                        >
-                            {isLoading ? 'Confirming...' : 'Confirm Request'}
+                        <Button className="w-full" onClick={handleConfirm} disabled={isLoading}>
+                            {isLoading ? "Confirming..." : "Confirm Request"}
                         </Button>
                     </div>
                 );
@@ -329,7 +337,7 @@ export function RequestMoneyDialog({
                             exit="exit"
                             variants={fadeIn}
                         />
-                        <DialogContent className="sm:max-w-md rounded-3xl border-none bg-gradient-to-b from-white to-slate-50/95 backdrop-blur-sm">
+                        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md rounded-3xl border-none bg-gradient-to-b from-white to-slate-50/95 backdrop-blur-sm">
                             <motion.div
                                 initial="initial"
                                 animate="animate"
@@ -340,23 +348,23 @@ export function RequestMoneyDialog({
                                     <DialogTitle>Request Money</DialogTitle>
                                 </DialogHeader>
 
-                                <Box sx={{ width: '100%', mb: 4, mt: 4 }}>
+                                <Box sx={{ width: "100%", mb: 4, mt: 4 }}>
                                     <Stepper
                                         activeStep={step}
                                         alternativeLabel
                                         sx={{
-                                            '& .MuiStepConnector-line': {
-                                                transition: 'border-color 0.3s ease'
-                                            }
+                                            "& .MuiStepConnector-line": {
+                                                transition: "border-color 0.3s ease",
+                                            },
                                         }}
                                     >
                                         {steps.map((label, index) => (
                                             <Step
                                                 key={label}
                                                 sx={{
-                                                    '& .MuiStepLabel-root': {
-                                                        transition: 'all 0.3s ease'
-                                                    }
+                                                    "& .MuiStepLabel-root": {
+                                                        transition: "all 0.3s ease",
+                                                    },
                                                 }}
                                             >
                                                 <StepLabel
@@ -371,8 +379,11 @@ export function RequestMoneyDialog({
                                                     <motion.span
                                                         initial={false}
                                                         animate={{
-                                                            color: step === index ? "rgb(59, 130, 246)" : "rgb(107, 114, 128)",
-                                                            fontWeight: step === index ? 600 : 400
+                                                            color:
+                                                                step === index
+                                                                    ? "rgb(59, 130, 246)"
+                                                                    : "rgb(107, 114, 128)",
+                                                            fontWeight: step === index ? 600 : 400,
                                                         }}
                                                     >
                                                         {label}
@@ -394,7 +405,7 @@ export function RequestMoneyDialog({
                                         transition={{
                                             type: "spring",
                                             stiffness: 300,
-                                            damping: 30
+                                            damping: 30,
                                         }}
                                     >
                                         {renderStepContent()}
@@ -433,10 +444,7 @@ export function RequestMoneyDialog({
                             <PaymentRequestQR request={createdRequest} />
 
                             <div className="flex justify-end space-x-2">
-                                <Button
-                                    variant="outline"
-                                    onClick={() => setShowQR(false)}
-                                >
+                                <Button variant="outline" onClick={() => setShowQR(false)}>
                                     Close
                                 </Button>
                                 <Button
@@ -453,4 +461,4 @@ export function RequestMoneyDialog({
             </AlertDialog>
         </>
     );
-} 
+}
