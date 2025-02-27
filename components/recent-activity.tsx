@@ -147,8 +147,7 @@ export function RecentActivity() {
                 <h3 className="header-text text-primary-foreground">recently</h3>
             </div>
             <CardContent className="p-0 m-0 !border-0 overflow-y-auto max-h-[calc(100vh-10rem)] pb-60">
-                {/* {!ready || isLoading ? ( */}
-                {1 ? (
+                {!ready || isLoading ? (
                     <RecentActivitySkeleton />
                 ) : (
                     <div className="!border-0">
