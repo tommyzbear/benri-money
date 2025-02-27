@@ -14,6 +14,7 @@ export async function POST(request: Request) {
         const { data, error } = await supabase
             .from("transaction_history")
             .insert({
+                decimals: transaction.decimals,
                 from_account_id: transaction.from_account_id,
                 to_account_id: transaction.to_account_id,
                 from_address: transaction.from_address,

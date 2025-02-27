@@ -70,6 +70,7 @@ export interface TransactionHistory {
     chain: string;
     token_name: string;
     created_at: string;
+    decimals: number;
 }
 
 export interface PaymentRequest {
