@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { config } from "@/lib/wallet/config";
-import { TokenData } from "@/app/services/alchemy";
+import { TokenData } from "@/services/alchemy";
 
 interface WalletState {
     totalBalance: number | undefined;

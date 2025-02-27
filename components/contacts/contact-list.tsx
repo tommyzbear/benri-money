@@ -12,7 +12,9 @@ import { RequestMoneyDialog } from "@/components/dialogs/request-money-dialog";
 import { ChatDialog } from "@/components/chat/chat-dialog";
 import { ContactCard } from "./contact-card";
 import { ProfileImgMask } from "../profile/profile-img-mask";
-
+import { AiCard } from "./ai-card";
+import { AiChatDialog } from "../chat/ai-chat-dialog";
+import { useAiChatStore } from "@/stores/use-ai-chat-store";
 interface ContactListProps {
     friendSearchQuery: string;
 }
@@ -26,6 +28,8 @@ export function ContactList({ friendSearchQuery }: ContactListProps) {
     const [selectedRequestContact, setSelectedRequestContact] = useState<Contact | null>(null);
     const [unfriendingId, setUnfriendingId] = useState<string | null>(null);
     const [chatOpen, setChatOpen] = useState(false);
+    const [aiChatOpen, setAiChatOpen] = useState(false);
+    const { sessionName, setSessionName, startNewChat, fetchSessions, sessionId, addSession } = useAiChatStore();
     const [addFriendOpen, setAddFriendOpen] = useState(false);
     const [selectedAddFriend, setSelectedAddFriend] = useState<Contact | null>(null);
 
@@ -33,11 +37,11 @@ export function ContactList({ friendSearchQuery }: ContactListProps) {
 
     const filteredFriends = friendSearchQuery
         ? friends.filter(
-              (friend) =>
-                  friend.username?.toLowerCase().includes(friendSearchQuery.toLowerCase()) ||
-                  friend.email?.toLowerCase().includes(friendSearchQuery.toLowerCase()) ||
-                  friend.wallet?.toLowerCase().includes(friendSearchQuery.toLowerCase())
-          )
+            (friend) =>
+                friend.username?.toLowerCase().includes(friendSearchQuery.toLowerCase()) ||
+                friend.email?.toLowerCase().includes(friendSearchQuery.toLowerCase()) ||
+                friend.wallet?.toLowerCase().includes(friendSearchQuery.toLowerCase())
+        )
         : friends;
 
     useEffect(() => {
@@ -124,10 +128,11 @@ export function ContactList({ friendSearchQuery }: ContactListProps) {
 
     return (
         <>
+            <AiCard onClick={() => setAiChatOpen(true)} />
             {isLoading ? (
                 contactListSkeleton()
             ) : (
-                <div className="">
+                <>
                     <AnimatePresence>
                         {filteredFriends.map((contact, index) => (
                             <ContactCard
@@ -135,8 +140,6 @@ export function ContactList({ friendSearchQuery }: ContactListProps) {
                                 contact={contact}
                                 index={index}
                                 unfriendingId={unfriendingId}
-                                onSendClick={(e) => handleSendClick(e, contact)}
-                                onRequestClick={(e) => handleRequestClick(e, contact)}
                                 onContactClick={(e) => handleContactClick(e, contact)}
                                 onUnfriendClick={(e) => handleUnfriend(contact.id)}
                                 onAddFriendClick={(e) => handleAddFriendClick(e, contact)}
@@ -149,7 +152,7 @@ export function ContactList({ friendSearchQuery }: ContactListProps) {
                             {friendSearchQuery ? "No results found" : "No contacts yet"}
                         </div>
                     )}
-                </div>
+                </>
             )}
 
             {selectedContact && user && (
@@ -160,6 +163,16 @@ export function ContactList({ friendSearchQuery }: ContactListProps) {
                     user={user}
                 />
             )}
+
+            <AiChatDialog
+                open={aiChatOpen}
+                onOpenChange={setAiChatOpen}
+                user={user}
+                sessionName={sessionName}
+                setSessionName={setSessionName}
+                sessionId={sessionId}
+                addSession={addSession}
+            />
 
             <SendMoneyDialog
                 open={sendDialogOpen}

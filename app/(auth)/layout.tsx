@@ -3,7 +3,7 @@ import { MobileHeader } from "@/components/header/mobile-header";
 import { MobileNav } from "@/components/mobile-nav";
 import { Metadata } from "next";
 import { cookies } from "next/headers";
-import { privyClient } from "@/lib/privy";
+import { privy } from "@/lib/privy";
 import { redirect } from "next/navigation";
 import { AnimatePresence } from "framer-motion";
 export const metadata: Metadata = {
@@ -20,7 +20,7 @@ async function checkAuth() {
     if (!cookieAuthToken) return null;
 
     try {
-        const claims = await privyClient.verifyAuthToken(cookieAuthToken.value);
+        const claims = await privy.verifyToken(cookieAuthToken.value);
         return claims;
     } catch (error) {
         console.error(error);

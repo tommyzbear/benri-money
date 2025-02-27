@@ -19,8 +19,8 @@ import { OdosAssembledTransaction, OdosQuoteResponse } from "@/types/odos_types"
 import { ConnectedWallet } from "@privy-io/react-auth";
 import { encodeFunctionData } from "viem";
 import { erc20Abi } from "viem";
-import { odosClient } from "@/app/services/odos";
-import { TokenData } from "@/app/services/alchemy";
+import { odosClient } from "@/services/odos";
+import { TokenData } from "@/services/alchemy";
 import { ethers } from "ethers";
 
 interface SwapCardProps {
@@ -104,10 +104,10 @@ export function SwapCard({ wallet, chains, onTransactionSuccess }: SwapCardProps
                 selectedChain.id === 1
                     ? odosClient.routerAddressByChain["eip155:1"]
                     : selectedChain.id === 137
-                    ? odosClient.routerAddressByChain["eip155:137"]
-                    : selectedChain.id === 8453
-                    ? odosClient.routerAddressByChain["eip155:8453"]
-                    : "";
+                        ? odosClient.routerAddressByChain["eip155:137"]
+                        : selectedChain.id === 8453
+                            ? odosClient.routerAddressByChain["eip155:8453"]
+                            : "";
 
             if (!spenderAddress) {
                 toast({
@@ -158,10 +158,10 @@ export function SwapCard({ wallet, chains, onTransactionSuccess }: SwapCardProps
             selectedChain.id === 1
                 ? odosClient.routerAddressByChain["eip155:1"]
                 : selectedChain.id === 137
-                ? odosClient.routerAddressByChain["eip155:137"]
-                : selectedChain.id === 8453
-                ? odosClient.routerAddressByChain["eip155:8453"]
-                : "";
+                    ? odosClient.routerAddressByChain["eip155:137"]
+                    : selectedChain.id === 8453
+                        ? odosClient.routerAddressByChain["eip155:8453"]
+                        : "";
 
         if (!spenderAddress) {
             toast({

@@ -1,14 +1,14 @@
 "use client";
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CreditCard, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Stepper, Step, StepLabel, Box } from "@mui/material";
 import Image from "next/image";
 import { Contact } from "@/types/data";
 import { parseEther } from "viem";
-import { usePrivy, useWallets } from "@privy-io/react-auth";
+import { ConnectedWallet, usePrivy, useWallets } from "@privy-io/react-auth";
 import { useToast } from "@/hooks/use-toast";
 import { base, mainnet, polygon } from "viem/chains";
 import { dialogSlideUp, fadeIn, stepVariants } from "@/lib/animations";
@@ -55,8 +55,8 @@ const StepperIcon = ({
                     color: active
                         ? "rgb(59, 130, 246)"
                         : completed
-                        ? "rgb(34, 197, 94)"
-                        : "rgb(156, 163, 175)",
+                            ? "rgb(34, 197, 94)"
+                            : "rgb(156, 163, 175)",
                 }}
                 transition={{
                     type: "spring",
@@ -85,7 +85,8 @@ export function SendMoneyDialog({
     const [selectedChain, setSelectedChain] = useState<Chain>(null);
     const [amount, setAmount] = useState<string>("");
     const [isLoading, setIsLoading] = useState(false);
-    const { wallets } = useWallets();
+    const { wallets, ready } = useWallets();
+    const [privyWallet, setPrivyWallet] = useState<ConnectedWallet | undefined>(undefined);
     const { toast } = useToast();
     const { user } = usePrivy();
     const { addTransaction } = useTransactionsStore();
@@ -104,9 +105,15 @@ export function SendMoneyDialog({
         goToNextStep();
     };
 
+    useEffect(() => {
+        if (ready) {
+            setPrivyWallet(wallets.find((wallet) => wallet.walletClientType === "privy"));
+        }
+    }, [ready, wallets]);
+
     const handleConfirm = async () => {
         setIsLoading(true);
-        if (!selectedContact?.wallet || !amount || !wallets || wallets.length === 0) {
+        if (!selectedContact?.wallet || !amount || !privyWallet) {
             console.error("Missing required transaction details");
             toast({
                 variant: "destructive",
@@ -117,33 +124,32 @@ export function SendMoneyDialog({
             return;
         }
 
-        const wallet = wallets[0];
         const chainId =
             selectedChain === "Base"
                 ? base.id
                 : selectedChain === "Polygon"
-                ? polygon.id
-                : mainnet.id;
+                    ? polygon.id
+                    : mainnet.id;
         const chain =
             selectedChain === "Base"
                 ? "Base"
                 : selectedChain === "Polygon"
-                ? "Polygon"
-                : "Ethereum";
+                    ? "Polygon"
+                    : "Ethereum";
         const token =
             selectedChain === "Base"
                 ? base.nativeCurrency
                 : selectedChain === "Polygon"
-                ? polygon.nativeCurrency
-                : mainnet.nativeCurrency;
+                    ? polygon.nativeCurrency
+                    : mainnet.nativeCurrency;
 
         try {
             if (selectedChain === "Base") {
-                await wallet.switchChain(base.id);
+                await privyWallet?.switchChain(base.id);
             } else if (selectedChain === "Polygon") {
-                await wallet.switchChain(polygon.id);
+                await privyWallet?.switchChain(polygon.id);
             } else if (selectedChain === "Ethereum") {
-                await wallet.switchChain(mainnet.id);
+                await privyWallet?.switchChain(mainnet.id);
             } else {
                 toast({
                     variant: "destructive",
@@ -154,7 +160,7 @@ export function SendMoneyDialog({
                 return;
             }
 
-            const provider = await wallet.getEthereumProvider();
+            const provider = await privyWallet?.getEthereumProvider();
             const transactionRequest = {
                 to: selectedContact.wallet,
                 value: parseEther(amount),
@@ -168,7 +174,7 @@ export function SendMoneyDialog({
             await addTransaction({
                 from_account_id: user?.id || "",
                 to_account_id: selectedContact.id,
-                from_address: wallet.address,
+                from_address: privyWallet?.address,
                 to_address: selectedContact.wallet,
                 amount: parseEther(amount).toString(),
                 token_address: "0x0000000000000000000000000000000000000000",
@@ -266,14 +272,14 @@ export function SendMoneyDialog({
                                         )}
                                         {(chain === "Arbitrum Sepolia" ||
                                             chain === "Arbitrum Goerli") && (
-                                            <Image
-                                                src="/icons/arbitrum-arb-logo.svg"
-                                                alt="Arbitrum Network Logo"
-                                                width={32}
-                                                height={32}
-                                                className="rounded-full"
-                                            />
-                                        )}
+                                                <Image
+                                                    src="/icons/arbitrum-arb-logo.svg"
+                                                    alt="Arbitrum Network Logo"
+                                                    width={32}
+                                                    height={32}
+                                                    className="rounded-full"
+                                                />
+                                            )}
                                         {chain === "Sepolia" && (
                                             <Image
                                                 src="/icons/ethereum-eth-logo.svg"
@@ -298,12 +304,12 @@ export function SendMoneyDialog({
                                                 {chain === "Ethereum"
                                                     ? "~3 minutes"
                                                     : chain === "Base"
-                                                    ? "~17 sec"
-                                                    : chain === "Solana"
-                                                    ? "~36 sec"
-                                                    : chain === "Algorand"
-                                                    ? "~19 sec"
-                                                    : "~4 minutes"}
+                                                        ? "~17 sec"
+                                                        : chain === "Solana"
+                                                            ? "~36 sec"
+                                                            : chain === "Algorand"
+                                                                ? "~19 sec"
+                                                                : "~4 minutes"}
                                             </div>
                                         </div>
                                     </div>
@@ -328,10 +334,10 @@ export function SendMoneyDialog({
                                     {selectedChain === "Base"
                                         ? "ETH"
                                         : selectedChain === "Polygon"
-                                        ? "ETH"
-                                        : selectedChain === "Ethereum"
-                                        ? "ETH"
-                                        : "ETH"}
+                                            ? "ETH"
+                                            : selectedChain === "Ethereum"
+                                                ? "ETH"
+                                                : "ETH"}
                                 </p>
                             </div>
                             <Button className="w-full" onClick={handleSubmit} disabled={!amount}>
@@ -367,9 +373,9 @@ export function SendMoneyDialog({
                                     <span className="font-medium truncate ml-4">
                                         {selectedContact?.wallet
                                             ? `${selectedContact.wallet.slice(
-                                                  0,
-                                                  6
-                                              )}...${selectedContact.wallet.slice(-4)}`
+                                                0,
+                                                6
+                                            )}...${selectedContact.wallet.slice(-4)}`
                                             : ""}
                                     </span>
                                 </div>

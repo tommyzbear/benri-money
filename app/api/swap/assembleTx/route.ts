@@ -1,22 +1,10 @@
-import { privyClient } from "@/lib/privy";
-import { cookies } from "next/headers";
+import { privy } from "@/lib/privy";
 import { NextResponse } from "next/server";
-import { odosClient } from "@/app/services/odos";
+import { odosClient } from "@/services/odos";
 
 export async function POST(request: Request) {
     try {
-        const cookieStore = cookies();
-        const cookieAuthToken = cookieStore.get("privy-token");
-
-        if (!cookieAuthToken) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
-
-        const claims = await privyClient.verifyAuthToken(cookieAuthToken.value);
-
-        if (!claims) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
+        await privy.getClaims();
 
         const { pathId, userAddr } = await request.json();
 

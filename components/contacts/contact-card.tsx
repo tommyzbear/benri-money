@@ -2,19 +2,15 @@
 
 import { Button } from "@/components/ui/button";
 import { Contact } from "@/types/data";
-import { X, Send, Plus, HandCoins, Check } from "lucide-react";
-import Image from "next/image";
+import { X } from "lucide-react";
 import { motion } from "framer-motion";
 import { blo } from "blo";
-import { ChatTeardropDots } from "@phosphor-icons/react";
 import { ProfileImgMask } from "../profile/profile-img-mask";
 
 interface ContactCardProps {
     contact: Contact;
     index: number;
     unfriendingId: string | null;
-    onSendClick: (e: React.MouseEvent) => void;
-    onRequestClick: (e: React.MouseEvent) => void;
     onContactClick: (e: React.MouseEvent) => void;
     onUnfriendClick: (e: React.MouseEvent) => void;
     onAddFriendClick: (e: React.MouseEvent) => void;
@@ -24,8 +20,6 @@ export function ContactCard({
     contact,
     index,
     unfriendingId,
-    onSendClick,
-    onRequestClick,
     onContactClick,
     onUnfriendClick,
     onAddFriendClick,
@@ -44,7 +38,11 @@ export function ContactCard({
                     <div className="flex items-center min-w-0 flex-1 gap-2">
                         <div className="flex-shrink-0 mr-4 h-10 w-10">
                             <ProfileImgMask
-                                imageUrl={blo(contact.wallet as `0x${string}`)}
+                                imageUrl={
+                                    contact.profileImg === null
+                                        ? blo(contact.wallet as `0x${string}`)
+                                        : contact.profileImg
+                                }
                                 fill="hsl(var(--primary-foreground))"
                                 className="antialiased"
                             />

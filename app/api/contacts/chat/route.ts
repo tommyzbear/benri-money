@@ -1,19 +1,11 @@
-import { privyClient } from "@/lib/privy";
+import { privy } from "@/lib/privy";
 import { supabase } from "@/lib/supabase";
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { Message } from "@/types/data";
 
 export async function GET(request: Request) {
     try {
-        const cookieStore = cookies();
-        const cookieAuthToken = cookieStore.get("privy-token");
-
-        if (!cookieAuthToken) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-        const claims = await privyClient.verifyAuthToken(cookieAuthToken.value);
-
-        if (!claims) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        await privy.getClaims();
 
         const { searchParams } = new URL(request.url);
         const sender = searchParams.get("sender");
@@ -53,14 +45,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
     try {
-        const cookieStore = cookies();
-        const cookieAuthToken = cookieStore.get("privy-token");
-
-        if (!cookieAuthToken) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-        const claims = await privyClient.verifyAuthToken(cookieAuthToken.value);
-
-        if (!claims) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        const claims = await privy.getClaims();
 
         const message: Omit<Message, "id" | "sent_at"> = await request.json();
 
