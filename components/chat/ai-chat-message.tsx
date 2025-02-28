@@ -12,6 +12,7 @@ import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { useTransactionsStore } from "@/stores/use-transactions-store";
 import { useToast } from "@/hooks/use-toast";
 import { encodeFunctionData, erc20Abi, parseEther, parseUnits } from "viem";
+import { Loader2 } from "lucide-react";
 
 interface TransactionInfo {
     amount: string;
@@ -27,9 +28,10 @@ interface TransactionInfo {
 interface AiChatMessagesProps {
     messages: Message[];
     messagesEndRef: RefObject<HTMLDivElement>;
+    loading: boolean;
 }
 
-export function AiChatMessages({ messages, messagesEndRef }: AiChatMessagesProps) {
+export function AiChatMessages({ messages, messagesEndRef, loading }: AiChatMessagesProps) {
     const { wallets } = useWallets();
     const { addTransaction } = useTransactionsStore();
     const { user } = usePrivy();
@@ -192,6 +194,7 @@ export function AiChatMessages({ messages, messagesEndRef }: AiChatMessagesProps
                                     </ReactMarkdown>
                                 )}
                             </div>
+
                             {isLastInStack && (
                                 <span className="text-xs text-zinc-500 mt-2 tracking-tighter px-3 pb-3">
                                     {moment(msg.createdAt).format("h:mm a")}
@@ -201,6 +204,11 @@ export function AiChatMessages({ messages, messagesEndRef }: AiChatMessagesProps
                     </div>
                 );
             })}
+            {loading && (
+                <div className="flex justify-center items-center">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                </div>
+            )}
             <div ref={messagesEndRef} />
         </div>
     );

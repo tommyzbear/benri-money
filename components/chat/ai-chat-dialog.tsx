@@ -58,15 +58,11 @@ export function AiChatDialog({ open, onOpenChange, sessionName, setSessionName, 
                 title: "Error",
                 description: error.message || "Failed to process your request",
             });
-        },
-        onToolCall: (toolCall) => {
-            console.log("toolCall", toolCall);
-        },
+        }
     });
 
     useEffect(() => {
         const fetchMessages = async () => {
-            console.log("sessionId", sessionId);
             try {
                 const response = await fetch(`/api/chat/sessions/${sessionId}`);
                 if (!response.ok) throw new Error("Failed to fetch session messages");
@@ -173,12 +169,9 @@ export function AiChatDialog({ open, onOpenChange, sessionName, setSessionName, 
                         <AiChatMessages
                             messages={messages}
                             messagesEndRef={messagesEndRef}
+                            loading={status === 'submitted'}
                         />
-                        {status === 'submitted' && (
-                            <div className="flex justify-center items-center">
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                            </div>
-                        )}
+
                         <AiChatInput
                             inputValue={input}
                             setInputValue={handleInputChange}
