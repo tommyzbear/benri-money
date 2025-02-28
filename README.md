@@ -1,36 +1,122 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Benri Money - Web3 Payment and wallet management at ease
+
+Benri Money is a Web2 friendly, venmo-style payment app embedded with an intelligent Web3 assistant that helps users with daily cryptocurrency transactions, P2P payments, market insights, and social intelligence. It provides a seamless interface for interacting with blockchain networks and accessing real-time crypto market data.
+
+## Features
+
+### 1. Token Transfers
+- Send tokens (ETH, USDC, WETH, WBTC) across multiple networks (Base, Ethereum, Polygon)
+- User-friendly transactions using usernames or email addresses
+- Built-in transaction validation and security checks
+- Real-time transaction status updates
+
+### 2. Market Analysis
+- Real-time token price tracking
+- Detailed market data including:
+  - Price changes
+  - Trading volume
+  - Liquidity metrics
+  - Buy/sell activity
+
+### 3. Social Intelligence
+- Twitter sentiment analysis for crypto topics
+- Trending token tracking across multiple timeframes (4h, 24h, 3d, 7d)
+- Twitter account smart stats
+- Token mention monitoring and analysis
+
+### 4. DeFi Features
+- Token swapping functionality
+- Staking capabilities
+- Real-time price quotes
+- Transaction assembly and execution
+
+## Technology Stack
+
+- **Frontend**: Next.js, React, TypeScript
+- **UI Components**: Shadcn/UI, Material-UI
+- **Web3**: Viem, Privy
+- **Authentication**: Privy Auth
+- **State Management**: Custom stores
+- **Animation**: Framer Motion
+- **Data Fetching**: REST APIs
+- **Database**: Supabase
+- **Styling**: Tailwind CSS
+
+## Core Components
+
+### Payment Components
+- Web2 friendly on-ramp integration
+- P2P payment interface
+- Transaction history
+- Payment request and receive
+- Payment notification
+- Messaging services
+
+### AI Chat Interface
+- Real-time AI interactions
+- Tool-based action execution
+- Suggested actions for common tasks
+- Transaction card rendering
+- Markdown support for responses
+
+### DeFi Components
+- Swap Card for token exchanges
+- Staking Card for yield opportunities
+- Transaction assembly and execution
+- Network switching support
+
+## Security Features
+
+- Transaction validation
+- Chain ID verification
+- Address validation
+- Error handling and recovery
+- User authentication
+- Secure wallet connections
 
 ## Getting Started
 
-First, run the development server:
+1. Clone the repository
+2. Install dependencies:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm i
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+3. Set up environment variables:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+cp .env.template .env.local
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Run the development server:
 
-## Learn More
+```bash
+pnpm dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+5. Open your browser and navigate to `http://localhost:3000` to access the application.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Architecture
 
-## Deploy on Vercel
+The application follows a modular architecture with:
+- Component-based UI design
+- Tool-based AI interaction system
+- Store-based state management
+- Service-based external integrations
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## API Integration
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The project integrates with multiple APIs:
+- Privy for authentication, user management and wallet connections
+- Odos for swap functionality
+- StakeKit for DeFi staking features
+- Custom APIs for transaction handling
+- Elfa AI for social media analysis
+- Gecko & Dexscreener for price tracking
+- Tavily for search and content retrieval
+
+## Arichitecture Diagram
+
+![Architecture Diagram](./architecture_diagram.png)
