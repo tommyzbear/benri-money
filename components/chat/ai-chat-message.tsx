@@ -6,13 +6,14 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { markdownComponents } from "./markdown-components";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { NetworkIcon } from "@/components/network-icon";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { useTransactionsStore } from "@/stores/use-transactions-store";
 import { useToast } from "@/hooks/use-toast";
 import { encodeFunctionData, erc20Abi, parseEther, parseUnits } from "viem";
-import { Loader2 } from "lucide-react";
+import { BadgeDollarSign, HelpCircle, Loader2, MessageSquare, Search, SendIcon, TrendingUp, Users } from "lucide-react";
+import suggestedActions, { SuggestedAction } from "@/lib/tools/suggestedActions";
 
 interface TransactionInfo {
     amount: string;
@@ -29,9 +30,10 @@ interface AiChatMessagesProps {
     messages: Message[];
     messagesEndRef: RefObject<HTMLDivElement>;
     loading: boolean;
+    setInput: (input: string) => void;
 }
 
-export function AiChatMessages({ messages, messagesEndRef, loading }: AiChatMessagesProps) {
+export function AiChatMessages({ messages, messagesEndRef, loading, setInput }: AiChatMessagesProps) {
     const { wallets } = useWallets();
     const { addTransaction } = useTransactionsStore();
     const { user } = usePrivy();
@@ -47,7 +49,15 @@ export function AiChatMessages({ messages, messagesEndRef, loading }: AiChatMess
             return;
         }
 
-        const wallet = wallets[0];
+        const wallet = wallets.find(w => w.walletClientType === "privy");
+        if (!wallet) {
+            toast({
+                title: "Error",
+                description: "No wallet connected",
+                variant: "destructive",
+            });
+            return;
+        }
 
         try {
             await wallet.switchChain(txInfo.chain_id);
@@ -209,7 +219,41 @@ export function AiChatMessages({ messages, messagesEndRef, loading }: AiChatMess
                     <Loader2 className="w-4 h-4 animate-spin" />
                 </div>
             )}
+            {!messages.length && (
+                <div className="grid grid-cols-1 gap-2">
+                    {suggestedActions.map((action) => (
+                        <Card className="p-1 hover:bg-accent/10 cursor-pointer" key={action.name} onClick={() => setInput(action.sampleMessage)}>
+                            <CardHeader className="p-1">
+                                <CardTitle className="flex items-center gap-2">
+                                    {getIconForAction(action)}
+                                    {action.name}
+                                </CardTitle>
+                            </CardHeader>
+                            <CardDescription className="text-sm px-2">{action.description}</CardDescription>
+                        </Card>
+                    ))}
+                </div>
+            )}
             <div ref={messagesEndRef} />
         </div>
     );
+}
+
+const getIconForAction = (action: SuggestedAction) => {
+    switch (action.icon) {
+        case "send-token":
+            return <SendIcon className="w-4 h-4" />;
+        case "price":
+            return <BadgeDollarSign className="w-4 h-4" />;
+        case "trending":
+            return <TrendingUp className="w-4 h-4" />;
+        case "research":
+            return <Search className="w-4 h-4" />;
+        case "social":
+            return <Users className="w-4 h-4" />;
+        case "mentions":
+            return <MessageSquare className="w-4 h-4" />;
+        default:
+            return <HelpCircle className="w-4 h-4" />;
+    }
 }

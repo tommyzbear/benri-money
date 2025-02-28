@@ -172,6 +172,7 @@ export function ContactList({ friendSearchQuery }: ContactListProps) {
                 setSessionName={setSessionName}
                 sessionId={sessionId}
                 addSession={addSession}
+                startNewChat={startNewChat}
             />
 
             <SendMoneyDialog
