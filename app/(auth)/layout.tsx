@@ -40,7 +40,8 @@ export default async function HomeLayout({
     }
 
     return (
-        <div className="flex flex-col bg-background px-4 sm:px-0 max-h-screen">
+        <div className="flex flex-col px-4 sm:px-0 max-h-screen">
+            <div className="absolute inset-0 bg-benri-pattern pointer-events-none -z-10" />
             <AnimatePresence initial={false} mode="popLayout">
                 <DesktopHeader className="hidden lg:block" />
                 <div className="h-full overflow-hidden">
