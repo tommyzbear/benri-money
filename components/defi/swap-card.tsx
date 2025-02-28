@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +22,7 @@ import { erc20Abi } from "viem";
 import { odosClient } from "@/services/odos";
 import { TokenData } from "@/services/alchemy";
 import { ethers } from "ethers";
+import debounce from "lodash/debounce";
 
 interface SwapCardProps {
     wallet?: ConnectedWallet;
@@ -34,61 +35,86 @@ export function SwapCard({ wallet, chains, onTransactionSuccess }: SwapCardProps
     const [toToken, setToToken] = useState<TokenData | null>(null);
     const [amount, setAmount] = useState("");
     const [approved, setApproved] = useState(true);
-    const [quote, setQuote] = useState<OdosQuoteResponse | null>(null);
+    const [assembledTransaction, setAssembledTransaction] = useState<OdosAssembledTransaction | null>(null);
     const [selectedChain, setSelectedChain] = useState<Chain>(chains[0]);
     const { balances } = useWalletStore();
     const { toast } = useToast();
 
-    const handleQuote = async () => {
-        if (!wallet || !amount || !fromToken || !toToken) {
-            toast({
-                title: "Invalid Input",
-                description: "Please fill in all fields",
-                variant: "destructive",
-            });
+    const handleQuote = useCallback(async (value: string) => {
+        if (!wallet || !value || !fromToken || !toToken) {
             return;
         }
 
-        const quote = await fetch("/api/swap/quote", {
-            method: "POST",
-            body: JSON.stringify({
-                chainId: selectedChain.id,
-                inputToken: {
-                    tokenAddress:
-                        fromToken.contractAddress === ""
-                            ? "0x0000000000000000000000000000000000000000"
-                            : fromToken.contractAddress,
-                    amount: ethers.utils.parseUnits(amount, fromToken.decimals).toString(),
-                },
-                outputToken: {
-                    tokenAddress:
-                        toToken.contractAddress === ""
-                            ? "0x0000000000000000000000000000000000000000"
-                            : toToken.contractAddress,
-                    proportion: 1,
-                },
-                userAddr: wallet.address,
-            }),
-        });
+        try {
+            const quote = await fetch("/api/swap/quote", {
+                method: "POST",
+                body: JSON.stringify({
+                    chainId: selectedChain.id,
+                    inputToken: {
+                        tokenAddress:
+                            fromToken.contractAddress === ""
+                                ? "0x0000000000000000000000000000000000000000"
+                                : fromToken.contractAddress,
+                        amount: ethers.utils.parseUnits(value, fromToken.decimals).toString(),
+                    },
+                    outputToken: {
+                        tokenAddress:
+                            toToken.contractAddress === ""
+                                ? "0x0000000000000000000000000000000000000000"
+                                : toToken.contractAddress,
+                        proportion: 1,
+                    },
+                    userAddr: wallet.address,
+                }),
+            });
 
-        if (!quote.ok) {
+            if (!quote.ok) {
+                throw new Error("Failed to get quote");
+            }
+
+            const data: OdosQuoteResponse = await quote.json();
+
+            const assembledTransaction = await fetch("/api/swap/assembleTx", {
+                method: "POST",
+                body: JSON.stringify({ pathId: data?.pathId, userAddr: wallet.address }),
+            });
+
+            if (!assembledTransaction.ok) {
+                throw new Error("Failed to assemble transaction");
+            }
+
+            const assembledTransactionData: OdosAssembledTransaction = await assembledTransaction.json();
+
+            setAssembledTransaction(assembledTransactionData);
+
+            toast({
+                title: "Quoted",
+                description: "Please proceed with the swap",
+            });
+        } catch (error) {
+            console.error("Error getting quote:", error);
             toast({
                 title: "Error",
-                description: "Failed to get quote",
+                description: error instanceof Error ? error.message : "Failed to get quote",
                 variant: "destructive",
             });
-            return;
         }
+    }, [wallet, fromToken, toToken, selectedChain.id, toast]);
 
-        const data: OdosQuoteResponse = await quote.json();
-        console.log("Quote", data);
+    const debouncedQuote = useMemo(
+        () => debounce((value: string) => handleQuote(value), 500),
+        [handleQuote]
+    );
 
-        setQuote(data);
-        toast({
-            title: "Quoted",
-            description: "Please proceed with the swap",
-        });
-    };
+    useEffect(() => {
+        return () => {
+            debouncedQuote.cancel();
+        };
+    }, [debouncedQuote]);
+
+    useEffect(() => {
+        setAssembledTransaction(null);
+    }, [fromToken, toToken, selectedChain]);
 
     useEffect(() => {
         const checkApproved = async () => {
@@ -151,6 +177,14 @@ export function SwapCard({ wallet, chains, onTransactionSuccess }: SwapCardProps
         checkApproved();
     }, [approved, wallet, fromToken, selectedChain, amount]);
 
+    useEffect(() => {
+        if (amount && fromToken && toToken) {
+            debouncedQuote(amount);
+        } else {
+            setAssembledTransaction(null);
+        }
+    }, [amount, fromToken, toToken, debouncedQuote]);
+
     const handleApprove = async () => {
         const provider = await wallet?.getEthereumProvider();
 
@@ -202,38 +236,13 @@ export function SwapCard({ wallet, chains, onTransactionSuccess }: SwapCardProps
     };
 
     const handleSwap = async () => {
-        if (!wallet || !amount || !fromToken || !toToken) {
-            toast({
-                title: "Invalid Input",
-                description: "Please fill in all fields",
-                variant: "destructive",
-            });
-            return;
-        }
-
-        const assembledTransaction = await fetch("/api/swap/assembleTx", {
-            method: "POST",
-            body: JSON.stringify({ pathId: quote?.pathId, userAddr: wallet.address }),
-        });
-
-        if (!assembledTransaction.ok) {
-            toast({
-                title: "Error",
-                description: "Failed to assemble transaction",
-                variant: "destructive",
-            });
-            return;
-        }
-
-        const data: OdosAssembledTransaction = await assembledTransaction.json();
-
         const provider = await wallet?.getEthereumProvider();
 
         const result = await provider?.request({
             method: "eth_sendTransaction",
             params: [
                 {
-                    ...data.transaction,
+                    ...assembledTransaction?.transaction,
                 },
             ],
         });
@@ -319,7 +328,7 @@ export function SwapCard({ wallet, chains, onTransactionSuccess }: SwapCardProps
                 </div>
 
                 <div className="space-y-2">
-                    <Input placeholder="0.0" disabled value="" />
+                    <Input placeholder="0.0" disabled value={assembledTransaction?.outValues[0]} />
                     <Select
                         value={toToken?.symbol}
                         onValueChange={(value) =>
@@ -350,15 +359,7 @@ export function SwapCard({ wallet, chains, onTransactionSuccess }: SwapCardProps
                 </div>
 
                 {approved ? (
-                    quote === null ? (
-                        <Button
-                            className="w-full"
-                            onClick={handleQuote}
-                            disabled={!wallet || !amount || !fromToken || !toToken}
-                        >
-                            Quote
-                        </Button>
-                    ) : (
+                    (
                         <Button
                             className="w-full"
                             onClick={handleSwap}
