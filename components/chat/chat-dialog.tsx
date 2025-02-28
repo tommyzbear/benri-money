@@ -58,6 +58,13 @@ export function ChatDialog({ open, onOpenChange, contact, user }: ChatDialogProp
                     timestamp: msg.sent_at,
                     amount: msg.amount ? Number(msg.amount) : undefined,
                     type: msg.message_type,
+                    tx: msg.transaction_history?.tx,
+                    decimals: msg.transaction_history?.decimals,
+                    tokenName: msg.transaction_history?.token_name,
+                    chain: msg.transaction_history?.chain,
+                    requestedTokenName: msg.payment_requests?.token_name,
+                    requestedTokenDecimals: msg.payment_requests?.decimals,
+                    requestedTokenAmount: msg.payment_requests?.amount,
                 }));
 
                 setMessages(formattedMessages);
@@ -108,6 +115,9 @@ export function ChatDialog({ open, onOpenChange, contact, user }: ChatDialogProp
                     timestamp: data.message.sent_at,
                     amount: data.message.amount ? Number(data.message.amount) : undefined,
                     type: data.message.message_type,
+                    tx: data.message.transaction_history?.tx,
+                    decimals: data.message.transaction_history?.decimals,
+                    tokenName: data.message.transaction_history?.token_name,
                 } as ChatMessage;
 
                 setMessages((prev) => [...prev, convertedMessage]);
@@ -197,6 +207,7 @@ export function ChatDialog({ open, onOpenChange, contact, user }: ChatDialogProp
                             handleKeyPress={handleKeyPress}
                             setRequestMoneyOpen={setRequestMoneyOpen}
                             setSendMoneyOpen={setSendMoneyOpen}
+                            contact={contact}
                         />
                     </div>
                 </DialogContent>

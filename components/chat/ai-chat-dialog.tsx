@@ -19,9 +19,10 @@ interface AiChatDialogProps {
     setSessionName: (name: string) => void;
     sessionId: string;
     addSession: (sessionId: string, sessionName: string) => void;
+    startNewChat: () => void;
 }
 
-export function AiChatDialog({ open, onOpenChange, sessionName, setSessionName, sessionId, addSession }: AiChatDialogProps) {
+export function AiChatDialog({ open, onOpenChange, sessionName, setSessionName, sessionId, addSession, startNewChat }: AiChatDialogProps) {
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const { toast } = useToast();
 
@@ -29,7 +30,7 @@ export function AiChatDialog({ open, onOpenChange, sessionName, setSessionName, 
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
 
-    const { messages, input, handleInputChange, handleSubmit, setMessages, setInput, status } = useChat({
+    const { messages, input, handleInputChange, handleSubmit, setInput, status } = useChat({
         api: "/api/chat",
         maxSteps: 5,
         id: sessionId,
@@ -64,20 +65,19 @@ export function AiChatDialog({ open, onOpenChange, sessionName, setSessionName, 
         },
     });
 
-    useEffect(() => {
-        const fetchMessages = async () => {
-            console.log("sessionId", sessionId);
-            try {
-                const response = await fetch(`/api/chat/sessions/${sessionId}`);
-                if (!response.ok) throw new Error("Failed to fetch session messages");
-                const messages = await response.json();
-                setMessages(messages);
-            } catch (error) {
-                console.error("Error fetching session messages:", error);
-            }
-        };
-        fetchMessages();
-    }, [sessionId, setMessages]);
+    // useEffect(() => {
+    //     const fetchMessages = async () => {
+    //         try {
+    //             const response = await fetch(`/api/chat/sessions/${sessionId}`);
+    //             if (!response.ok) throw new Error("Failed to fetch session messages");
+    //             const messages = await response.json();
+    //             setMessages(messages);
+    //         } catch (error) {
+    //             console.error("Error fetching session messages:", error);
+    //         }
+    //     };
+    //     fetchMessages();
+    // }, [sessionId, setMessages]);
 
     useEffect(() => {
         scrollToBottom();
@@ -173,17 +173,16 @@ export function AiChatDialog({ open, onOpenChange, sessionName, setSessionName, 
                         <AiChatMessages
                             messages={messages}
                             messagesEndRef={messagesEndRef}
+                            loading={status === 'submitted'}
+                            setInput={setInput}
                         />
-                        {status === 'submitted' && (
-                            <div className="flex justify-center items-center">
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                            </div>
-                        )}
+
                         <AiChatInput
                             inputValue={input}
                             setInputValue={handleInputChange}
                             handleSend={handleMessageSubmit}
                             status={status}
+                            startNewChat={startNewChat}
                         />
                     </div>
                 </DialogContent>

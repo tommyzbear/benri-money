@@ -1,13 +1,16 @@
 import { cn } from "@/lib/utils";
 import { RefObject } from "react";
 import Image from "next/image";
-import { formatValue } from "@/lib/utils";
 import moment from "moment";
 import { ChatMessage } from "@/types/chat";
+import { formatUnits } from "viem";
+import { config } from "@/lib/wallet/config";
+
 interface ChatMessagesProps {
     messages: ChatMessage[];
     contact: {
         username: string;
+        beFriended?: boolean;
     };
     messagesEndRef: RefObject<HTMLDivElement>;
 }
@@ -23,7 +26,9 @@ export function ChatMessages({ messages, contact, messagesEndRef }: ChatMessages
         switch (msg.type) {
             case "payment":
                 return (
-                    <div className="bg-zinc-600 text-white p-6 rounded-4xl text-center">
+                    <div className="bg-zinc-600 text-white p-6 rounded-4xl text-center" onClick={() => {
+                        window.open(`${config.chains.find((chain) => chain.name === msg.chain)?.blockExplorers.default.url}/tx/${msg.tx}`, "_blank");
+                    }}>
                         <h4 className="font-libre italic text-base">
                             {msg.sender !== "user" ? `${contact.username} sent` : "you sent"}
                         </h4>
@@ -36,7 +41,7 @@ export function ChatMessages({ messages, contact, messagesEndRef }: ChatMessages
                                 className="w-full h-full object-contain"
                             />
                         </div>
-                        <p className="font-libre text-xl">{formatValue(Number(msg.amount))}</p>
+                        <p className="font-libre text-xl">{formatUnits(BigInt(msg.amount ?? 0), msg.decimals ?? 18) + " " + msg.tokenName}</p>
                     </div>
                 );
             case "request":
@@ -54,7 +59,7 @@ export function ChatMessages({ messages, contact, messagesEndRef }: ChatMessages
                                 className="w-full h-full object-contain"
                             />
                         </div>
-                        <p className="font-libre text-xl">{formatValue(Number(msg.amount))}</p>
+                        <p className="font-libre text-xl">{formatUnits(BigInt(msg.requestedTokenAmount ?? 0), msg.requestedTokenDecimals ?? 18) + " " + msg.requestedTokenName}</p>
                     </div>
                 );
             case "message":
@@ -104,6 +109,12 @@ export function ChatMessages({ messages, contact, messagesEndRef }: ChatMessages
                     </div>
                 );
             })}
+            {!contact.beFriended && (
+                <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4 rounded">
+                    <p className="font-medium">Waiting for {contact.username} to add you back</p>
+                    <p className="text-sm">Some features may be limited until they added you as a friend.</p>
+                </div>
+            )}
             <div ref={messagesEndRef} />
         </div>
     );

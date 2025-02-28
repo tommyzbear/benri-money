@@ -2,10 +2,10 @@
 
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader } from "./ui/card";
-import { Wallet, Banknote, Eye, EyeClosed } from "lucide-react";
+import { Banknote, Eye, EyeClosed } from "lucide-react";
 import { useEffect, useState } from "react";
 import { SendMoneyDialog } from "./dialogs/send-money-dialog";
-import { useFundWallet, usePrivy, useWallets } from "@privy-io/react-auth";
+import { useFundWallet, useWallets } from "@privy-io/react-auth";
 import { SelectFriendDialog } from "./dialogs/select-friend-dialog";
 import { Contact } from "@/types/data";
 import { Skeleton } from "./ui/skeleton";

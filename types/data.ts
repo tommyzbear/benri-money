@@ -48,6 +48,7 @@ export interface Contact {
     email?: string;
     wallet?: string;
     isFriend?: boolean;
+    beFriended?: boolean;
     username: string;
     profileImg: string | null;
 }
@@ -86,6 +87,7 @@ export interface PaymentRequest {
     requested_at: string;
     cleared: boolean;
     rejected: boolean;
+    decimals: number;
 }
 
 export interface PaymentRequestWithWallet extends PaymentRequest {
@@ -146,6 +148,8 @@ export interface Message {
     transaction_id: number;
     payment_request_id: number;
     message_type: "message" | "payment" | "request";
+    transaction_history: TransactionHistory | null;
+    payment_requests: PaymentRequest | null;
 }
 
 export interface SupportedToken {

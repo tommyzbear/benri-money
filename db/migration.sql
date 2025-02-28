@@ -92,6 +92,7 @@ CREATE TABLE payment_requests (
     token_address VARCHAR(255) NOT NULL,
     -- Token name involved in the request
     requested_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    decimals INT4 NOT NULL DEFAULT 18,
     -- Timestamp of the request
     cleared BOOLEAN NOT NULL DEFAULT FALSE -- Indicates if the request has been cleared
     rejected BOOLEAN NOT NULL DEFAULT FALSE -- Indicates if the request has been rejected

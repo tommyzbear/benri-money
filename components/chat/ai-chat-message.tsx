@@ -5,13 +5,150 @@ import { Message } from "@ai-sdk/react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { markdownComponents } from "./markdown-components";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { NetworkIcon } from "@/components/network-icon";
+import { usePrivy, useWallets } from "@privy-io/react-auth";
+import { useTransactionsStore } from "@/stores/use-transactions-store";
+import { useToast } from "@/hooks/use-toast";
+import { encodeFunctionData, erc20Abi, parseEther, parseUnits } from "viem";
+import { BadgeDollarSign, HelpCircle, Loader2, MessageSquare, Search, SendIcon, TrendingUp, Users } from "lucide-react";
+import suggestedActions, { SuggestedAction } from "@/lib/tools/suggestedActions";
+
+interface TransactionInfo {
+    amount: string;
+    chain: string;
+    chain_id: number;
+    to_account_id: string;
+    to_address: string;
+    token_address: string;
+    token_name: string;
+    decimals: number;
+}
 
 interface AiChatMessagesProps {
     messages: Message[];
     messagesEndRef: RefObject<HTMLDivElement>;
+    loading: boolean;
+    setInput: (input: string) => void;
 }
 
-export function AiChatMessages({ messages, messagesEndRef }: AiChatMessagesProps) {
+export function AiChatMessages({ messages, messagesEndRef, loading, setInput }: AiChatMessagesProps) {
+    const { wallets } = useWallets();
+    const { addTransaction } = useTransactionsStore();
+    const { user } = usePrivy();
+    const { toast } = useToast();
+
+    const handleSendTransaction = async (txInfo: TransactionInfo) => {
+        if (!wallets.length) {
+            toast({
+                title: "Error",
+                description: "No wallet connected",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        const wallet = wallets.find(w => w.walletClientType === "privy");
+        if (!wallet) {
+            toast({
+                title: "Error",
+                description: "No wallet connected",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        try {
+            await wallet.switchChain(txInfo.chain_id);
+            const provider = await wallet.getEthereumProvider();
+
+            let result;
+            if (txInfo.token_address === "0x0000000000000000000000000000000000000000") {
+                // Native token transfer
+                result = await provider.request({
+                    method: "eth_sendTransaction",
+                    params: [{
+                        to: txInfo.to_address,
+                        value: parseEther(txInfo.amount).toString(),
+                    }],
+                });
+            } else {
+                // ERC20 token transfer
+                const data = encodeFunctionData({
+                    abi: erc20Abi,
+                    functionName: 'transfer',
+                    args: [
+                        txInfo.to_address as `0x${string}`,
+                        parseUnits(txInfo.amount, txInfo.decimals)
+                    ],
+                });
+
+                result = await provider.request({
+                    method: "eth_sendTransaction",
+                    params: [{
+                        to: txInfo.token_address,
+                        data,
+                    }],
+                });
+            }
+
+            await addTransaction({
+                from_account_id: user?.id || "",
+                to_account_id: txInfo.to_account_id,
+                from_address: wallet.address,
+                to_address: txInfo.to_address,
+                amount: parseUnits(txInfo.amount, txInfo.decimals).toString(10),
+                token_address: txInfo.token_address,
+                token_name: txInfo.token_name,
+                tx: result,
+                transaction_type: "wallet",
+                chain_id: txInfo.chain_id,
+                chain: txInfo.chain,
+                decimals: txInfo.decimals,
+            });
+
+            toast({
+                title: "Success",
+                description: "Transaction sent successfully!",
+            });
+        } catch (error) {
+            console.error("Transaction failed:", error);
+            toast({
+                variant: "destructive",
+                title: "Transaction Failed",
+                description: error instanceof Error ? error.message : "Failed to send transaction",
+            });
+        }
+    };
+
+    const renderTransactionCard = (txInfo: TransactionInfo) => {
+        return (
+            <Card className="bg-secondary border-none shadow-none mt-2">
+                <CardContent className="p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                        <div className="space-y-1">
+                            <p className="text-sm font-medium">Send {txInfo.token_name}</p>
+                            <p className="text-xs text-muted-foreground">
+                                Amount: {txInfo.amount} {txInfo.token_name}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                                To: {txInfo.to_address.slice(0, 6)}...{txInfo.to_address.slice(-4)}
+                            </p>
+                        </div>
+                        <NetworkIcon chain={txInfo.chain} className="h-6 w-6" />
+                    </div>
+                    <Button
+                        className="w-full"
+                        onClick={() => handleSendTransaction(txInfo)}
+                    >
+                        Send Transaction
+                    </Button>
+                </CardContent>
+            </Card>
+        );
+    };
+
     const renderDate = (timestamp: Date) => {
         return (
             <div className="text-center text-sm text-zinc-500 my-2">{moment(timestamp).format("MMM D, YYYY")}</div>
@@ -45,15 +182,29 @@ export function AiChatMessages({ messages, messagesEndRef }: AiChatMessagesProps
                                     msg.role === "user" ? "bg-muted" : "bg-secondary text-primary"
                                 )}
                             >
-                                {msg.role === "user"
-                                    ? msg.content
-                                    : <ReactMarkdown
+                                {msg.role === "user" ? (
+                                    msg.content
+                                ) : msg.parts?.some(
+                                    part => part.type === "tool-invocation" && part.toolInvocation.toolName === "sendTokenOnUserBehalf" && part.toolInvocation.state === "result"
+                                ) ? (
+                                    <>
+                                        {renderTransactionCard(
+                                            msg.parts.find(
+                                                part => part.type === "tool-invocation" &&
+                                                    part.toolInvocation.toolName === "sendTokenOnUserBehalf"
+                                            )?.toolInvocation.result.transaction_info
+                                        )}
+                                    </>
+                                ) : (
+                                    <ReactMarkdown
                                         remarkPlugins={[remarkGfm]}
                                         components={markdownComponents}
                                     >
                                         {msg.content}
-                                    </ReactMarkdown>}
+                                    </ReactMarkdown>
+                                )}
                             </div>
+
                             {isLastInStack && (
                                 <span className="text-xs text-zinc-500 mt-2 tracking-tighter px-3 pb-3">
                                     {moment(msg.createdAt).format("h:mm a")}
@@ -63,7 +214,46 @@ export function AiChatMessages({ messages, messagesEndRef }: AiChatMessagesProps
                     </div>
                 );
             })}
+            {loading && (
+                <div className="flex justify-center items-center">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                </div>
+            )}
+            {!messages.length && (
+                <div className="grid grid-cols-1 gap-2">
+                    {suggestedActions.map((action) => (
+                        <Card className="p-1 hover:bg-accent/10 cursor-pointer" key={action.name} onClick={() => setInput(action.sampleMessage)}>
+                            <CardHeader className="p-1">
+                                <CardTitle className="flex items-center gap-2">
+                                    {getIconForAction(action)}
+                                    {action.name}
+                                </CardTitle>
+                            </CardHeader>
+                            <CardDescription className="text-sm px-2">{action.description}</CardDescription>
+                        </Card>
+                    ))}
+                </div>
+            )}
             <div ref={messagesEndRef} />
         </div>
     );
+}
+
+const getIconForAction = (action: SuggestedAction) => {
+    switch (action.icon) {
+        case "send-token":
+            return <SendIcon className="w-4 h-4" />;
+        case "price":
+            return <BadgeDollarSign className="w-4 h-4" />;
+        case "trending":
+            return <TrendingUp className="w-4 h-4" />;
+        case "research":
+            return <Search className="w-4 h-4" />;
+        case "social":
+            return <Users className="w-4 h-4" />;
+        case "mentions":
+            return <MessageSquare className="w-4 h-4" />;
+        default:
+            return <HelpCircle className="w-4 h-4" />;
+    }
 }

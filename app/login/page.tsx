@@ -50,25 +50,38 @@ export default function Login() {
             </Head>
 
             <main className="flex min-h-screen min-w-full">
-                <div className="flex bg-privy-light-blue flex-1 p-6 justify-center items-center">
-                    <div>
-                        <div className="flex justify-center mb-8">
-                            <Image
-                                src="/coin.png"
-                                alt="Coin"
-                                width={480}
-                                height={480}
-                                priority
-                                className="rounded-3xl"
-                            />
-                        </div>
-                        <div className="mt-6 flex justify-center text-center">
-                            <button
-                                className="bg-blue-500 hover:bg-blue-600 py-3 px-6 text-white rounded-lg"
-                                onClick={login}
-                            >
-                                Log in
-                            </button>
+                <div className="flex flex-1 relative">
+                    <div className="absolute inset-0 bg-privy-light-blue/90 bg-benri-pattern" />
+                    <div className="flex flex-1 p-6 justify-center items-center relative z-10">
+                        <div className="flex flex-col justify-between items-center h-full w-full max-w-3xl mx-auto">
+                            <div className="flex justify-center mb-8">
+                                <span className="h-16 md:h-0"></span>
+                            </div>
+                            <div className="flex flex-col justify-center items-center text-center">
+                                <Image
+                                    src="/benri-mascot-edit.png"
+                                    alt="Benri Mascot"
+                                    width={400}
+                                    height={400}
+                                    priority
+                                    className="rounded-3xl opacity-70"
+                                />
+                                <button
+                                    className="mt-12 py-3 px-8 text-chart-4-foreground tracking-wide text-lg font-bold italic font-libre shadow-primary rounded-2xl bg-chart-4"
+                                    onClick={login}
+                                >
+                                    Log in
+                                </button>
+                            </div>
+                            <div className="flex flex-shrink-0 justify-center items-end opacity-50 mt-12 md:mt-24">
+                                <Image
+                                    src="/benri-logo-jp.svg"
+                                    alt="Benri Logo"
+                                    width={75}
+                                    height={50}
+                                    priority
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>

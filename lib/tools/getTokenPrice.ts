@@ -16,7 +16,7 @@ export const getTokenPrice = {
                 const { data, error } = await supabase
                     .from('coingecko_tokens')
                     .select('id')
-                    .eq('symbol', token);
+                    .eq('symbol', token.toLowerCase());
 
                 if (!error && data) {
                     const results = [];
@@ -36,10 +36,16 @@ export const getTokenPrice = {
 
                     return results.sort((a, b) => b.volume24h - a.volume24h)[0];
                 }
+
+                if (!data || data.length === 0) {
+                    return `No token found for ${token}`;
+                }
             }
 
             // Attempt to fetch token from dexscreener
             const pairs = await getPairsMatchingQuery(token)
+
+            console.log('pairs', pairs);
 
             if (pairs.length === 0) {
                 return `No pairs found for token ${token}`;

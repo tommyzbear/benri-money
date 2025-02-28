@@ -16,8 +16,6 @@ export async function POST(req: Request) {
     try {
         await privy.getClaims();
 
-        console.log(messages);
-
         const result = streamText({
             model: openai('gpt-4o-mini'),
             messages: [
