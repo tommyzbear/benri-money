@@ -20,6 +20,7 @@ import { useUserStore } from "@/stores/use-user-store";
 import { UploadProfileImageDialog } from "@/components/dialogs/upload-profile-image-dialog";
 import { SetUsernameDialog } from "@/components/dialogs/set-username-dialog";
 import { NotificationsDialog } from "../dialogs/notifications-dialog";
+import { useRouter } from "next/navigation";
 
 interface MobileHeaderProps {
     className?: string;
@@ -36,6 +37,7 @@ export function MobileHeader({ className }: MobileHeaderProps) {
     const { totalBalance, fetchBalances } = useWalletStore();
     const { user: userStore, fetchUser } = useUserStore();
     const [isTextScaled, setIsTextScaled] = useState(false);
+    const router = useRouter()
 
     useEffect(() => {
         if (!ready || !walletsReady) return;
@@ -47,7 +49,7 @@ export function MobileHeader({ className }: MobileHeaderProps) {
         if (totalBalance === undefined) {
             fetchBalances(
                 wallets.find((wallet) => wallet.walletClientType === "privy")?.address ??
-                    wallets[0].address
+                wallets[0].address
             );
         }
     }, [
@@ -215,6 +217,7 @@ export function MobileHeader({ className }: MobileHeaderProps) {
                                 ? "h-0 py-0 pointer-events-none"
                                 : "h-full py-4 pointer-events-auto"
                         )}
+                        onClick={() => router.push("/profile")}
                     >
                         <Wrench size={32} weight="fill" className="" />
                     </Button>

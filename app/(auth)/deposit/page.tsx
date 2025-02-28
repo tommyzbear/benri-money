@@ -79,49 +79,46 @@ export default function DepositPage() {
                                 "rounded-4xl p-5 text-chart-1-foreground",
                                 "shadow-primary max-w-full"
                             )}
+                            disabled={true}
                         >
                             <h2 className="mt-[35%] text-2xl font-libre italic mb-2">withdraw</h2>
                             <p className="text-muted-foreground text-roboto text-sm text-wrap">
-                                to your bank or crypto wallet
+                                to your bank or crypto wallet (coming soon)
                             </p>
                         </Button>
                     </div>
                     <div className="flex gap-2 h-36">
-                        <Link
+                        {/* <Link
                             href="/convert"
                             className={cn(
                                 "shadow-primary flex w-32 h-full",
                                 " flex-col justify-center items-start text-left",
                                 " bg-white rounded-7xl p-7 text-secondary-foreground"
                             )}
-                        ></Link>
-                        <Link
-                            href="/convert"
+                        ></Link> */}
+
+                        <Button
                             className={cn(
                                 "flex flex-1 h-full flex-col justify-center",
                                 "items-start text-left bg-secondary rounded-4xl",
                                 "p-5 text-secondary-foreground shadow-primary"
                             )}
+                            disabled={true}
                         >
-                            <h2 className="mt-[20%] text-2xl font-libre italic mb-2">convert</h2>
+                            <h2 className="mt-[10%] text-2xl font-libre italic mb-2">convert</h2>
                             <p className="text-muted-foreground text-roboto text-sm font-semibold">
-                                cash or cryptocurrencies
+                                cash or cryptocurrencies (coming soon)
                             </p>
-                        </Link>
+                        </Button>
                     </div>
 
                     {/* Bottom links */}
                     <div className="space-y-2 mt-6 bg-white text-secondary-foreground rounded-4xl">
                         <Link
-                            href="/payment-details"
+                            href=""
                             className="flex items-center justify-between mx-5 py-5 border-b border-secondary"
                         >
-                            <span className="text-lg text-zinc-600">payment details</span>
-                            <span className="text-xl">›</span>
-                        </Link>
-
-                        <Link href="/history" className="flex items-center justify-between p-5">
-                            <span className="text-lg text-zinc-600">history</span>
+                            <span className="text-lg text-zinc-600">payment details (coming soon)</span>
                             <span className="text-xl">›</span>
                         </Link>
                     </div>
