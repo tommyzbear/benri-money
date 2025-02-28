@@ -91,11 +91,12 @@ export const sendTokenOnUserBehalf = {
                 transaction_info: {
                     to_account_id: friend.friend.id,
                     to_address: friend.friend.wallet.find((wallet) => wallet?.wallet_client_type === 'privy')?.address,
-                    amount: (BigInt(amount) * BigInt(tokenData.decimals)).toString(),
+                    amount: amount.toString(),
                     token_address: tokenData.address,
                     token_name: tokenData.symbol,
                     chain_id: chainId,
                     chain: chain,
+                    decimals: tokenData.decimals,
                 }
             }
         } catch (error) {

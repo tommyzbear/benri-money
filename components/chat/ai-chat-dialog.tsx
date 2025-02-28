@@ -29,7 +29,7 @@ export function AiChatDialog({ open, onOpenChange, sessionName, setSessionName, 
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
 
-    const { messages, input, handleInputChange, handleSubmit, setMessages, setInput, status, addToolResult } = useChat({
+    const { messages, input, handleInputChange, handleSubmit, setMessages, setInput, status } = useChat({
         api: "/api/chat",
         maxSteps: 5,
         id: sessionId,
