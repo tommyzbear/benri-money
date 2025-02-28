@@ -20,7 +20,7 @@ export async function GET(request: Request) {
 
         const { data: messages, error } = await supabase
             .from("messages")
-            .select("*, transaction_history(*)")
+            .select("*, transaction_history(*), payment_requests(*)")
             .or(`and(sender.eq.${sender},receiver.eq.${receiver}),and(sender.eq.${receiver},receiver.eq.${sender})`)
             .order("sent_at", { ascending: true });
 

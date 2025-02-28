@@ -9,4 +9,7 @@ export interface ChatMessage {
     decimals?: number;
     tokenName?: string;
     chain?: string;
+    requestedTokenName?: string;
+    requestedTokenDecimals?: number;
+    requestedTokenAmount?: number;
 }

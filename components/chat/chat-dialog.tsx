@@ -62,6 +62,9 @@ export function ChatDialog({ open, onOpenChange, contact, user }: ChatDialogProp
                     decimals: msg.transaction_history?.decimals,
                     tokenName: msg.transaction_history?.token_name,
                     chain: msg.transaction_history?.chain,
+                    requestedTokenName: msg.payment_requests?.token_name,
+                    requestedTokenDecimals: msg.payment_requests?.decimals,
+                    requestedTokenAmount: msg.payment_requests?.amount,
                 }));
 
                 setMessages(formattedMessages);
@@ -204,6 +207,7 @@ export function ChatDialog({ open, onOpenChange, contact, user }: ChatDialogProp
                             handleKeyPress={handleKeyPress}
                             setRequestMoneyOpen={setRequestMoneyOpen}
                             setSendMoneyOpen={setSendMoneyOpen}
+                            contact={contact}
                         />
                     </div>
                 </DialogContent>

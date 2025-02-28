@@ -1,15 +1,16 @@
 import { cn } from "@/lib/utils";
 import { RefObject } from "react";
 import Image from "next/image";
-import { formatValue } from "@/lib/utils";
 import moment from "moment";
 import { ChatMessage } from "@/types/chat";
 import { formatUnits } from "viem";
 import { config } from "@/lib/wallet/config";
+
 interface ChatMessagesProps {
     messages: ChatMessage[];
     contact: {
         username: string;
+        beFriended?: boolean;
     };
     messagesEndRef: RefObject<HTMLDivElement>;
 }
@@ -58,7 +59,7 @@ export function ChatMessages({ messages, contact, messagesEndRef }: ChatMessages
                                 className="w-full h-full object-contain"
                             />
                         </div>
-                        <p className="font-libre text-xl">{formatUnits(BigInt(msg.amount ?? 0), msg.decimals ?? 18) + " " + msg.tokenName}</p>
+                        <p className="font-libre text-xl">{formatUnits(BigInt(msg.requestedTokenAmount ?? 0), msg.requestedTokenDecimals ?? 18) + " " + msg.requestedTokenName}</p>
                     </div>
                 );
             case "message":
@@ -76,8 +77,6 @@ export function ChatMessages({ messages, contact, messagesEndRef }: ChatMessages
                 return null;
         }
     };
-
-    console.log(messages);
 
     return (
         <div className="flex-1 p-4 overflow-y-auto">
@@ -110,6 +109,12 @@ export function ChatMessages({ messages, contact, messagesEndRef }: ChatMessages
                     </div>
                 );
             })}
+            {!contact.beFriended && (
+                <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4 rounded">
+                    <p className="font-medium">Waiting for {contact.username} to add you back</p>
+                    <p className="text-sm">Some features may be limited until they added you as a friend.</p>
+                </div>
+            )}
             <div ref={messagesEndRef} />
         </div>
     );

@@ -5,15 +5,15 @@ import { PaymentRequestWithWallet } from "@/types/data";
 import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
-import Image from "next/image";
+import { NetworkIcon } from "@/components/network-icon";
 import { usePrivy } from "@privy-io/react-auth";
 import { useWallets } from "@privy-io/react-auth";
-import { base, baseSepolia, mainnet, polygon, sepolia } from "@wagmi/core/chains";
 import { useState } from "react";
 import { usePaymentRequestsStore } from "@/stores/use-payment-requests-store";
 import { useTransactionsStore } from "@/stores/use-transactions-store";
 import { motion } from "framer-motion";
 import { PaymentRequest } from "@/types/data";
+import { formatUnits, parseUnits, encodeFunctionData, erc20Abi } from "viem";
 
 interface NotificationsDialogProps {
     open: boolean;
@@ -53,32 +53,39 @@ export function NotificationsDialog({ open, onOpenChange, requests }: Notificati
         setIsLoading(true);
 
         try {
-            if (request.chain === "Base") {
-                await wallet.switchChain(base.id);
-            } else if (request.chain === "Polygon") {
-                await wallet.switchChain(polygon.id);
-            } else if (request.chain === "Ethereum") {
-                await wallet.switchChain(mainnet.id);
-            } else {
-                toast({
-                    variant: "destructive",
-                    title: "Error",
-                    description: "Unsupported chain",
-                });
-                setIsLoading(false);
-                return;
-            }
-
+            // Switch to the correct chain
+            await wallet.switchChain(request.chain_id);
             const provider = await wallet.getEthereumProvider();
-            const transactionRequest = {
-                to: request.requester_wallet,
-                value: request.amount,
-            };
 
-            const result = await provider.request({
-                method: "eth_sendTransaction",
-                params: [transactionRequest],
-            });
+            let result;
+            if (request.token_address === "0x0000000000000000000000000000000000000000") {
+                // Native token transfer
+                result = await provider.request({
+                    method: "eth_sendTransaction",
+                    params: [{
+                        to: request.requester_wallet,
+                        value: request.amount.toString(),
+                    }],
+                });
+            } else {
+                // ERC20 token transfer
+                const data = encodeFunctionData({
+                    abi: erc20Abi,
+                    functionName: 'transfer',
+                    args: [
+                        request.requester_wallet as `0x${string}`,
+                        BigInt(request.amount.toString())
+                    ],
+                });
+
+                result = await provider.request({
+                    method: "eth_sendTransaction",
+                    params: [{
+                        to: request.token_address,
+                        data,
+                    }],
+                });
+            }
 
             // Save transaction using the store
             await addTransaction({
@@ -93,6 +100,7 @@ export function NotificationsDialog({ open, onOpenChange, requests }: Notificati
                 transaction_type: "wallet",
                 chain_id: request.chain_id,
                 chain: request.chain,
+                decimals: request.decimals,
             });
 
             // Mark request as cleared
@@ -155,7 +163,7 @@ export function NotificationsDialog({ open, onOpenChange, requests }: Notificati
                                 <div className="flex items-center justify-between">
                                     <div className="space-y-1">
                                         <p className="font-medium">
-                                            {(Number(request.amount) / 1e18).toFixed(4)}{" "}
+                                            {formatUnits(BigInt(request.amount), request.decimals)}{" "}
                                             {request.token_name}
                                         </p>
                                         <p className="text-sm text-muted-foreground">
@@ -166,23 +174,7 @@ export function NotificationsDialog({ open, onOpenChange, requests }: Notificati
                                         </p>
                                     </div>
                                     <div className="flex items-center space-x-2">
-                                        {request.chain === "Base Sepolia" ? (
-                                            <Image
-                                                src="/icons/base-logo.svg"
-                                                alt="Base Network"
-                                                width={24}
-                                                height={24}
-                                                className="rounded-full"
-                                            />
-                                        ) : (
-                                            <Image
-                                                src="/icons/ethereum-eth-logo.svg"
-                                                alt="Ethereum Network"
-                                                width={24}
-                                                height={24}
-                                                className="rounded-full"
-                                            />
-                                        )}
+                                        <NetworkIcon chain={request.chain} className="h-6 w-6" />
                                         <Button
                                             size="sm"
                                             onClick={() => handlePay(request)}

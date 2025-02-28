@@ -31,6 +31,7 @@ export async function POST(request: Request) {
                 amount: body.amount,
                 token_name: body.token_name,
                 token_address: body.token_address,
+                decimals: body.decimals,
             })
             .select()
             .single();

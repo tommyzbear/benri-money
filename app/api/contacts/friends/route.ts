@@ -37,6 +37,16 @@ export async function GET(request: Request) {
             return NextResponse.json({ error: "Error fetching friends" }, { status: 500 });
         }
 
+        const { data: addedUserAsFriend, error: addedUserAsFriendError } = await supabase
+            .from("friends")
+            .select('*')
+            .eq("friend_id", claims.userId);
+
+        if (addedUserAsFriendError) {
+            console.error("Error fetching friends:", addedUserAsFriendError);
+            return NextResponse.json({ error: "Error fetching friends" }, { status: 500 });
+        }
+
         // Transform the data to match the expected format
         const friends = data.map(({ friend }) => ({
             id: friend.id,
@@ -45,6 +55,7 @@ export async function GET(request: Request) {
             email: friend.email[0]?.address,
             wallet: friend.wallet[0]?.address,
             isFriend: true,
+            beFriended: addedUserAsFriend.some((f) => f.account_id === friend.id),
         }));
 
         return NextResponse.json({ data: friends });
