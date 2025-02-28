@@ -5,6 +5,7 @@ import { CreditCard, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { dialogSlideUp, fadeIn } from "@/lib/animations";
 import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
 
 export function DepositDialog({
     open,
@@ -17,8 +18,37 @@ export function DepositDialog({
     redirectUrl?: string;
     fundWallet: () => Promise<void>;
 }) {
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [selectedMethodId, setSelectedMethodId] = useState<string | null>(null);
+
+
     const handleOpenChange = (newOpen: boolean) => {
-        onOpenChange(newOpen);
+        // Only allow closing if not processing
+        if (!isProcessing) {
+            onOpenChange(newOpen);
+        }
+    };
+
+    const handleMethodClick = async (method: { id: string; redirect?: string; onClick?: () => Promise<void> }) => {
+        try {
+            setIsProcessing(true);
+            setSelectedMethodId(method.id);
+            
+            if (method.onClick) {
+                await method.onClick();
+            }
+            
+            if (method.redirect) {
+                window.location.href = method.redirect;
+            }
+            
+            // Close the dialog after successful processing
+            onOpenChange(false);
+        } catch (error) {
+            console.error("Error handling deposit method:", error);
+            setIsProcessing(false);
+            setSelectedMethodId(null);
+        }
     };
 
     return (
@@ -40,7 +70,9 @@ export function DepositDialog({
                             variants={dialogSlideUp}
                         >
                             <DialogHeader className="text-left p-4">
-                                <DialogTitle>Deposit Crypto</DialogTitle>
+                                <DialogTitle>
+                                    {isProcessing ? "Processing..." : "Deposit Crypto"}
+                                </DialogTitle>
                             </DialogHeader>
 
                             <div className="space-y-4 py-4">
@@ -63,19 +95,19 @@ export function DepositDialog({
                                             key={method.id}
                                             variant="outline"
                                             className="w-full justify-start h-16 relative"
-                                            onClick={() => {
-                                                if (method.redirect) {
-                                                    window.location.href = method.redirect;
-                                                }
-                                                if (method.onClick) {
-                                                    method.onClick();
-                                                }
-                                            }}
+                                            onClick={() => handleMethodClick(method)}
+                                            disabled={isProcessing}
+                                            data-selected={selectedMethodId === method.id}
                                         >
                                             <div className="flex items-center space-x-3">
                                                 {method.icon}
                                                 <span>{method.name}</span>
                                             </div>
+                                            {selectedMethodId === method.id && (
+                                                <div className="absolute right-4">
+                                                    <div className="h-4 w-4 rounded-full border-2 border-t-transparent border-primary animate-spin"></div>
+                                                </div>
+                                            )}
                                         </Button>
                                     ))}
                                 </div>

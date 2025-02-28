@@ -534,7 +534,16 @@ export function SendMoneyDialog({
             <DepositDialog
                 open={showDepositDialog}
                 onOpenChange={(open) => setShowDepositDialog(open)}
-                fundWallet={() => fundWallet(selectedContact?.wallet as `0x${string}` ?? "")}
+                fundWallet={() =>
+                    fundWallet(
+                        wallets.find((wallet) => wallet.walletClientType === "privy")?.address ?? "",
+                        {
+                            asset: "USDC",
+                            amount: "10",
+                            chain: base,
+                        }
+                    )
+                }
             />
         </>
     );
