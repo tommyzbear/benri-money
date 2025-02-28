@@ -175,7 +175,7 @@ export function SwapCard({ wallet, chains, onTransactionSuccess }: SwapCardProps
         };
 
         checkApproved();
-    }, [approved, wallet, fromToken, selectedChain, amount]);
+    }, [approved, wallet, fromToken, selectedChain, amount, toToken]);
 
     useEffect(() => {
         if (amount && fromToken && toToken) {
