@@ -4,7 +4,7 @@ import { config } from '../wallet/config';
 import { supabase } from '../supabase';
 
 export const sendTokenOnUserBehalf = {
-    description: 'Send a specify amount of token on behalf of a user to a recipient address',
+    description: 'Send a specify amount of token on behalf of a user to a recipient, user can provide a username or email address',
     parameters: z.object({
         chain: z.string().describe("Chain to swap on, it can be a chain id or a chain name, must be explicitly specified").refine((val) => val === 'Base' || val === 'Ethereum' || val === 'Polygon', {
             message: 'Chain not supported, please select a supported chain from Base, Ethereum, or Polygon'

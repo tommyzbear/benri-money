@@ -79,6 +79,7 @@ export class CoinGeckoAPI {
 
     async getCoinById(id: string): Promise<CoinDetail> {
         const url = buildUrl(`/coins/${id}`);
+        console.log('url', url);
         return this.fetchWithAuth(url);
     }
 
