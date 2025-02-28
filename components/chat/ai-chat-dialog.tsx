@@ -35,7 +35,6 @@ export function AiChatDialog({ open, onOpenChange, sessionName, setSessionName, 
         maxSteps: 5,
         id: sessionId,
         onFinish: async (message) => {
-            console.log("message", message);
             try {
                 await fetch("/api/chat/message", {
                     method: "POST",
