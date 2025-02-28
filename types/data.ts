@@ -146,6 +146,7 @@ export interface Message {
     transaction_id: number;
     payment_request_id: number;
     message_type: "message" | "payment" | "request";
+    transaction_history: TransactionHistory | null;
 }
 
 export interface SupportedToken {

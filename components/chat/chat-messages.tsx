@@ -4,6 +4,8 @@ import Image from "next/image";
 import { formatValue } from "@/lib/utils";
 import moment from "moment";
 import { ChatMessage } from "@/types/chat";
+import { formatUnits } from "viem";
+import { config } from "@/lib/wallet/config";
 interface ChatMessagesProps {
     messages: ChatMessage[];
     contact: {
@@ -23,7 +25,9 @@ export function ChatMessages({ messages, contact, messagesEndRef }: ChatMessages
         switch (msg.type) {
             case "payment":
                 return (
-                    <div className="bg-zinc-600 text-white p-6 rounded-4xl text-center">
+                    <div className="bg-zinc-600 text-white p-6 rounded-4xl text-center" onClick={() => {
+                        window.open(`${config.chains.find((chain) => chain.name === msg.chain)?.blockExplorers.default.url}/tx/${msg.tx}`, "_blank");
+                    }}>
                         <h4 className="font-libre italic text-base">
                             {msg.sender !== "user" ? `${contact.username} sent` : "you sent"}
                         </h4>
@@ -36,7 +40,7 @@ export function ChatMessages({ messages, contact, messagesEndRef }: ChatMessages
                                 className="w-full h-full object-contain"
                             />
                         </div>
-                        <p className="font-libre text-xl">{formatValue(Number(msg.amount))}</p>
+                        <p className="font-libre text-xl">{formatUnits(BigInt(msg.amount ?? 0), msg.decimals ?? 18) + " " + msg.tokenName}</p>
                     </div>
                 );
             case "request":
@@ -54,7 +58,7 @@ export function ChatMessages({ messages, contact, messagesEndRef }: ChatMessages
                                 className="w-full h-full object-contain"
                             />
                         </div>
-                        <p className="font-libre text-xl">{formatValue(Number(msg.amount))}</p>
+                        <p className="font-libre text-xl">{formatUnits(BigInt(msg.amount ?? 0), msg.decimals ?? 18) + " " + msg.tokenName}</p>
                     </div>
                 );
             case "message":
@@ -72,6 +76,8 @@ export function ChatMessages({ messages, contact, messagesEndRef }: ChatMessages
                 return null;
         }
     };
+
+    console.log(messages);
 
     return (
         <div className="flex-1 p-4 overflow-y-auto">
