@@ -7,6 +7,7 @@ import { DepositDialog } from "@/components/dialogs/deposit-dialog";
 import { useState } from "react";
 import { useFundWallet, useWallets } from "@privy-io/react-auth";
 import { cn } from "@/lib/utils";
+import { base } from "viem/chains";
 
 export default function DepositPage() {
     const [depositDialogOpen, setDepositDialogOpen] = useState(false);
@@ -51,7 +52,13 @@ export default function DepositPage() {
                 open={depositDialogOpen}
                 onOpenChange={setDepositDialogOpen}
                 redirectUrl={redirectUrl}
-                fundWallet={() => fundWallet(privyWalletAddress ?? "")}
+                fundWallet={() =>
+                    fundWallet(privyWalletAddress ?? "", {
+                        asset: "USDC",
+                        amount: "10",
+                        chain: base,
+                    })
+                }
             />
 
             <div className="flex flex-1 max-w-full lg:flex-row lg:mx-auto lg:max-w-7xl lg:pb-8">

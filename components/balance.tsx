@@ -17,6 +17,7 @@ import { formatValue } from "@/lib/utils";
 import { TokenData } from "@/services/alchemy";
 import { DepositDialog } from "./dialogs/deposit-dialog";
 import { NetworkIcon } from "./network-icon";
+import { base } from "viem/chains";
 
 const balancesSum = (balances: TokenData[]) => {
     return balances.reduce((acc, balance) => acc + Number(balance.value), 0);
@@ -177,7 +178,13 @@ export function Balance() {
                 open={depositDialogOpen}
                 onOpenChange={setDepositDialogOpen}
                 redirectUrl={redirectUrl}
-                fundWallet={() => fundWallet(privyWalletAddress ?? "")}
+                fundWallet={() =>
+                    fundWallet(privyWalletAddress ?? "", {
+                        asset: "USDC",
+                        amount: "10",
+                        chain: base,
+                    })
+                }
             />
         </Card>
     );
