@@ -5,6 +5,9 @@ Benri Money is a Web2 friendly, venmo-style payment app embedded with an intelli
 #### Website
 https://benri-money.vercel.app
 
+#### Social Intelligence Demo
+[Benri AI](https://drive.google.com/file/d/1ntx_HrhMgF_iy-nzd_q28h1NgrE1g5fC/view?usp=drivesdk)
+
 ## Features
 
 ### 1. Token Transfers
