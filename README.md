@@ -1,6 +1,9 @@
-# Benri Money - Web3 Payment and wallet management at ease
+# [Benri Money](https://benri-money.vercel.app) - Web3 Payment and wallet management at ease
 
 Benri Money is a Web2 friendly, venmo-style payment app embedded with an intelligent Web3 assistant that helps users with daily cryptocurrency transactions, P2P payments, market insights, and social intelligence. It provides a seamless interface for interacting with blockchain networks and accessing real-time crypto market data.
+
+#### Website
+https://benri-money.vercel.app
 
 ## Features
 
