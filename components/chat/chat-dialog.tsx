@@ -15,6 +15,7 @@ import { ChatMessages } from "@/components/chat/chat-messages";
 import { User } from "@privy-io/react-auth";
 import { useToast } from "@/hooks/use-toast";
 import { ChatMessage } from "@/types/chat";
+import { supabase } from "@/lib/supabase";
 
 interface ChatDialogProps {
     open: boolean;
@@ -76,14 +77,73 @@ export function ChatDialog({ open, onOpenChange, contact, user }: ChatDialogProp
                     variant: "destructive",
                 });
             }
-        };
+        }
 
-        fetchMessages();
+        fetchMessages()
     }, [user?.id, contact.id, toast]);
 
     useEffect(() => {
         scrollToBottom();
     }, [messages]);
+
+    useEffect(() => {
+        const channel = supabase
+            .channel("messages_update")
+            .on(
+                "postgres_changes",
+                {
+                    event: "INSERT",
+                    schema: "public",
+                    table: "messages",
+                    filter: `and(or(sender.eq.${user.id},receiver.eq.${user.id}),or(message_type.eq.payment,message_type.eq.request))`,
+                },
+                async () => {
+                    if (!user?.id || !contact.id) return;
+
+                    try {
+                        const response = await fetch(
+                            `/api/contacts/chat?sender=${user.id}&receiver=${contact.id}`
+                        );
+
+                        if (!response.ok) {
+                            throw new Error("Failed to fetch messages");
+                        }
+
+                        const data = await response.json();
+
+                        // Transform the messages to match the expected format
+                        const formattedMessages: ChatMessage[] = data.messages.map((msg: Message) => ({
+                            id: msg.id.toString(),
+                            content: msg.content || "",
+                            sender: msg.sender === user.id ? "user" : "other",
+                            timestamp: msg.sent_at,
+                            amount: msg.amount ? Number(msg.amount) : undefined,
+                            type: msg.message_type,
+                            tx: msg.transaction_history?.tx,
+                            decimals: msg.transaction_history?.decimals,
+                            tokenName: msg.transaction_history?.token_name,
+                            chain: msg.transaction_history?.chain,
+                            requestedTokenName: msg.payment_requests?.token_name,
+                            requestedTokenDecimals: msg.payment_requests?.decimals,
+                            requestedTokenAmount: msg.payment_requests?.amount,
+                        }));
+
+                        setMessages(formattedMessages);
+                    } catch (error) {
+                        console.error("Error fetching messages:", error);
+                        toast({
+                            title: "Error fetching messages",
+                            description: "Please try again later",
+                            variant: "destructive",
+                        });
+                    }
+                }
+            )
+            .subscribe();
+        return () => {
+            channel.unsubscribe();
+        };
+    }, [user?.id, toast, contact.id]);
 
     const handleSend = async () => {
         if (!inputValue.trim()) return;
