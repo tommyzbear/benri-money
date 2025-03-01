@@ -95,10 +95,13 @@ export function ChatDialog({ open, onOpenChange, contact, user }: ChatDialogProp
                     event: "INSERT",
                     schema: "public",
                     table: "messages",
-                    filter: `and(or(sender.eq.${user.id},receiver.eq.${user.id}),or(message_type.eq.payment,message_type.eq.request))`,
+                    filter: "message_type=in.(payment, request)",
                 },
-                async () => {
+                async (payload) => {
+                    console.log(payload.new)
                     if (!user?.id || !contact.id) return;
+
+                    if ((payload.new as Message).sender !== user.id && (payload.new as Message).receiver !== user.id) return;
 
                     try {
                         const response = await fetch(
